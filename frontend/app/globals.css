@@ -1,0 +1,340 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 0 0% 3.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 3.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 3.9%;
+    --primary: 0 0% 9%;
+    --primary-foreground: 0 0% 98%;
+    --secondary: 0 0% 96.1%;
+    --secondary-foreground: 0 0% 9%;
+    --muted: 0 0% 96.1%;
+    --muted-foreground: 0 0% 45.1%;
+    --accent: 0 0% 96.1%;
+    --accent-foreground: 0 0% 9%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 89.8%;
+    --input: 0 0% 89.8%;
+    --ring: 0 0% 3.9%;
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    --background: 0 0% 3.9%;
+    --foreground: 0 0% 98%;
+    --card: 0 0% 3.9%;
+    --card-foreground: 0 0% 98%;
+    --popover: 0 0% 3.9%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 0 0% 98%;
+    --primary-foreground: 0 0% 9%;
+    --secondary: 0 0% 14.9%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 0 0% 14.9%;
+    --muted-foreground: 0 0% 63.9%;
+    --accent: 0 0% 14.9%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 66.7%;
+    --input: 0 0% 14.9%;
+    --ring: 0 0% 83.1%;
+  }
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family: var(--font-inter), -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  }
+
+  /* Custom scrollbar styles */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--muted)) hsl(var(--background));
+  }
+
+  /* Webkit scrollbar styles */
+  *::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  *::-webkit-scrollbar-track {
+    background: hsl(var(--background));
+  }
+
+  *::-webkit-scrollbar-thumb {
+    background: hsl(var(--muted));
+    border-radius: 4px;
+    border: 2px solid hsl(var(--background));
+  }
+
+  *::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--muted-foreground) / 0.5);
+  }
+}
+
+/* Typing text highlighting */
+.char-correct-default {
+  color: hsl(var(--foreground));
+}
+
+.char-correct-blue {
+  color: #3B82F6;
+}
+
+.char-correct-yellow {
+  color: #EAB308;
+}
+
+.char-correct-green {
+  color: #22C55E;
+}
+
+.char-incorrect {
+  color: hsl(0 84% 50%);
+  opacity: 0.5;
+}
+
+.char-current {
+  color: hsl(var(--muted-foreground));
+  opacity: 0.6;
+}
+
+.char-pending {
+  color: hsl(var(--muted-foreground));
+  transition: color 0.2s ease-out;
+  opacity: 0.6;
+}
+
+.char-typed {
+  animation: char-pop 0.2s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+.char-pulse {
+  animation: char-pulse-scale 0.8s ease-in-out infinite;
+}
+
+.animate-bounce-up {
+  animation: bounceUp var(--animation-speed, 0.5s) cubic-bezier(0.25, 1.5, 0.5, 1);
+}
+
+.animate-bounce-down {
+  animation: bounceDown var(--animation-speed, 0.5s) cubic-bezier(0.25, 1.5, 0.5, 1);
+}
+
+/* Animations */
+@keyframes pulse-underline {
+  0%, 100% {
+    text-decoration-color: hsl(var(--foreground) / 0.3);
+  }
+  50% {
+    text-decoration-color: hsl(var(--foreground) / 0.8);
+  }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-2px); }
+  75% { transform: translateX(2px); }
+}
+
+@keyframes shake-strong {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  10% { transform: translate(-4px, 0) rotate(-2deg); }
+  20% { transform: translate(4px, 0) rotate(2deg); }
+  30% { transform: translate(-4px, 0) rotate(-2deg); }
+  40% { transform: translate(4px, 0) rotate(2deg); }
+  50% { transform: translate(-3px, 0) rotate(-1deg); }
+  60% { transform: translate(3px, 0) rotate(1deg); }
+  70% { transform: translate(-2px, 0) rotate(-0.5deg); }
+  80% { transform: translate(2px, 0) rotate(0.5deg); }
+  90% { transform: translate(-1px, 0); }
+}
+
+@keyframes fade-out-incorrect {
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.05;
+  }
+}
+
+@keyframes char-pop {
+  0% {
+    transform: scale(0.8);
+    opacity: 0.5;
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes bounceUp {
+  0% {
+    transform: translateY(0);
+  }
+  25% {
+    transform: translateY(calc(-1 * var(--bounce-height, 4px)));
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+@keyframes bounceDown {
+  0% {
+    transform: translateY(0);
+  }
+  25% {
+    transform: translateY(var(--bounce-height, 4px));
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+@keyframes char-pulse-scale {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 0.8;
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes number-change {
+  0% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Utility classes */
+.animate-fade-in {
+  animation: fade-in 0.4s ease-out;
+}
+
+.animate-number-change {
+  animation: number-change 0.2s ease-out;
+}
+
+.animate-scale-in {
+  animation: scale-in 0.3s ease-out;
+}
+
+/* Smooth transitions for interactive elements */
+button,
+a {
+  transition: all 0.2s ease-out;
+}
+
+/* Typing text container - prevent word breaking */
+.typing-text-container {
+  word-break: keep-all;
+  overflow-wrap: normal;
+  word-wrap: normal;
+  hyphens: none;
+  -webkit-hyphens: none;
+  -ms-hyphens: none;
+  white-space: normal;
+}
+
+/* Tabular numbers for consistent stat displays */
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Noise background container */
+.noise-bg {
+  position: relative;
+  overflow: hidden;
+}
+
+/* Animation speed slider */
+.animation-speed-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 80px;
+  height: 4px;
+  background: hsl(var(--muted));
+  border-radius: 2px;
+  outline: none;
+  cursor: pointer;
+}
+
+.animation-speed-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 12px;
+  height: 12px;
+  background: hsl(var(--foreground));
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.animation-speed-slider::-moz-range-thumb {
+  width: 12px;
+  height: 12px;
+  background: hsl(var(--foreground));
+  border-radius: 50%;
+  cursor: pointer;
+  border: none;
+}
+
+/* Cursor splash ripple animation */
+@keyframes ripple-splash {
+  0% {
+    width: 10px;
+    height: 10px;
+    opacity: 0.15;
+  }
+  100% {
+    width: 80px;
+    height: 80px;
+    opacity: 0;
+  }
+}

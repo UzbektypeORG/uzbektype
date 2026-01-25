@@ -1,0 +1,21 @@
+{
+  "name": "Uzbektype - Tez Yozish Testi | Typing Speed Test | Тест Скорости Печати",
+  "short_name": "Uzbektype",
+  "description": "Bepul tez yozish testi online. 1 daqiqa va 5 daqiqa formatlar. Free typing speed test. Тест скорости печати онлайн.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#000000",
+  "lang": "uz",
+  "dir": "ltr",
+  "scope": "/",
+  "categories": ["education", "productivity"],
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

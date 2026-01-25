@@ -1,0 +1,17 @@
+{
+  "name": "uzbektype-backend",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Backend API for UzbekType typing test application",
+  "scripts": {
+    "dev": "echo 'Backend coming soon...'",
+    "build": "echo 'Backend not configured yet'",
+    "start": "echo 'Backend not configured yet'"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.39.0"
+  },
+  "devDependencies": {
+    "typescript": "^5"
+  }
+}
