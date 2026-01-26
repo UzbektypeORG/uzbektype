@@ -16,15 +16,15 @@ type Language = typeof languages[number];
 // Language-specific metadata
 const getMetadata = (lang: Language): Metadata => {
   const titles = {
-    uz: "Uzbektype - Tez Yozish Testi | O'zbek Klaviatura Tezligi",
-    en: "Uzbektype - Typing Speed Test | Free Online WPM Test",
-    ru: "Uzbektype - Тест Скорости Печати | Проверка WPM Онлайн"
+    uz: "UzbekType — Yozish Tezligini Sinab Ko'ring | Typing Test",
+    en: "UzbekType — Test Your Typing Speed | Free Online Typing Test",
+    ru: "UzbekType — Проверьте Скорость Печати | Бесплатный Тест Онлайн"
   };
 
   const descriptions = {
-    uz: "Bepul onlayn tez yozish testi. 1 daqiqa, 5 daqiqa va ko'p formatlar. O'zbek, ingliz va rus tillarida WPM tezligini tekshiring.",
-    en: "Free online typing speed test. Test your WPM in 1 minute, 5 minutes and more formats. Available in Uzbek, English and Russian languages.",
-    ru: "Бесплатный онлайн тест скорости печати. Проверьте свой WPM за 1 минуту, 5 минут и другие форматы. Доступно на узбекском, английском и русском языках."
+    uz: "Minimalist dizayn va interaktiv animatsiyalar bilan yozish tezligini sinang, natijangizni real vaqtda ko'ring. UzbekType — tez, qulay va bepul typing test.",
+    en: "Test your typing speed with minimalist design and interactive animations, see your results in real time. UzbekType — fast, convenient, and free typing test.",
+    ru: "Проверьте скорость печати с минималистичным дизайном и интерактивными анимациями, смотрите результаты в реальном времени. UzbekType — быстрый, удобный и бесплатный тест печати."
   };
 
   const keywords = {
