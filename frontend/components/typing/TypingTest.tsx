@@ -231,9 +231,9 @@ export default function TypingTest({ config, text: initialText, onComplete, anim
         setLineOffsets(prev => [...prev, detectedLine].sort((a, b) => a - b));
       }
 
-      // When we reach line 3 (0-indexed: line 2), scroll up
-      if (detectedLine >= 2 && currentLine < detectedLine - 1) {
-        setCurrentLine(detectedLine - 1);
+      // When we reach line 2 (0-indexed: line 1), scroll up
+      if (detectedLine >= 1 && currentLine < detectedLine) {
+        setCurrentLine(detectedLine);
       }
     }
   }, [userInput, lineOffsets, currentLine]);
