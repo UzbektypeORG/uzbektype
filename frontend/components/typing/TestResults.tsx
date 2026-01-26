@@ -97,12 +97,12 @@ export default function TestResults({
   return (
     <div className="w-full max-w-5xl mx-auto space-y-6 md:space-y-8 animate-fade-in">
       {/* Main content: Stats + Graph */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-8">
         {/* Left: Main Statistics */}
-        <div className="flex flex-row lg:flex-col justify-center items-center lg:items-start gap-6 lg:gap-6">
+        <div className="flex flex-row lg:flex-col justify-between lg:justify-start items-center lg:items-start p-4 lg:p-0 border border-border lg:border-0 rounded-lg lg:rounded-none gap-4 lg:gap-6">
           {/* WPM */}
-          <div className="space-y-1 text-center lg:text-left">
-            <div className="text-5xl md:text-7xl lg:text-8xl font-bold tabular-nums text-primary">
+          <div className="space-y-1 text-left">
+            <div className="text-4xl md:text-7xl lg:text-8xl font-bold tabular-nums text-primary">
               {animatedWpm}
             </div>
             <div className="text-xs md:text-base text-muted-foreground uppercase tracking-wider">
@@ -111,8 +111,8 @@ export default function TestResults({
           </div>
 
           {/* Accuracy */}
-          <div className="space-y-1 text-center lg:text-left">
-            <div className="text-5xl md:text-6xl lg:text-7xl font-bold tabular-nums text-primary">
+          <div className="space-y-1 text-right lg:text-left">
+            <div className="text-4xl md:text-6xl lg:text-7xl font-bold tabular-nums text-primary">
               {animatedAccuracy}%
             </div>
             <div className="text-xs md:text-base text-muted-foreground uppercase tracking-wider">
@@ -223,7 +223,7 @@ export default function TestResults({
       </div>
 
       {/* Actions */}
-      <div className="flex justify-center">
+      <div className="flex justify-center pb-20 md:pb-0">
         <button
           onClick={onRetry}
           className="px-8 py-3 bg-primary text-primary-foreground rounded-lg hover:opacity-90 transition-all duration-200 font-medium"
