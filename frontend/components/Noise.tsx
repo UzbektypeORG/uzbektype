@@ -15,17 +15,8 @@ const Noise = ({
 }: NoiseProps) => {
   return (
     <div className="noise-overlay" style={{ opacity: patternAlpha / 100 }}>
-      <svg className="noise-svg">
-        <filter id="noise">
-          <feTurbulence
-            type="fractalNoise"
-            baseFrequency="0.8"
-            numOctaves="4"
-            stitchTiles="stitch"
-          />
-        </filter>
-        <rect width="100%" height="100%" filter="url(#noise)" />
-      </svg>
+      <div className="noise-layer noise-layer-1" />
+      <div className="noise-layer noise-layer-2" />
     </div>
   );
 };
