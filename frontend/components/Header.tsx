@@ -62,6 +62,9 @@ export default function Header({ lang }: HeaderProps) {
   // const [isLoggingIn, setIsLoggingIn] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
+  // Check if we're on a test page
+  const isTestPage = pathname.includes('/tests/');
+
   useEffect(() => {
     // Language is now controlled by the URL, not localStorage
 
@@ -242,13 +245,15 @@ export default function Header({ lang }: HeaderProps) {
             )}
           </div>
 
-          {/* Start Button */}
-          <Link
-            href={`/${lang}/tests/30s-easy`}
-            className="px-4 py-1.5 text-sm rounded bg-primary text-primary-foreground hover:opacity-90 transition-all font-medium"
-          >
-            {navContent[lang].start}
-          </Link>
+          {/* Start Button - only show on landing page */}
+          {!isTestPage && (
+            <Link
+              href={`/${lang}/tests/30s-easy`}
+              className="px-4 py-1.5 text-sm rounded bg-primary text-primary-foreground hover:opacity-90 transition-all font-medium"
+            >
+              {navContent[lang].start}
+            </Link>
+          )}
 
           {/* Auth Section - Backend temporarily disabled */}
           {/* {user ? (
@@ -371,14 +376,16 @@ export default function Header({ lang }: HeaderProps) {
             {navContent[lang].home}
           </a>
 
-          {/* Start Button for Mobile */}
-          <Link
-            href={`/${lang}/tests/30s-easy`}
-            className="px-4 py-2.5 text-sm rounded bg-primary text-primary-foreground hover:opacity-90 transition-all font-medium text-center"
-            onClick={() => setIsMobileMenuOpen(false)}
-          >
-            {navContent[lang].start}
-          </Link>
+          {/* Start Button for Mobile - only show on landing page */}
+          {!isTestPage && (
+            <Link
+              href={`/${lang}/tests/30s-easy`}
+              className="px-4 py-2.5 text-sm rounded bg-primary text-primary-foreground hover:opacity-90 transition-all font-medium text-center"
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
+              {navContent[lang].start}
+            </Link>
+          )}
 
           {/* Language Selector for Mobile */}
           <div className="border-t border-border pt-4 mt-2">

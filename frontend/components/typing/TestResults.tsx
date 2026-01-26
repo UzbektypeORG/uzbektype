@@ -57,6 +57,9 @@ const labels = {
     consistency: "Barqarorlik",
     time: "Vaqt",
     tryAgain: "Qaytadan",
+    easy: "Oson",
+    medium: "O'rta",
+    hard: "Qiyin",
   },
   en: {
     wpm: "WPM",
@@ -66,6 +69,9 @@ const labels = {
     consistency: "Consistency",
     time: "Time",
     tryAgain: "Try Again",
+    easy: "Easy",
+    medium: "Medium",
+    hard: "Hard",
   },
   ru: {
     wpm: "WPM",
@@ -75,6 +81,9 @@ const labels = {
     consistency: "Стабильность",
     time: "Время",
     tryAgain: "Ещё раз",
+    easy: "Лёгкий",
+    medium: "Средний",
+    hard: "Сложный",
   },
 };
 
@@ -107,6 +116,10 @@ export default function TestResults({
             </div>
             <div className="text-[10px] md:text-base text-muted-foreground uppercase tracking-wider">
               {t.wpm}
+              <span className="mx-1 md:mx-2">·</span>
+              <span className="normal-case">{config.testType.toUpperCase()}</span>
+              <span className="mx-1 md:mx-2">·</span>
+              <span className="normal-case">{t[config.difficulty]}</span>
             </div>
           </div>
 
@@ -185,7 +198,7 @@ export default function TestResults({
               <span>WPM</span>
             </div>
             <div className="flex items-center gap-1">
-              <div className="w-3 h-0.5 bg-muted-foreground" style={{ borderTop: '1px dashed' }} />
+              <div className="w-4 border-t border-dashed border-muted-foreground" />
               <span>Raw WPM</span>
             </div>
           </div>
