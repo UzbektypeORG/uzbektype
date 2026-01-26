@@ -439,8 +439,9 @@ export default function TypingTest({ config, text: initialText, onComplete, anim
       </div>
 
       {/* Time Progress Bar - only for time-based tests */}
+      {/* On mobile: fixed below navbar, on desktop: normal position below text */}
       {isTimeBased && startTime && (
-        <div className="w-full max-w-[95vw] md:max-w-[80vw] mt-4 px-4 sm:px-8 md:px-12">
+        <div className="fixed top-[73px] left-0 right-0 px-4 z-40 md:static md:w-full md:max-w-[80vw] md:mt-4 md:px-12">
           <div className="h-1 bg-muted rounded-full overflow-hidden">
             <div
               className="h-full bg-primary rounded-full"
