@@ -196,7 +196,7 @@ export default async function LandingPage({ params }: { params: Promise<{ lang: 
   return (
     <main className="min-h-screen">
       {/* Hero Section - Full screen */}
-      <section id="hero" className="min-h-screen flex items-start md:items-center justify-center px-4 sm:px-6 noise-bg -mt-[73px]">
+      <section id="hero" className="min-h-screen flex items-center justify-center px-4 sm:px-6 noise-bg -mt-[73px]">
         <Noise
           patternSize={300}
           patternScaleX={2}
@@ -204,7 +204,7 @@ export default async function LandingPage({ params }: { params: Promise<{ lang: 
           patternRefreshInterval={3}
           patternAlpha={25}
         />
-        <div className="max-w-5xl mx-auto text-center space-y-4 md:space-y-6 animate-fade-in pt-32 md:pt-28" style={{ position: 'relative', zIndex: 2 }}>
+        <div className="max-w-5xl mx-auto text-center space-y-4 md:space-y-6 animate-fade-in pt-20 md:pt-28" style={{ position: 'relative', zIndex: 2 }}>
           <div className="space-y-2 md:space-y-3">
             {/* Title - 2 lines on mobile, 1 line on desktop */}
             <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold tracking-tight leading-tight px-2">
@@ -213,12 +213,12 @@ export default async function LandingPage({ params }: { params: Promise<{ lang: 
               <span className="hidden md:inline">{t.hero.titleLine1} {t.hero.titleLine2}</span>
             </h1>
             {/* Secondary text */}
-            <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-muted-foreground font-medium px-2 max-w-lg md:max-w-none mx-auto">
+            <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-muted-foreground font-medium px-2 max-w-xs md:max-w-none mx-auto">
               {t.hero.subtitle}
             </p>
           </div>
           {/* Tertiary text */}
-          <p className="text-sm sm:text-base md:text-lg text-muted-foreground/80 max-w-sm md:max-w-xl mx-auto leading-relaxed px-4">
+          <p className="text-sm sm:text-base md:text-lg text-muted-foreground/80 max-w-xs md:max-w-xl mx-auto leading-relaxed px-4">
             {t.hero.description}
           </p>
           <div className="flex justify-center pt-2 md:pt-4 px-4">
