@@ -37,6 +37,13 @@ export interface TypingStats {
   totalChars: number;
 }
 
+// WPM data point for graph
+export interface WpmDataPoint {
+  time: number; // seconds
+  wpm: number;
+  rawWpm: number;
+}
+
 // User profile
 export interface UserProfile {
   id: string;

@@ -10,8 +10,8 @@ type Props = {
 };
 
 // Supported languages
-export const languages = ['uz', 'en', 'ru'] as const;
-export type Language = typeof languages[number];
+const languages = ['uz', 'en', 'ru'] as const;
+type Language = typeof languages[number];
 
 // Language-specific metadata
 const getMetadata = (lang: Language): Metadata => {
@@ -29,59 +29,49 @@ const getMetadata = (lang: Language): Metadata => {
 
   const keywords = {
     uz: [
+      // Primary
       "tez yozish testi",
-      "tezyozuv testi",
-      "klaviatura tezligi testi",
-      "tez yozish mashqi",
-      "yozish tezligini tekshirish",
       "typing test uzbek",
-      "uzbek typing test",
       "tez yozish testi online",
-      "1 daqiqa tez yozish testi",
-      "bepul tez yozish testi",
+      // Secondary
       "klaviaturada tez yozish mashqi",
-      "yozish tezligini oshirish testi",
-      "o'zbek tezyozuv",
+      "yozish tezligini tekshirish",
+      "yozish tezligini oshirish",
+      "interaktiv typing test",
+      "harflar animatsiyasi bilan tez yozish testi",
+      "minimalist typing test",
+      "bepul tez yozish testi",
+      "1 daqiqa tez yozish testi",
       "WPM test o'zbek",
-      "onlayn tezyozuv",
-      "yozish ko'nikmasi",
     ],
     en: [
-      "typing test",
-      "speed typing test",
-      "typing speed test online",
-      "wpm test",
-      "typing test online free",
-      "keyboard speed test",
-      "typing practice online",
-      "typing test 1 minute",
-      "typing test 5 minutes",
+      // Primary
       "typing speed test",
-      "words per minute",
       "online typing test",
+      "wpm test",
+      // Secondary
+      "interactive typing test",
+      "animated typing test",
+      "minimal typing practice",
+      "typing accuracy test",
+      "typing test 1 minute",
       "free typing test",
-      "typing practice",
-      "typing speed game",
-      "typing tutor",
+      "modern typing test",
+      "typing practice online",
     ],
     ru: [
-      "тест на скорость печати",
+      // Primary
+      "тест скорости печати",
       "скорость печати онлайн",
-      "typing test онлайн",
       "wpm тест",
-      "клавиатурный тренажер",
+      // Secondary
+      "интерактивный тест печати",
+      "анимация букв при печати",
+      "минималистичный тест печати",
       "тест печати 1 минута",
       "бесплатный тест скорости печати",
-      "тренажер печати онлайн",
-      "проверить скорость печати",
-      "тест скорости печати",
-      "скорость печати",
-      "тест набора текста",
-      "онлайн тест печати",
-      "WPM тест",
-      "бесплатный тест печати",
-      "слепая печать",
       "проверка скорости печати",
+      "тренировка печати онлайн",
     ]
   };
 

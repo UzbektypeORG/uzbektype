@@ -1,28 +1,52 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
-import type { TestConfig, TypingStats } from "@/types";
+import type { TestConfig, TypingStats, WpmDataPoint } from "@/types";
 
 interface TypingTestProps {
   config: TestConfig;
   text: string;
-  onComplete: (stats: TypingStats & { timeElapsed: number }) => void;
+  onComplete: (stats: TypingStats & { timeElapsed: number; wpmHistory: WpmDataPoint[]; rawWpm: number; consistency: number }) => void;
   animationSpeed: number;
   correctCharColor: 'default' | 'blue' | 'yellow' | 'green';
+  animationMode: 'bounce' | 'fade';
 }
 
-export default function TypingTest({ config, text, onComplete, animationSpeed, correctCharColor }: TypingTestProps) {
+export default function TypingTest({ config, text: initialText, onComplete, animationSpeed, correctCharColor, animationMode }: TypingTestProps) {
   const [userInput, setUserInput] = useState("");
   const [startTime, setStartTime] = useState<number | null>(null);
   const [currentTime, setCurrentTime] = useState(0);
   const [isFinished, setIsFinished] = useState(false);
   const [cursorPosition, setCursorPosition] = useState({ left: 0, top: 0, height: 0 });
+  const [wpmHistory, setWpmHistory] = useState<WpmDataPoint[]>([]);
+  const [currentLine, setCurrentLine] = useState(0);
+  const [lineOffsets, setLineOffsets] = useState<number[]>([0]);
+  const lastRecordedSecond = useRef(0);
+
+  // For time-based tests: extend text when user reaches the end
+  const [text, setText] = useState(initialText);
+  const baseTextRef = useRef(initialText);
+
+  // Reset text when initialText changes (e.g., on retry)
+  useEffect(() => {
+    setText(initialText);
+    baseTextRef.current = initialText;
+  }, [initialText]);
 
   const currentCharRef = useRef<HTMLSpanElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const textWrapperRef = useRef<HTMLDivElement>(null);
 
   const isTimeBased = config.testType.endsWith("s");
   const testValue = parseInt(config.testType);
+
+  // Extend text when user is close to the end (time-based tests only)
+  useEffect(() => {
+    if (isTimeBased && !isFinished && userInput.length >= text.length - 50) {
+      // Append the base text again with a space separator
+      setText(prev => prev + " " + baseTextRef.current);
+    }
+  }, [userInput.length, text.length, isTimeBased, isFinished]);
 
   const calculateStats = useCallback((): TypingStats => {
     const correctChars = userInput
@@ -46,9 +70,29 @@ export default function TypingTest({ config, text, onComplete, animationSpeed, c
 
   useEffect(() => {
     if (!startTime || isFinished) return;
-    const interval = setInterval(() => setCurrentTime(Date.now()), 100);
+    const interval = setInterval(() => {
+      const now = Date.now();
+      setCurrentTime(now);
+
+      // Record WPM every second
+      const elapsedSeconds = Math.floor((now - startTime) / 1000);
+      if (elapsedSeconds > lastRecordedSecond.current && elapsedSeconds > 0) {
+        lastRecordedSecond.current = elapsedSeconds;
+
+        const correctChars = userInput
+          .split("")
+          .filter((char, i) => char === text[i]).length;
+        const totalChars = userInput.length;
+        const timeInMinutes = elapsedSeconds / 60;
+
+        const wpm = Math.round((correctChars / 5) / timeInMinutes);
+        const rawWpm = Math.round((totalChars / 5) / timeInMinutes);
+
+        setWpmHistory(prev => [...prev, { time: elapsedSeconds, wpm, rawWpm }]);
+      }
+    }, 100);
     return () => clearInterval(interval);
-  }, [startTime, isFinished]);
+  }, [startTime, isFinished, userInput, text]);
 
   useEffect(() => {
     if (!startTime || isFinished) return;
@@ -73,7 +117,22 @@ export default function TypingTest({ config, text, onComplete, animationSpeed, c
     setIsFinished(true);
     const stats = calculateStats();
     const timeElapsed = startTime ? (Date.now() - startTime) / 1000 : 0;
-    onComplete({ ...stats, timeElapsed });
+
+    // Calculate raw WPM (all characters typed / 5 / time)
+    const rawWpm = timeElapsed > 0 ? Math.round((stats.totalChars / 5 / timeElapsed) * 60) : 0;
+
+    // Calculate consistency (standard deviation of WPM values)
+    let consistency = 100;
+    if (wpmHistory.length > 1) {
+      const wpmValues = wpmHistory.map(p => p.wpm);
+      const avgWpm = wpmValues.reduce((a, b) => a + b, 0) / wpmValues.length;
+      const variance = wpmValues.reduce((sum, val) => sum + Math.pow(val - avgWpm, 2), 0) / wpmValues.length;
+      const stdDev = Math.sqrt(variance);
+      // Consistency = 100 - (coefficient of variation * 100), clamped to 0-100
+      consistency = avgWpm > 0 ? Math.max(0, Math.min(100, Math.round(100 - (stdDev / avgWpm) * 100))) : 100;
+    }
+
+    onComplete({ ...stats, timeElapsed, wpmHistory, rawWpm, consistency });
   };
 
   const handleKeyPress = (e: KeyboardEvent) => {
@@ -104,33 +163,71 @@ export default function TypingTest({ config, text, onComplete, animationSpeed, c
   const timeElapsed = startTime ? (currentTime - startTime) / 1000 : 0;
 
   // Calculate bounce height based on animation speed
-  // Linear interpolation: 0.1s → 2px, 2.0s → 24px
+  // Linear interpolation: 0s → 0px (no animation), 0.1s → 2px, 2.0s → 24px
   const minSpeed = 0.1, maxSpeed = 2.0;
   const minHeight = 2, maxHeight = 24;
-  const bounceHeight = Math.round(
+  const isAnimationDisabled = animationSpeed === 0;
+  const bounceHeight = isAnimationDisabled ? 0 : Math.round(
     minHeight + ((animationSpeed - minSpeed) / (maxSpeed - minSpeed)) * (maxHeight - minHeight)
   );
 
-  // Update cursor position
+  // Update cursor position and detect line changes
   useEffect(() => {
     if (currentCharRef.current && containerRef.current) {
       const charRect = currentCharRef.current.getBoundingClientRect();
       const containerRect = containerRef.current.getBoundingClientRect();
 
+      const relativeTop = charRect.top - containerRect.top;
+
+      // Position cursor based on context:
+      // - When at end of text: use RIGHT edge of last char (cursor after all text)
+      // - Otherwise: use LEFT edge of next char to type (follows line wrapping)
+      const isAtEnd = userInput.length >= text.length;
+      const cursorLeft = isAtEnd
+        ? charRect.right - containerRect.left  // RIGHT edge when finished
+        : charRect.left - containerRect.left;  // LEFT edge of next char to type
+
       setCursorPosition({
-        left: charRect.left - containerRect.left,
-        top: charRect.top - containerRect.top,
+        left: cursorLeft,
+        top: relativeTop,
         height: charRect.height,
       });
+
+      // Detect which line we're on based on character position
+      const lineHeight = charRect.height * 1.5; // approximate line height with leading
+      const detectedLine = Math.floor(relativeTop / lineHeight);
+
+      // Update line offsets for scrolling
+      if (detectedLine >= 0 && !lineOffsets.includes(detectedLine)) {
+        setLineOffsets(prev => [...prev, detectedLine].sort((a, b) => a - b));
+      }
+
+      // When we reach line 3 (0-indexed: line 2), scroll up
+      if (detectedLine >= 2 && currentLine < detectedLine - 1) {
+        setCurrentLine(detectedLine - 1);
+      }
     }
-  }, [userInput]);
+  }, [userInput, lineOffsets, currentLine]);
+
+  const getTargetColor = () => {
+    const colors = {
+      default: 'hsl(var(--foreground))',
+      blue: '#3B82F6',
+      yellow: '#EAB308',
+      green: '#22C55E',
+    };
+    return colors[correctCharColor];
+  };
 
   const renderText = () => {
     const words = text.split(' ');
     let charIndex = 0;
+    const targetColor = getTargetColor();
+    // Cursor ref target: next char to type (for line wrapping), or last char if at end of text
+    const cursorRefIndex = userInput.length >= text.length ? text.length - 1 : userInput.length;
 
     return words.map((word, wordIdx) => {
-      const wordChars = word.split('').map((char, charIdx) => {
+      const wordChars = word.split('').map((char) => {
         const currentIndex = charIndex;
         charIndex++;
 
@@ -140,7 +237,13 @@ export default function TypingTest({ config, text, onComplete, animationSpeed, c
         if (currentIndex < userInput.length) {
           const isCorrect = userInput[currentIndex] === char;
           className = isCorrect ? `char-correct-${correctCharColor}` : "char-incorrect";
-          animationClass = isCorrect ? "animate-bounce-up" : "animate-bounce-down";
+          if (!isAnimationDisabled) {
+            if (animationMode === 'bounce') {
+              animationClass = isCorrect ? "animate-bounce-up" : "animate-bounce-down";
+            } else {
+              animationClass = isCorrect ? "animate-fade-correct" : "animate-fade-incorrect";
+            }
+          }
         } else if (currentIndex === userInput.length) {
           className = "char-current";
           animationClass = "";
@@ -149,8 +252,9 @@ export default function TypingTest({ config, text, onComplete, animationSpeed, c
         return (
           <span
             key={currentIndex}
-            ref={currentIndex === userInput.length ? currentCharRef : null}
+            ref={currentIndex === cursorRefIndex ? currentCharRef : null}
             className={`${className} ${animationClass} inline-block transition-all duration-75`}
+            style={{ '--fade-target-color': targetColor } as React.CSSProperties}
           >
             {char}
           </span>
@@ -166,7 +270,13 @@ export default function TypingTest({ config, text, onComplete, animationSpeed, c
       if (spaceIndex < userInput.length) {
         const isSpaceCorrect = userInput[spaceIndex] === ' ';
         spaceClassName = isSpaceCorrect ? `char-correct-${correctCharColor}` : "char-incorrect";
-        spaceAnimationClass = isSpaceCorrect ? "animate-bounce-up" : "animate-bounce-down";
+        if (!isAnimationDisabled) {
+          if (animationMode === 'bounce') {
+            spaceAnimationClass = isSpaceCorrect ? "animate-bounce-up" : "animate-bounce-down";
+          } else {
+            spaceAnimationClass = isSpaceCorrect ? "animate-fade-correct" : "animate-fade-incorrect";
+          }
+        }
       } else if (spaceIndex === userInput.length) {
         spaceClassName = "char-current";
         spaceAnimationClass = "";
@@ -179,8 +289,9 @@ export default function TypingTest({ config, text, onComplete, animationSpeed, c
           </span>
           {wordIdx < words.length - 1 && (
             <span
-              ref={spaceIndex === userInput.length ? currentCharRef : null}
+              ref={spaceIndex === cursorRefIndex ? currentCharRef : null}
               className={`${spaceClassName} ${spaceAnimationClass} inline-block`}
+              style={{ '--fade-target-color': targetColor } as React.CSSProperties}
             >
               {'\u00A0'}
             </span>
@@ -195,36 +306,99 @@ export default function TypingTest({ config, text, onComplete, animationSpeed, c
     return () => window.removeEventListener("keydown", handleKeyPress);
   }, [userInput, startTime, isFinished, text, isTimeBased]);
 
+  const [lineHeight, setLineHeight] = useState(72);
+
+  // Update line height on mount and resize
+  useEffect(() => {
+    const updateLineHeight = () => {
+      if (window.innerWidth >= 768) {
+        setLineHeight(72); // md: text-4xl with leading
+      } else if (window.innerWidth >= 640) {
+        setLineHeight(60); // sm: text-3xl with leading
+      } else {
+        setLineHeight(48); // default: text-2xl with leading
+      }
+    };
+
+    updateLineHeight();
+    window.addEventListener('resize', updateLineHeight);
+    return () => window.removeEventListener('resize', updateLineHeight);
+  }, []);
+
   if (isFinished) return null;
+
+  const visibleLines = 4;
+  const scrollOffset = currentLine * lineHeight;
 
   return (
     <div className="w-full animate-fade-in flex flex-col items-center">
       {/* Text Display */}
-      <div className="typing-text-container px-4 sm:px-8 md:px-12 py-6 md:py-10 w-full max-w-[95vw] md:max-w-[80vw]">
+      <div
+        className="typing-text-container px-4 sm:px-8 md:px-12 py-6 md:py-10 w-full max-w-[95vw] md:max-w-[80vw] overflow-hidden relative"
+        style={{
+          maxHeight: `${lineHeight * visibleLines + 40}px`, // 4 lines + padding
+        }}
+      >
+        {/* Top fade overlay - appears when scrolling */}
+        <div
+          className="absolute top-0 left-0 right-0 z-10 pointer-events-none transition-opacity duration-300"
+          style={{
+            height: `${lineHeight * 1.2}px`,
+            background: 'linear-gradient(to bottom, hsl(var(--background)) 0%, hsl(var(--background)) 20%, transparent 100%)',
+            opacity: currentLine > 0 ? 1 : 0,
+          }}
+        />
         <div
           ref={containerRef}
-          className="relative text-lg sm:text-xl md:text-2xl leading-relaxed md:leading-loose select-none bg-transparent transition-all duration-200 cursor-text font-mono tracking-normal text-center"
+          className="relative select-none bg-transparent cursor-text tracking-normal text-center"
           style={{
+            fontFamily: 'var(--font-poppins), sans-serif',
+            fontWeight: 500,
+            letterSpacing: '0.05em',
             '--animation-speed': `${animationSpeed}s`,
-            '--bounce-height': `${bounceHeight}px`
+            '--bounce-height': `${bounceHeight}px`,
+            transform: `translateY(-${scrollOffset}px)`,
+            transition: 'transform 0.3s ease-out',
           } as React.CSSProperties}
         >
-          {renderText()}
+          <div
+            ref={textWrapperRef}
+            className="text-2xl sm:text-3xl md:text-4xl leading-relaxed md:leading-loose"
+          >
+            {renderText()}
+          </div>
 
           {/* Vertical Cursor */}
           <div
-            className="absolute w-0.5 bg-yellow-500 transition-all duration-150 ease-out pointer-events-none"
+            className="absolute w-[2.5px] transition-all duration-150 ease-out pointer-events-none"
             style={{
               left: `${cursorPosition.left}px`,
               top: `${cursorPosition.top}px`,
               height: `${cursorPosition.height}px`,
-              transform: 'scaleY(0.85)',
+              transform: 'scaleY(0.65)',
               transformOrigin: 'center',
+              backgroundColor: getTargetColor(),
             }}
           />
         </div>
       </div>
 
+      {/* Time Progress Bar - only for time-based tests */}
+      {isTimeBased && startTime && (
+        <div className="w-full max-w-[95vw] md:max-w-[80vw] mt-4 px-4 sm:px-8 md:px-12">
+          <div className="h-1 bg-muted rounded-full overflow-hidden">
+            <div
+              className="h-full bg-primary rounded-full"
+              style={{
+                width: '100%',
+                transform: 'scaleX(0)',
+                transformOrigin: 'left',
+                animation: `progress-fill ${testValue}s linear forwards`,
+              }}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }

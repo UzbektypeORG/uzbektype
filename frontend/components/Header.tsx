@@ -127,6 +127,30 @@ export default function Header({ lang }: HeaderProps) {
     localStorage.setItem("uzbektype_theme", newIsDark ? "dark" : "light");
   };
 
+  // Handle navigation with hash scrolling
+  const handleHashNavigation = (e: React.MouseEvent, hash: string) => {
+    e.preventDefault();
+    const isOnLandingPage = pathname === `/${lang}` || pathname === `/${lang}/`;
+
+    if (isOnLandingPage) {
+      // Already on landing page, just scroll to the section
+      const element = document.getElementById(hash);
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth' });
+      }
+    } else {
+      // Navigate to landing page first, then scroll
+      router.push(`/${lang}`);
+      // Wait for navigation and then scroll
+      setTimeout(() => {
+        const element = document.getElementById(hash);
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth' });
+        }
+      }, 100);
+    }
+  };
+
   // Backend temporarily disabled
   // const handleGoogleLogin = async () => {
   //   setIsLoggingIn(true);
@@ -152,18 +176,20 @@ export default function Header({ lang }: HeaderProps) {
 
         {/* Desktop Navigation */}
         <nav className="hidden md:flex items-center gap-6">
-          <Link href={`/${lang}#hero`} className="text-sm hover:text-foreground transition-colors">
+          <a
+            href={`/${lang}#hero`}
+            onClick={(e) => handleHashNavigation(e, 'hero')}
+            className="text-sm hover:text-foreground transition-colors cursor-pointer"
+          >
             {navContent[lang].home}
-          </Link>
-          <Link href={`/${lang}#features`} className="text-sm hover:text-foreground transition-colors">
+          </a>
+          <a
+            href={`/${lang}#features`}
+            onClick={(e) => handleHashNavigation(e, 'features')}
+            className="text-sm hover:text-foreground transition-colors cursor-pointer"
+          >
             {navContent[lang].features}
-          </Link>
-          <Link href={`/${lang}#blog`} className="text-sm hover:text-foreground transition-colors">
-            {navContent[lang].blog}
-          </Link>
-          <Link href={`/${lang}#leaderboard`} className="text-sm hover:text-foreground transition-colors">
-            {navContent[lang].results}
-          </Link>
+          </a>
 
           {/* Dark Mode Toggle */}
           <button
@@ -324,34 +350,26 @@ export default function Header({ lang }: HeaderProps) {
       {isMobileMenuOpen && (
         <div className="md:hidden border-t border-border bg-background/95 backdrop-blur-md">
           <div className="max-w-6xl mx-auto px-4 py-4 flex flex-col gap-4">
-            <Link
+            <a
               href={`/${lang}#hero`}
-              className="text-sm hover:text-foreground transition-colors py-2"
-              onClick={() => setIsMobileMenuOpen(false)}
+              className="text-sm hover:text-foreground transition-colors py-2 cursor-pointer"
+              onClick={(e) => {
+                handleHashNavigation(e, 'hero');
+                setIsMobileMenuOpen(false);
+              }}
             >
               {navContent[lang].home}
-            </Link>
-            <Link
+            </a>
+            <a
               href={`/${lang}#features`}
-              className="text-sm hover:text-foreground transition-colors py-2"
-              onClick={() => setIsMobileMenuOpen(false)}
+              className="text-sm hover:text-foreground transition-colors py-2 cursor-pointer"
+              onClick={(e) => {
+                handleHashNavigation(e, 'features');
+                setIsMobileMenuOpen(false);
+              }}
             >
               {navContent[lang].features}
-            </Link>
-            <Link
-              href={`/${lang}#blog`}
-              className="text-sm hover:text-foreground transition-colors py-2"
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              {navContent[lang].blog}
-            </Link>
-            <Link
-              href={`/${lang}#leaderboard`}
-              className="text-sm hover:text-foreground transition-colors py-2"
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              {navContent[lang].results}
-            </Link>
+            </a>
 
             {/* Language Selector for Mobile */}
             <div className="border-t border-border pt-4 mt-2">

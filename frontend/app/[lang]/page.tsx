@@ -1,6 +1,7 @@
 import Link from "next/link";
 import FeatureIcon from "@/components/FeatureIcon";
 import Noise from "@/components/Noise";
+import StartButton from "@/components/StartButton";
 
 type Language = "uz" | "en" | "ru";
 
@@ -17,11 +18,11 @@ const content = {
       title: "Imkoniyatlar",
       items: [
         { icon: "zap" as const, title: "Tez va Bepul", description: "Ro'yxatdan o'tish talab qilinmaydi. Darhol boshlang." },
-        { icon: "chart" as const, title: "Real Vaqt Statistika", description: "Yozayotganingizda WPM va aniqlikni ko'ring." },
-        { icon: "globe" as const, title: "3 Ta Til", description: "O'zbek, ingliz va rus tillarini qo'llab-quvvatlaydi." },
-        { icon: "target" as const, title: "Ko'plab Testlar", description: "Vaqt va so'z asosidagi testlar, 3 ta qiyinchilik darajasi." },
-        { icon: "star" as const, title: "Yulduzli Baho", description: "Natijalaringiz asosida 1 dan 5 gacha yulduz oling." },
-        { icon: "save" as const, title: "Tarixni Saqlash", description: "Natijalaringiz brauzeringizda saqlanadi." }
+        { icon: "chart" as const, title: "Real Vaqt Statistika", description: "Yozayotganingizda WPM va aniqlikni jonli kuzating." },
+        { icon: "globe" as const, title: "3 Ta Til", description: "O'zbek, ingliz va rus tillarida matnlar." },
+        { icon: "target" as const, title: "9 Xil Test", description: "Vaqt (10s, 30s, 60s) va qiyinchilik (oson, o'rta, qiyin) tanlang." },
+        { icon: "zap" as const, title: "Animatsiyalar", description: "Rang, tezlik va animatsiya turini sozlang." },
+        { icon: "star" as const, title: "Batafsil Natijalar", description: "WPM grafigi, aniqlik va barqarorlik ko'rsatkichlari." }
       ]
     },
     howItWorks: {
@@ -76,11 +77,11 @@ const content = {
       title: "Features",
       items: [
         { icon: "zap" as const, title: "Fast & Free", description: "No signup required. Start testing immediately." },
-        { icon: "chart" as const, title: "Real-time Stats", description: "See your WPM and accuracy as you type." },
-        { icon: "globe" as const, title: "3 Languages", description: "Support for Uzbek, English, and Russian." },
-        { icon: "target" as const, title: "Multiple Tests", description: "Time-based and word-based tests with 3 difficulty levels." },
-        { icon: "star" as const, title: "Star Rating", description: "Get rated from 1 to 5 stars based on your performance." },
-        { icon: "save" as const, title: "Track Progress", description: "Your results are saved locally in your browser." }
+        { icon: "chart" as const, title: "Real-time Stats", description: "Watch your WPM and accuracy live as you type." },
+        { icon: "globe" as const, title: "3 Languages", description: "Texts in Uzbek, English, and Russian." },
+        { icon: "target" as const, title: "9 Test Modes", description: "Choose time (10s, 30s, 60s) and difficulty (easy, medium, hard)." },
+        { icon: "zap" as const, title: "Animations", description: "Customize colors, speed, and animation styles." },
+        { icon: "star" as const, title: "Detailed Results", description: "WPM graph, accuracy, and consistency metrics." }
       ]
     },
     howItWorks: {
@@ -134,12 +135,12 @@ const content = {
     features: {
       title: "Возможности",
       items: [
-        { icon: "zap" as const, title: "Быстро и Бесплатно", description: "Регистрация не требуется. Начните тестирование сразу." },
-        { icon: "chart" as const, title: "Статистика в Реальном Времени", description: "Смотрите WPM и точность во время печати." },
-        { icon: "globe" as const, title: "3 Языка", description: "Поддержка узбекского, английского и русского языков." },
-        { icon: "target" as const, title: "Множество Тестов", description: "Тесты на время и на количество слов с 3 уровнями сложности." },
-        { icon: "star" as const, title: "Звездный Рейтинг", description: "Получайте от 1 до 5 звезд на основе ваших результатов." },
-        { icon: "save" as const, title: "Отслеживание Прогресса", description: "Результаты сохраняются локально в вашем браузере." }
+        { icon: "zap" as const, title: "Быстро и Бесплатно", description: "Регистрация не требуется. Начните сразу." },
+        { icon: "chart" as const, title: "Статистика в Реальном Времени", description: "Следите за WPM и точностью во время печати." },
+        { icon: "globe" as const, title: "3 Языка", description: "Тексты на узбекском, английском и русском." },
+        { icon: "target" as const, title: "9 Режимов Тестов", description: "Выбирайте время (10s, 30s, 60s) и сложность (легкий, средний, сложный)." },
+        { icon: "zap" as const, title: "Анимации", description: "Настраивайте цвета, скорость и стили анимации." },
+        { icon: "star" as const, title: "Подробные Результаты", description: "График WPM, точность и стабильность." }
       ]
     },
     howItWorks: {
@@ -212,19 +213,14 @@ export default async function LandingPage({ params }: { params: Promise<{ lang: 
           <p className="text-base sm:text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed px-4">
             {t.hero.description}
           </p>
-          <div className="flex flex-col sm:flex-row gap-3 md:gap-4 justify-center pt-2 md:pt-4 px-4">
-            <Link
-              href={`/${currentLang}/tests/30s-medium`}
-              className="px-8 py-4 md:px-10 md:py-5 bg-primary text-primary-foreground rounded-lg hover:opacity-90 transition-all duration-200 font-semibold text-lg md:text-xl"
+          <div className="flex justify-center pt-2 md:pt-4 px-4">
+            <StartButton
+              href={`/${currentLang}/tests/30s-easy`}
+              lang={currentLang}
+              className="px-12 py-4 md:px-16 md:py-5 bg-primary text-primary-foreground rounded-lg hover:opacity-90 transition-all duration-200 font-semibold text-lg md:text-xl"
             >
               {t.hero.startBtn}
-            </Link>
-            <Link
-              href={`/${currentLang}/tests`}
-              className="px-8 py-4 md:px-10 md:py-5 border-2 border-border rounded-lg hover:border-foreground transition-all duration-200 font-semibold text-lg md:text-xl"
-            >
-              {t.hero.learnBtn}
-            </Link>
+            </StartButton>
           </div>
         </div>
       </section>
@@ -283,123 +279,6 @@ export default async function LandingPage({ params }: { params: Promise<{ lang: 
         </div>
       </section>
 
-      {/* Blog Section - Temporarily Commented Out */}
-      {/* <section id="blog" className="min-h-screen flex items-center">
-        <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 py-16 md:py-20">
-          <div className="text-center mb-12 md:mb-16">
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4">{t.blog.title}</h2>
-            <Link
-              href={`/${currentLang}/blog`}
-              className="text-base md:text-lg text-muted-foreground hover:text-foreground transition-colors underline"
-            >
-              {t.blog.readMore} →
-            </Link>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
-            {t.blog.articles.map((article, index) => (
-              <Link
-                key={index}
-                href={`/${currentLang}/blog/${index + 1}`}
-                className="group p-6 md:p-8 rounded-lg border border-border hover:border-foreground dark:hover:border-white hover:bg-accent/30 transition-all duration-300 space-y-3 md:space-y-4"
-                style={{
-                  animation: `fade-in 0.4s ease-out ${index * 100}ms forwards`,
-                  opacity: 0
-                }}
-              >
-                <div className="text-xs md:text-sm text-muted-foreground">{article.date}</div>
-                <h3 className="text-xl md:text-2xl font-semibold group-hover:text-primary transition-colors">
-                  {article.title}
-                </h3>
-                <p className="text-sm md:text-base text-muted-foreground leading-relaxed">
-                  {article.excerpt}
-                </p>
-                <div className="text-xs md:text-sm font-medium group-hover:translate-x-2 transition-transform inline-block">
-                  {lang === "uz" ? "O'qish" : lang === "ru" ? "Читать" : "Read"} →
-                </div>
-              </Link>
-            ))}
-          </div>
-        </div>
-      </section> */}
-
-      {/* CTA Section - Full screen */}
-      <section id="leaderboard" className="min-h-screen flex items-center">
-        <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 py-16 md:py-20">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-12 items-center">
-            {/* Left side - CTA Content */}
-            <div className="text-center lg:text-left space-y-6 md:space-y-8 animate-fade-in">
-              <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold">{t.cta.title}</h2>
-              <p className="text-lg sm:text-xl md:text-2xl text-muted-foreground">
-                {t.cta.description}
-              </p>
-              <Link
-                href={`/${currentLang}/tests`}
-                className="inline-block px-8 py-4 md:px-12 md:py-6 bg-primary text-primary-foreground rounded-lg hover:opacity-90 transition-all duration-200 font-semibold text-lg md:text-xl lg:text-2xl"
-              >
-                {t.cta.button}
-              </Link>
-            </div>
-
-            {/* Right side - Weekly Leaderboard */}
-            <div className="w-full">
-              <div className="border border-border rounded-lg p-4 bg-accent/10 backdrop-blur-sm">
-                <h3 className="text-xl font-bold mb-4 text-center">{t.cta.leaderboard.title}</h3>
-                <div className="space-y-2">
-                  {[
-                    { rank: 1, name: "Kamola_2003", wpm: 142, accuracy: 98.5 },
-                    { rank: 2, name: "FastFingers", wpm: 138, accuracy: 97.2 },
-                    { rank: 3, name: "TypeMaster", wpm: 135, accuracy: 99.1 },
-                    { rank: 4, name: "Alisher_T", wpm: 132, accuracy: 96.8 },
-                    { rank: 5, name: "Speedster", wpm: 128, accuracy: 98.3 },
-                    { rank: 6, name: "Dilnoza", wpm: 125, accuracy: 97.5 },
-                    { rank: 7, name: "QuickType", wpm: 123, accuracy: 96.4 },
-                    { rank: 8, name: "Rustam_99", wpm: 120, accuracy: 98.0 },
-                    { rank: 9, name: "ProTyper", wpm: 118, accuracy: 95.9 },
-                    { rank: 10, name: "Zarina_K", wpm: 115, accuracy: 97.8 }
-                  ].map((player, index) => (
-                    <div
-                      key={player.rank}
-                      className={`flex items-center gap-3 p-2.5 rounded-md transition-all duration-200 ${
-                        player.rank <= 3
-                          ? "bg-primary/10 border border-primary/20"
-                          : "bg-background/50 border border-border/50"
-                      } hover:border-foreground/30`}
-                    >
-                      <div
-                        className={`flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center font-bold text-xs ${
-                          player.rank === 1
-                            ? "bg-yellow-500/20 text-yellow-600 dark:text-yellow-400"
-                            : player.rank === 2
-                            ? "bg-gray-400/20 text-gray-600 dark:text-gray-400"
-                            : player.rank === 3
-                            ? "bg-orange-600/20 text-orange-600 dark:text-orange-400"
-                            : "bg-muted text-muted-foreground"
-                        }`}
-                      >
-                        {player.rank}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="font-semibold text-sm truncate">{player.name}</div>
-                      </div>
-                      <div className="flex items-center gap-2 text-xs">
-                        <div className="text-right">
-                          <div className="font-bold">{player.wpm}</div>
-                          <div className="text-[10px] text-muted-foreground">{t.cta.leaderboard.wpm}</div>
-                        </div>
-                        <div className="text-right">
-                          <div className="font-semibold">{player.accuracy}%</div>
-                          <div className="text-[10px] text-muted-foreground">{t.cta.leaderboard.accuracy}</div>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* Footer */}
       <footer className="py-12 md:py-16 border-t border-border/50">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
@@ -420,12 +299,6 @@ export default async function LandingPage({ params }: { params: Promise<{ lang: 
                 </Link>
                 <Link href={`/${lang}/tests`} className="text-muted-foreground hover:text-foreground transition-colors">
                   {t.footer.links.tests}
-                </Link>
-                <Link href={`/${lang}#blog`} className="text-muted-foreground hover:text-foreground transition-colors">
-                  {t.footer.links.blog}
-                </Link>
-                <Link href={`/${lang}#leaderboard`} className="text-muted-foreground hover:text-foreground transition-colors">
-                  {t.footer.links.results}
                 </Link>
               </nav>
             </div>

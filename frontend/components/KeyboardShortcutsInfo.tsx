@@ -79,7 +79,7 @@ export default function KeyboardShortcutsInfo() {
   const t = shortcuts[lang];
 
   return (
-    <div className="fixed bottom-4 right-4 z-50 opacity-35">
+    <div className="fixed bottom-4 right-4 z-50 opacity-35 hidden md:block">
       {!isVisible ? (
         <div className="relative">
           <button
