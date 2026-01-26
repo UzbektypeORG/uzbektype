@@ -26,7 +26,8 @@ const navContent = {
     results: "Natijalar",
     login: "Kirish",
     logout: "Chiqish",
-    profile: "Profil"
+    profile: "Profil",
+    start: "Boshlash"
   },
   en: {
     home: "Home",
@@ -35,7 +36,8 @@ const navContent = {
     results: "Results",
     login: "Login",
     logout: "Logout",
-    profile: "Profile"
+    profile: "Profile",
+    start: "Start"
   },
   ru: {
     home: "Главная",
@@ -44,7 +46,8 @@ const navContent = {
     results: "Результаты",
     login: "Войти",
     logout: "Выйти",
-    profile: "Профиль"
+    profile: "Профиль",
+    start: "Начать"
   }
 };
 
@@ -239,6 +242,14 @@ export default function Header({ lang }: HeaderProps) {
             )}
           </div>
 
+          {/* Start Button */}
+          <Link
+            href={`/${lang}/tests/30s-easy`}
+            className="px-4 py-1.5 text-sm rounded bg-primary text-primary-foreground hover:opacity-90 transition-all font-medium"
+          >
+            {navContent[lang].start}
+          </Link>
+
           {/* Auth Section - Backend temporarily disabled */}
           {/* {user ? (
             <div className="flex items-center gap-3">
@@ -359,6 +370,15 @@ export default function Header({ lang }: HeaderProps) {
           >
             {navContent[lang].home}
           </a>
+
+          {/* Start Button for Mobile */}
+          <Link
+            href={`/${lang}/tests/30s-easy`}
+            className="px-4 py-2.5 text-sm rounded bg-primary text-primary-foreground hover:opacity-90 transition-all font-medium text-center"
+            onClick={() => setIsMobileMenuOpen(false)}
+          >
+            {navContent[lang].start}
+          </Link>
 
           {/* Language Selector for Mobile */}
           <div className="border-t border-border pt-4 mt-2">

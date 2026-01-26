@@ -143,9 +143,10 @@ export default function TestPage() {
     const completedTests = parseInt(localStorage.getItem("uzbektype_completed_tests") || "0") + 1;
     localStorage.setItem("uzbektype_completed_tests", completedTests.toString());
 
-    // Show feedback modal after exactly 5 tests (and not already shown)
-    const feedbackShown = localStorage.getItem("uzbektype_feedback_shown");
-    if (completedTests === 5 && !feedbackShown) {
+    // Show feedback modal at 5, 15, 30 tests (if not already submitted)
+    const feedbackSubmitted = localStorage.getItem("uzbektype_feedback_submitted");
+    const feedbackMilestones = [5, 15, 30];
+    if (feedbackMilestones.includes(completedTests) && !feedbackSubmitted) {
       setTimeout(() => {
         setShowFeedbackModal(true);
       }, 1500); // Show after results appear
@@ -177,13 +178,13 @@ export default function TestPage() {
       }
     }
 
-    // Mark feedback as shown
-    localStorage.setItem("uzbektype_feedback_shown", "true");
+    // Mark feedback as submitted (won't show again)
+    localStorage.setItem("uzbektype_feedback_submitted", "true");
   };
 
   const handleFeedbackClose = () => {
     setShowFeedbackModal(false);
-    localStorage.setItem("uzbektype_feedback_shown", "true");
+    // Don't mark as submitted - will show again at next milestone
   };
 
   const handleRetry = () => {

@@ -2,6 +2,7 @@ import Link from "next/link";
 import FeatureIcon from "@/components/FeatureIcon";
 import Noise from "@/components/Noise";
 import StartButton from "@/components/StartButton";
+import FooterFeedback from "@/components/FooterFeedback";
 
 type Language = "uz" | "en" | "ru";
 
@@ -331,8 +332,9 @@ export default async function LandingPage({ params }: { params: Promise<{ lang: 
           </div>
 
           {/* Copyright */}
-          <div className="pt-8 border-t border-border/50 text-center">
+          <div className="pt-8 border-t border-border/50 flex flex-col md:flex-row items-center justify-between gap-4">
             <p className="text-sm text-muted-foreground">&copy; {new Date().getFullYear()} {t.footer.copyright}</p>
+            <FooterFeedback lang={currentLang} />
           </div>
         </div>
       </footer>
