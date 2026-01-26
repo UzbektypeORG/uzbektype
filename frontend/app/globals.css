@@ -52,6 +52,12 @@
 @layer base {
   html {
     scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Fix mobile scroll performance */
+  body {
+    overscroll-behavior: none;
   }
 
   /* Offset for fixed navbar when scrolling to anchor links */

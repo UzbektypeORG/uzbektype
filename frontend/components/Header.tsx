@@ -168,7 +168,7 @@ export default function Header({ lang }: HeaderProps) {
   // };
 
   return (
-    <header className="backdrop-blur-sm bg-background/0 sticky top-0 z-50">
+    <header className="backdrop-blur-sm bg-background/0 sticky top-0 z-50 relative">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
         <Link href={`/${lang}`} className="text-xl font-bold">
           uzbektype
@@ -344,8 +344,8 @@ export default function Header({ lang }: HeaderProps) {
 
       {/* Mobile Menu */}
       <div
-        className={`md:hidden border-t border-border bg-background/95 backdrop-blur-md overflow-hidden transition-all duration-300 ease-in-out ${
-          isMobileMenuOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
+        className={`md:hidden absolute left-0 right-0 top-full border-t border-border bg-background/95 backdrop-blur-md overflow-hidden transition-all duration-300 ease-in-out ${
+          isMobileMenuOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0 pointer-events-none'
         }`}
       >
         <div className="max-w-6xl mx-auto px-4 py-4 flex flex-col gap-4">
