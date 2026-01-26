@@ -19,7 +19,7 @@ const content = {
       title: "Imkoniyatlar",
       items: [
         { icon: "zap" as const, title: "Tez va Bepul", description: "Ro'yxatdan o'tish talab qilinmaydi. Darhol boshlang." },
-        { icon: "chart" as const, title: "Real Vaqt Statistika", description: "Yozayotganingizda WPM va aniqlikni jonli kuzating." },
+        { icon: "chart" as const, title: "Aniq Statistika", description: "Yozib bo'lgan WPM statistikani ko'rish imkoniyati." },
         { icon: "globe" as const, title: "3 Ta Til", description: "O'zbek, ingliz va rus tillarida matnlar." },
         { icon: "target" as const, title: "9 Xil Test", description: "Vaqt (10s, 30s, 60s) va qiyinchilik (oson, o'rta, qiyin) tanlang." },
         { icon: "zap" as const, title: "Animatsiyalar", description: "Rang, tezlik va animatsiya turini sozlang." },
@@ -268,7 +268,7 @@ export default async function LandingPage({ params }: { params: Promise<{ lang: 
             {t.howItWorks.steps.map((step, index) => (
               <div
                 key={index}
-                className="flex gap-4 md:gap-6 p-6 md:p-8 rounded-lg border border-transparent hover:border-border/50 transition-all duration-300"
+                className="flex gap-4 md:gap-6 p-6 md:p-8 rounded-lg border border-transparent md:hover:border-border/50 transition-all duration-300"
                 style={{
                   animation: `fade-in 0.4s ease-out ${index * 150}ms forwards`,
                   opacity: 0
@@ -292,7 +292,7 @@ export default async function LandingPage({ params }: { params: Promise<{ lang: 
       {/* Footer */}
       <footer className="py-12 md:py-16 border-t border-border/50">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12 mb-8 md:mb-12">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 mb-8 md:mb-12">
             {/* Brand Section */}
             <div className="space-y-4">
               <h3 className="text-xl font-bold">uzbektype</h3>
@@ -300,23 +300,10 @@ export default async function LandingPage({ params }: { params: Promise<{ lang: 
               <p className="text-xs text-muted-foreground">{t.footer.description}</p>
             </div>
 
-            {/* Quick Links */}
-            <div className="space-y-4">
-              <h4 className="text-sm font-semibold">{currentLang === "uz" ? "Tezkor havolalar" : currentLang === "ru" ? "Быстрые ссылки" : "Quick Links"}</h4>
-              <nav className="flex flex-col space-y-2 text-sm">
-                <Link href={`/${lang}#features`} className="text-muted-foreground hover:text-foreground transition-colors">
-                  {t.footer.links.features}
-                </Link>
-                <Link href={`/${lang}/tests`} className="text-muted-foreground hover:text-foreground transition-colors">
-                  {t.footer.links.tests}
-                </Link>
-              </nav>
-            </div>
-
             {/* Social Media */}
-            <div className="space-y-4">
+            <div className="space-y-4 md:text-right">
               <h4 className="text-sm font-semibold">{t.footer.social}</h4>
-              <div className="flex gap-4">
+              <div className="flex gap-4 md:justify-end">
                 <a
                   href="https://instagram.com/uzbektype"
                   target="_blank"
@@ -345,7 +332,7 @@ export default async function LandingPage({ params }: { params: Promise<{ lang: 
 
           {/* Copyright */}
           <div className="pt-8 border-t border-border/50 text-center">
-            <p className="text-sm text-muted-foreground">&copy; 2024 {t.footer.copyright}</p>
+            <p className="text-sm text-muted-foreground">&copy; {new Date().getFullYear()} {t.footer.copyright}</p>
           </div>
         </div>
       </footer>

@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Timer, RotateCcw, MoveVertical, Blend } from "lucide-react";
 import TypingTest from "@/components/typing/TypingTest";
 import TestResults from "@/components/typing/TestResults";
+import FeedbackModal from "@/components/FeedbackModal";
 import { getTestText } from "@/lib/getTestText";
 import { calculateStars } from "@/lib/calculateStars";
 import { saveTestResult } from "@/lib/localStorage";
@@ -61,6 +62,8 @@ export default function TestPage() {
   const [animationSpeed, setAnimationSpeed] = useState(1);
   const [correctCharColor, setCorrectCharColor] = useState<'default' | 'blue' | 'yellow' | 'green'>('default');
   const [animationMode, setAnimationMode] = useState<'bounce' | 'fade'>('bounce');
+  const [showFeedbackModal, setShowFeedbackModal] = useState(false);
+  const [feedbackSheetUrl, setFeedbackSheetUrl] = useState<string | null>(null);
 
   useEffect(() => {
     // Load animation speed and color from localStorage
@@ -136,7 +139,51 @@ export default function TestPage() {
       totalChars: stats.totalChars,
     });
 
+    // Track completed tests count for feedback modal
+    const completedTests = parseInt(localStorage.getItem("uzbektype_completed_tests") || "0") + 1;
+    localStorage.setItem("uzbektype_completed_tests", completedTests.toString());
+
+    // Show feedback modal after exactly 5 tests (and not already shown)
+    const feedbackShown = localStorage.getItem("uzbektype_feedback_shown");
+    if (completedTests === 5 && !feedbackShown) {
+      setTimeout(() => {
+        setShowFeedbackModal(true);
+      }, 1500); // Show after results appear
+    }
+
     setResult(stats);
+  };
+
+  const handleFeedbackSubmit = async (feedback: string) => {
+    // Get the Google Sheets URL from localStorage or environment
+    const sheetUrl = localStorage.getItem("uzbektype_feedback_sheet_url");
+
+    if (sheetUrl) {
+      try {
+        await fetch(sheetUrl, {
+          method: "POST",
+          mode: "no-cors",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            feedback,
+            timestamp: new Date().toISOString(),
+            userAgent: navigator.userAgent,
+          }),
+        });
+      } catch (error) {
+        console.error("Failed to submit feedback:", error);
+      }
+    }
+
+    // Mark feedback as shown
+    localStorage.setItem("uzbektype_feedback_shown", "true");
+  };
+
+  const handleFeedbackClose = () => {
+    setShowFeedbackModal(false);
+    localStorage.setItem("uzbektype_feedback_shown", "true");
   };
 
   const handleRetry = () => {
@@ -362,6 +409,14 @@ export default function TestPage() {
           </div>
         </div>
       )}
+
+      {/* Feedback Modal */}
+      <FeedbackModal
+        isOpen={showFeedbackModal}
+        onClose={handleFeedbackClose}
+        onSubmit={handleFeedbackSubmit}
+        lang={lang}
+      />
     </main>
   );
 }
