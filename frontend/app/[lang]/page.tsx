@@ -207,7 +207,7 @@ export default async function LandingPage({ params }: { params: Promise<{ lang: 
         <div className="max-w-5xl mx-auto text-center space-y-4 md:space-y-6 animate-fade-in pt-0 md:pt-28" style={{ position: 'relative', zIndex: 2 }}>
           <div className="space-y-2 md:space-y-3">
             {/* Secondary text */}
-            <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-muted-foreground font-medium max-w-[280px] md:max-w-none mx-auto">
+            <p className="text-xs sm:text-base md:text-xl lg:text-2xl text-muted-foreground font-medium whitespace-nowrap">
               {t.hero.subtitle}
             </p>
             {/* Title - 2 lines on mobile, 1 line on desktop */}
