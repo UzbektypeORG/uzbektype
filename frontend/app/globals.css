@@ -52,12 +52,13 @@
 @layer base {
   html {
     scroll-behavior: smooth;
-    -webkit-overflow-scrolling: touch;
   }
 
-  /* Fix mobile scroll performance */
   body {
-    overscroll-behavior: none;
+    @apply bg-background text-foreground;
+    font-family: var(--font-inter), -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-y: none;
   }
 
   /* Offset for fixed navbar when scrolling to anchor links */
@@ -68,16 +69,13 @@
   /* Hero section has negative margin, needs different offset */
   #hero {
     scroll-margin-top: 0;
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
   }
 
   /* Features section needs extra offset */
   #features {
     scroll-margin-top: 120px;
-  }
-
-  body {
-    @apply bg-background text-foreground;
-    font-family: var(--font-inter), -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   }
 
   /* Custom scrollbar styles */
@@ -350,7 +348,6 @@ a {
 /* Noise background container */
 .noise-bg {
   position: relative;
-  overflow: hidden;
 }
 
 /* Animation speed slider */

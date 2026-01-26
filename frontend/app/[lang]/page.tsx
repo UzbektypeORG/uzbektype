@@ -204,7 +204,7 @@ export default async function LandingPage({ params }: { params: Promise<{ lang: 
           patternRefreshInterval={3}
           patternAlpha={25}
         />
-        <div className="max-w-5xl mx-auto text-center space-y-4 md:space-y-6 animate-fade-in pt-0 md:pt-28" style={{ position: 'relative', zIndex: 2 }}>
+        <div className="max-w-5xl mx-auto text-center space-y-4 md:space-y-6 animate-fade-in pt-0 md:pt-28" style={{ position: 'relative', zIndex: 2, transform: 'translateZ(0)' }}>
           <div className="space-y-2 md:space-y-3">
             {/* Secondary text */}
             <p className="text-xs sm:text-base md:text-xl lg:text-2xl text-muted-foreground font-medium whitespace-nowrap">
