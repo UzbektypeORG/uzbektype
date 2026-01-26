@@ -8,6 +8,11 @@
   overflow: hidden;
 }
 
+/* Dark mode - reduce noise visibility */
+:root.dark .noise-overlay {
+  opacity: 0.12 !important;
+}
+
 .noise-layer {
   position: absolute;
   inset: -50%;
@@ -18,11 +23,11 @@
 }
 
 .noise-layer-1 {
-  animation: noise-shift-1 0.5s steps(2) infinite;
+  animation: noise-shift-1 0.15s steps(4) infinite;
 }
 
 .noise-layer-2 {
-  animation: noise-shift-2 0.7s steps(3) infinite;
+  animation: noise-shift-2 0.2s steps(5) infinite;
   opacity: 0.5;
 }
 
