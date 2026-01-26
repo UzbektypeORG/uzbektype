@@ -194,17 +194,19 @@ export default async function LandingPage({ params }: { params: Promise<{ lang: 
   const t = content[currentLang];
 
   return (
-    <main className="min-h-screen">
+    <main className="min-h-screen relative">
+      {/* Global Noise Overlay - Fixed on screen */}
+      <Noise
+        patternSize={300}
+        patternScaleX={2}
+        patternScaleY={2}
+        patternRefreshInterval={3}
+        patternAlpha={25}
+      />
+
       {/* Hero Section - Full screen */}
-      <section id="hero" className="min-h-screen flex items-center justify-center px-4 sm:px-6 noise-bg -mt-[73px]">
-        <Noise
-          patternSize={300}
-          patternScaleX={2}
-          patternScaleY={2}
-          patternRefreshInterval={3}
-          patternAlpha={25}
-        />
-        <div className="max-w-5xl mx-auto text-center space-y-4 md:space-y-6 animate-fade-in pt-0 md:pt-28" style={{ position: 'relative', zIndex: 2, transform: 'translateZ(0)' }}>
+      <section id="hero" className="min-h-screen flex items-center justify-center px-4 sm:px-6 -mt-[73px]">
+        <div className="max-w-5xl mx-auto text-center space-y-4 md:space-y-6 animate-fade-in pt-0 md:pt-28" style={{ position: 'relative', zIndex: 2 }}>
           <div className="space-y-2 md:space-y-3">
             {/* Secondary text */}
             <p className="text-xs sm:text-base md:text-xl lg:text-2xl text-muted-foreground font-medium whitespace-nowrap">
