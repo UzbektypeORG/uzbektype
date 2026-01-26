@@ -36,6 +36,7 @@ export default function TypingTest({ config, text: initialText, onComplete, anim
   const currentCharRef = useRef<HTMLSpanElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const textWrapperRef = useRef<HTMLDivElement>(null);
+  const hiddenInputRef = useRef<HTMLInputElement>(null);
 
   const isTimeBased = config.testType.endsWith("s");
   const testValue = parseInt(config.testType);
@@ -156,6 +157,34 @@ export default function TypingTest({ config, text: initialText, onComplete, anim
       e.preventDefault();
       if (!isTimeBased && userInput.length >= text.length) return;
       setUserInput((prev) => prev + e.key);
+    }
+  };
+
+  // Handle mobile input changes
+  const handleMobileInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (isFinished) return;
+
+    const newValue = e.target.value;
+
+    // Start timer on first input
+    if (!startTime && newValue.length > 0) {
+      setStartTime(Date.now());
+      setCurrentTime(Date.now());
+    }
+
+    // For non-time-based tests, limit input length
+    if (!isTimeBased && newValue.length > text.length) {
+      setUserInput(newValue.slice(0, text.length));
+      return;
+    }
+
+    setUserInput(newValue);
+  };
+
+  // Focus hidden input when clicking on typing area
+  const handleTypingAreaClick = () => {
+    if (hiddenInputRef.current && !isFinished) {
+      hiddenInputRef.current.focus();
     }
   };
 
@@ -306,6 +335,17 @@ export default function TypingTest({ config, text: initialText, onComplete, anim
     return () => window.removeEventListener("keydown", handleKeyPress);
   }, [userInput, startTime, isFinished, text, isTimeBased]);
 
+  // Auto-focus hidden input on mount (helps mobile)
+  useEffect(() => {
+    // Small delay to ensure DOM is ready
+    const timer = setTimeout(() => {
+      if (hiddenInputRef.current) {
+        hiddenInputRef.current.focus();
+      }
+    }, 100);
+    return () => clearTimeout(timer);
+  }, []);
+
   const [lineHeight, setLineHeight] = useState(72);
 
   // Update line height on mount and resize
@@ -332,9 +372,24 @@ export default function TypingTest({ config, text: initialText, onComplete, anim
 
   return (
     <div className="w-full animate-fade-in flex flex-col items-center">
+      {/* Hidden input for mobile keyboard */}
+      <input
+        ref={hiddenInputRef}
+        type="text"
+        value={userInput}
+        onChange={handleMobileInput}
+        className="sr-only"
+        autoCapitalize="none"
+        autoCorrect="off"
+        autoComplete="off"
+        spellCheck={false}
+        aria-label="Type here"
+      />
+
       {/* Text Display */}
       <div
-        className="typing-text-container px-4 sm:px-8 md:px-12 py-6 md:py-10 w-full max-w-[95vw] md:max-w-[80vw] overflow-hidden relative"
+        onClick={handleTypingAreaClick}
+        className="typing-text-container px-4 sm:px-8 md:px-12 py-6 md:py-10 w-full max-w-[95vw] md:max-w-[80vw] overflow-hidden relative cursor-text"
         style={{
           maxHeight: `${lineHeight * visibleLines + 40}px`, // 4 lines + padding
         }}
