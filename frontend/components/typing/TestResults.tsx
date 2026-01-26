@@ -97,33 +97,33 @@ export default function TestResults({
   return (
     <div className="w-full max-w-5xl mx-auto space-y-6 md:space-y-8 animate-fade-in">
       {/* Main content: Stats + Graph */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 md:gap-4 lg:gap-8">
         {/* Left: Main Statistics */}
-        <div className="flex flex-row lg:flex-col justify-between lg:justify-start items-center lg:items-start p-4 lg:p-0 border border-border lg:border-0 rounded-lg lg:rounded-none gap-4 lg:gap-6">
+        <div className="flex flex-row lg:flex-col justify-between lg:justify-start items-center lg:items-start p-3 md:p-4 lg:p-0 border border-border lg:border-0 rounded-lg lg:rounded-none gap-2 md:gap-4 lg:gap-6">
           {/* WPM */}
-          <div className="space-y-1 text-left">
-            <div className="text-4xl md:text-7xl lg:text-8xl font-bold tabular-nums text-primary">
+          <div className="space-y-0.5 md:space-y-1 text-left">
+            <div className="text-3xl md:text-7xl lg:text-8xl font-bold tabular-nums text-primary">
               {animatedWpm}
             </div>
-            <div className="text-xs md:text-base text-muted-foreground uppercase tracking-wider">
+            <div className="text-[10px] md:text-base text-muted-foreground uppercase tracking-wider">
               {t.wpm}
             </div>
           </div>
 
           {/* Accuracy */}
-          <div className="space-y-1 text-right lg:text-left">
-            <div className="text-4xl md:text-6xl lg:text-7xl font-bold tabular-nums text-primary">
+          <div className="space-y-0.5 md:space-y-1 text-right lg:text-left">
+            <div className="text-3xl md:text-6xl lg:text-7xl font-bold tabular-nums text-primary">
               {animatedAccuracy}%
             </div>
-            <div className="text-xs md:text-base text-muted-foreground uppercase tracking-wider">
+            <div className="text-[10px] md:text-base text-muted-foreground uppercase tracking-wider">
               {t.accuracy}
             </div>
           </div>
         </div>
 
         {/* Right: WPM Graph */}
-        <div className="border border-border rounded-lg p-4 md:p-6 bg-card/50">
-          <div className="h-48 md:h-64">
+        <div className="border border-border rounded-lg p-3 md:p-4 lg:p-6 bg-card/50">
+          <div className="h-36 md:h-48 lg:h-64">
             {stats.wpmHistory.length > 0 ? (
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart
@@ -193,32 +193,32 @@ export default function TestResults({
       </div>
 
       {/* Secondary Statistics */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="text-center p-3 md:p-4 border border-border rounded-lg">
-          <div className="text-xl md:text-2xl font-semibold tabular-nums text-muted-foreground">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-4">
+        <div className="text-center p-2 md:p-3 lg:p-4 border border-border rounded-lg">
+          <div className="text-base md:text-xl lg:text-2xl font-semibold tabular-nums text-muted-foreground">
             {animatedRawWpm}
           </div>
-          <div className="text-xs text-muted-foreground mt-1">{t.rawWpm}</div>
+          <div className="text-[10px] md:text-xs text-muted-foreground mt-0.5 md:mt-1">{t.rawWpm}</div>
         </div>
-        <div className="text-center p-3 md:p-4 border border-border rounded-lg">
-          <div className="text-xl md:text-2xl font-semibold tabular-nums text-muted-foreground">
+        <div className="text-center p-2 md:p-3 lg:p-4 border border-border rounded-lg">
+          <div className="text-base md:text-xl lg:text-2xl font-semibold tabular-nums text-muted-foreground">
             <span className="text-green-500">{animatedCorrect}</span>
-            <span className="mx-1">/</span>
+            <span className="mx-0.5 md:mx-1">/</span>
             <span className="text-red-500">{animatedIncorrect}</span>
           </div>
-          <div className="text-xs text-muted-foreground mt-1">{t.characters}</div>
+          <div className="text-[10px] md:text-xs text-muted-foreground mt-0.5 md:mt-1">{t.characters}</div>
         </div>
-        <div className="text-center p-3 md:p-4 border border-border rounded-lg">
-          <div className="text-xl md:text-2xl font-semibold tabular-nums text-muted-foreground">
+        <div className="text-center p-2 md:p-3 lg:p-4 border border-border rounded-lg">
+          <div className="text-base md:text-xl lg:text-2xl font-semibold tabular-nums text-muted-foreground">
             {animatedConsistency}%
           </div>
-          <div className="text-xs text-muted-foreground mt-1">{t.consistency}</div>
+          <div className="text-[10px] md:text-xs text-muted-foreground mt-0.5 md:mt-1">{t.consistency}</div>
         </div>
-        <div className="text-center p-3 md:p-4 border border-border rounded-lg">
-          <div className="text-xl md:text-2xl font-semibold tabular-nums text-muted-foreground">
+        <div className="text-center p-2 md:p-3 lg:p-4 border border-border rounded-lg">
+          <div className="text-base md:text-xl lg:text-2xl font-semibold tabular-nums text-muted-foreground">
             {animatedTime}s
           </div>
-          <div className="text-xs text-muted-foreground mt-1">{t.time}</div>
+          <div className="text-[10px] md:text-xs text-muted-foreground mt-0.5 md:mt-1">{t.time}</div>
         </div>
       </div>
 

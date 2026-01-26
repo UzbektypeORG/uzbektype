@@ -181,7 +181,7 @@ export default function TestPage() {
       {!result ? (
         <>
           {/* Upper flex-1 space - test header at bottom */}
-          <div className="flex-1 flex items-end justify-center pb-4 md:pb-8 px-2 md:px-0">
+          <div className="pt-4 md:pt-0 md:flex-1 flex items-start md:items-end justify-center pb-4 md:pb-8 px-2 md:px-0">
             <div className="w-full md:w-[80%] max-w-6xl flex flex-col md:flex-row items-center justify-between gap-3 md:gap-0">
               {/* Mobile Row 1: Time + Difficulty (side by side) */}
               {/* Desktop: Left section */}
@@ -348,8 +348,8 @@ export default function TestPage() {
             </div>
           </div>
 
-          {/* Lower flex-1 space - empty */}
-          <div className="flex-1"></div>
+          {/* Lower flex-1 space - empty (takes remaining space on mobile for keyboard) */}
+          <div className="flex-1 md:flex-1"></div>
         </>
       ) : (
         <div className="flex-1 flex items-center justify-center px-4 md:px-0">
