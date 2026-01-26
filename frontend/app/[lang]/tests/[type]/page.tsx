@@ -12,7 +12,6 @@ import { calculateStars } from "@/lib/calculateStars";
 import { saveTestResult } from "@/lib/localStorage";
 import type { TestConfig, TypingStats, Language, TestType, Difficulty, WpmDataPoint } from "@/types";
 
-const languages: Language[] = ["uz", "en", "ru"];
 const testTypes: TestType[] = ["10s", "30s", "60s", "10w", "30w", "60w"];
 const difficulties: Difficulty[] = ["easy", "medium", "hard"];
 
@@ -63,7 +62,20 @@ export default function TestPage() {
   const [correctCharColor, setCorrectCharColor] = useState<'default' | 'blue' | 'yellow' | 'green'>('default');
   const [animationMode, setAnimationMode] = useState<'bounce' | 'fade'>('bounce');
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
-  const [feedbackSheetUrl, setFeedbackSheetUrl] = useState<string | null>(null);
+
+  // Restore fullscreen if it was active before navigation
+  useEffect(() => {
+    const wasFullscreen = localStorage.getItem("uzbektype_was_fullscreen");
+    if (wasFullscreen === "true") {
+      localStorage.removeItem("uzbektype_was_fullscreen");
+      // Small delay to ensure page is loaded
+      setTimeout(() => {
+        document.documentElement.requestFullscreen?.().catch(() => {
+          // Fullscreen request failed, ignore
+        });
+      }, 100);
+    }
+  }, []);
 
   useEffect(() => {
     // Load animation speed and color from localStorage
@@ -186,6 +198,9 @@ export default function TestPage() {
   };
 
   const handleRetry = () => {
+    // Close feedback modal if open
+    setShowFeedbackModal(false);
+
     // Regenerate text with a new random topic
     if (config) {
       const isWordBased = config.testType.endsWith("w");
