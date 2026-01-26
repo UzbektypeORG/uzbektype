@@ -174,7 +174,7 @@ export default function Header({ lang }: HeaderProps) {
   // };
 
   return (
-    <header className="backdrop-blur-md bg-background/30 sticky top-0 z-50 relative">
+    <header className="backdrop-blur-md bg-background/15 sticky top-0 z-50 relative">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
         <Link href={`/${lang}`} className="text-xl font-bold">
           uzbektype
