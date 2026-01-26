@@ -45,14 +45,18 @@ export default function StartButton({ href, lang, children, className }: StartBu
   }, []);
 
   const handleClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+
     // Store fullscreen state before navigation
     if (document.fullscreenElement) {
       localStorage.setItem("uzbektype_was_fullscreen", "true");
     }
 
     if (isMobile) {
-      e.preventDefault();
       setShowModal(true);
+    } else {
+      // Use router.push for client-side navigation (keeps fullscreen)
+      router.push(href);
     }
   };
 
