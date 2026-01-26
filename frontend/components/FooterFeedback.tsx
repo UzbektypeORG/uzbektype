@@ -17,26 +17,24 @@ export default function FooterFeedback({ lang }: FooterFeedbackProps) {
   const [showModal, setShowModal] = useState(false);
 
   const handleSubmit = async (feedback: string) => {
-    const sheetUrl = localStorage.getItem("uzbektype_feedback_sheet_url");
+    const sheetUrl = "https://script.google.com/macros/s/AKfycby-IiWY0K3DKTYsy3G3Rknj_8O-Ux67qkIAV9ChaGrG4jJsGOZyVFgBmaqudiW9e6fi/exec";
 
-    if (sheetUrl) {
-      try {
-        await fetch(sheetUrl, {
-          method: "POST",
-          mode: "no-cors",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            feedback,
-            timestamp: new Date().toISOString(),
-            userAgent: navigator.userAgent,
-            source: "footer",
-          }),
-        });
-      } catch (error) {
-        console.error("Failed to submit feedback:", error);
-      }
+    try {
+      await fetch(sheetUrl, {
+        method: "POST",
+        mode: "no-cors",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          feedback,
+          timestamp: new Date().toISOString(),
+          userAgent: navigator.userAgent,
+          source: "footer",
+        }),
+      });
+    } catch (error) {
+      console.error("Failed to submit feedback:", error);
     }
 
     localStorage.setItem("uzbektype_feedback_submitted", "true");
