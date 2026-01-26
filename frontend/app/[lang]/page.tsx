@@ -8,9 +8,10 @@ type Language = "uz" | "en" | "ru";
 const content = {
   uz: {
     hero: {
-      title: "Yozish Tezligingizni Sinab Ko'ring",
-      subtitle: "Terayotganingizda real vaqtda WPM va aniqlikni kuzating",
-      description: "O'zbek, ingliz va rus tillarida bepul onlayn yozish testi. Hech qanday ro'yxatdan o'tishsiz, darhol boshlang.",
+      titleLine1: "Yozish Tezligingizni",
+      titleLine2: "Sinab Ko'ring",
+      subtitle: "Sekin yozish ish va o'qishda vaqtni yeb qo'yadi",
+      description: "Uzbektype yordamida klaviaturadagi tezligingizni aniqlang va uni oshirishni bugunoq boshlang.",
       startBtn: "Boshlash",
       learnBtn: "Formatni tanlash"
     },
@@ -67,9 +68,10 @@ const content = {
   },
   en: {
     hero: {
-      title: "Test Your Typing Speed",
-      subtitle: "Track your WPM and accuracy in real-time as you type",
-      description: "Free online typing test in Uzbek, English, and Russian. No signup required, start instantly.",
+      titleLine1: "Test Your",
+      titleLine2: "Typing Speed",
+      subtitle: "Slow typing wastes time at work and school",
+      description: "Discover your keyboard speed with Uzbektype and start improving today.",
       startBtn: "Start",
       learnBtn: "Choose Format"
     },
@@ -126,9 +128,10 @@ const content = {
   },
   ru: {
     hero: {
-      title: "Проверьте Скорость Печати",
-      subtitle: "Отслеживайте WPM и точность в реальном времени",
-      description: "Бесплатный онлайн-тест скорости печати на узбекском, английском и русском языках. Не требуется регистрация, начните сразу.",
+      titleLine1: "Проверьте Скорость",
+      titleLine2: "Печати",
+      subtitle: "Медленный набор отнимает время на работе и учёбе",
+      description: "Узнайте свою скорость набора с Uzbektype и начните улучшать её уже сегодня.",
       startBtn: "Начать",
       learnBtn: "Выбрать формат"
     },
@@ -201,16 +204,21 @@ export default async function LandingPage({ params }: { params: Promise<{ lang: 
           patternRefreshInterval={3}
           patternAlpha={25}
         />
-        <div className="max-w-5xl mx-auto text-center space-y-6 md:space-y-8 animate-fade-in pt-20 md:pt-28" style={{ position: 'relative', zIndex: 2 }}>
-          <div className="space-y-3 md:space-y-4">
+        <div className="max-w-5xl mx-auto text-center space-y-4 md:space-y-6 animate-fade-in pt-20 md:pt-28" style={{ position: 'relative', zIndex: 2 }}>
+          <div className="space-y-2 md:space-y-3">
+            {/* Title - 2 lines on mobile, 1 line on desktop */}
             <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold tracking-tight leading-tight px-2">
-              {t.hero.title}
+              <span className="md:hidden block">{t.hero.titleLine1}</span>
+              <span className="md:hidden block">{t.hero.titleLine2}</span>
+              <span className="hidden md:inline">{t.hero.titleLine1} {t.hero.titleLine2}</span>
             </h1>
-            <p className="text-lg sm:text-xl md:text-2xl lg:text-3xl text-muted-foreground font-medium px-2">
+            {/* Secondary text */}
+            <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-muted-foreground font-medium px-2">
               {t.hero.subtitle}
             </p>
           </div>
-          <p className="text-base sm:text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed px-4">
+          {/* Tertiary text */}
+          <p className="text-sm sm:text-base md:text-lg text-muted-foreground/80 max-w-2xl mx-auto leading-relaxed px-4">
             {t.hero.description}
           </p>
           <div className="flex justify-center pt-2 md:pt-4 px-4">
