@@ -66,7 +66,7 @@ export async function generateMetadata({ params }: { params: Promise<{ lang: Lan
     description: seo.description,
     keywords: seo.keywords,
     alternates: {
-      canonical: `https://www.uzbektype.uz/${currentLang}`,
+      canonical: `https://uzbektype.uz/${currentLang}`,
       languages: {
         "uz": "/uz",
         "en": "/en",
@@ -76,7 +76,7 @@ export async function generateMetadata({ params }: { params: Promise<{ lang: Lan
     openGraph: {
       title: seo.title,
       description: seo.description,
-      url: `https://www.uzbektype.uz/${currentLang}`,
+      url: `https://uzbektype.uz/${currentLang}`,
       locale: currentLang === "uz" ? "uz_UZ" : currentLang === "en" ? "en_US" : "ru_RU",
     },
   };

@@ -82,7 +82,7 @@ const getMetadata = (lang: Language): Metadata => {
   };
 
   return {
-    metadataBase: new URL("https://www.uzbektype.uz"),
+    metadataBase: new URL("https://uzbektype.uz"),
     title: titles[lang],
     description: descriptions[lang],
     keywords: keywords[lang],
@@ -96,18 +96,18 @@ const getMetadata = (lang: Language): Metadata => {
       apple: "/icon.svg",
     },
     alternates: {
-      canonical: `https://www.uzbektype.uz/${lang}`,
+      canonical: `https://uzbektype.uz/${lang}`,
       languages: {
-        'uz': 'https://www.uzbektype.uz/uz',
-        'en': 'https://www.uzbektype.uz/en',
-        'ru': 'https://www.uzbektype.uz/ru',
+        'uz': 'https://uzbektype.uz/uz',
+        'en': 'https://uzbektype.uz/en',
+        'ru': 'https://uzbektype.uz/ru',
       }
     },
     openGraph: {
       type: "website",
       locale: locales[lang],
       alternateLocale: Object.values(locales).filter(l => l !== locales[lang]),
-      url: `https://www.uzbektype.uz/${lang}`,
+      url: `https://uzbektype.uz/${lang}`,
       title: titles[lang],
       description: descriptions[lang],
       siteName: "Uzbektype",

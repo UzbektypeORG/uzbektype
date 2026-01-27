@@ -21,7 +21,7 @@ export default function StructuredData({ lang }: StructuredDataProps) {
     "@context": "https://schema.org",
     "@type": "WebApplication",
     "name": names[lang],
-    "url": `https://www.uzbektype.uz/${lang}`,
+    "url": `https://uzbektype.uz/${lang}`,
     "description": descriptions[lang],
     "applicationCategory": "EducationalApplication",
     "operatingSystem": "Web Browser",
@@ -39,7 +39,7 @@ export default function StructuredData({ lang }: StructuredDataProps) {
       "@type": "UseAction",
       "target": {
         "@type": "EntryPoint",
-        "urlTemplate": `https://www.uzbektype.uz/${lang}/tests/{testType}`,
+        "urlTemplate": `https://uzbektype.uz/${lang}/tests/{testType}`,
         "actionPlatform": [
           "http://schema.org/DesktopWebPlatform",
           "http://schema.org/MobileWebPlatform"
