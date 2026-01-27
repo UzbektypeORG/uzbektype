@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import FeatureIcon from "@/components/FeatureIcon";
 import Noise from "@/components/Noise";
@@ -5,6 +6,81 @@ import StartButton from "@/components/StartButton";
 import FooterFeedback from "@/components/FooterFeedback";
 
 type Language = "uz" | "en" | "ru";
+
+// Per-language SEO metadata
+const seoContent = {
+  uz: {
+    title: "Uzbektype - Interaktiv Typing Test | Yozish Tezligini Aniqlash",
+    description: "Interaktiv typing test - yozish tezligini real vaqtda aniqlang. Bepul onlayn klaviatura tezligi testi o'zbek tilida. WPM va aniqlik statistikasi.",
+    keywords: [
+      "yozish tezligini aniqlash",
+      "tez yozish testi",
+      "yozish tezligi testi",
+      "klaviatura tezligi testi",
+      "interaktiv typing test",
+      "animatsion typing test",
+      "wpm testi",
+      "yozish tezligini interaktiv tarzda aniqlash",
+      "animatsiyali typing test bepul",
+      "klaviaturada tez yozishni sinash",
+    ],
+  },
+  en: {
+    title: "Uzbektype - Interactive Typing Test | Free Online WPM Speed Test",
+    description: "Interactive typing speed test with real-time WPM tracking. Free online typing test with accuracy stats. Check your keyboard speed now.",
+    keywords: [
+      "typing speed test",
+      "online typing test",
+      "free typing test",
+      "typing test",
+      "interactive typing test",
+      "animated typing test",
+      "wpm test",
+      "check typing speed online",
+      "real time typing speed test",
+    ],
+  },
+  ru: {
+    title: "Uzbektype - Интерактивный Тест Печати | Проверка Скорости Онлайн",
+    description: "Интерактивный тест скорости печати в реальном времени. Бесплатный онлайн тест с WPM статистикой. Проверьте скорость набора сейчас.",
+    keywords: [
+      "тест скорости печати",
+      "проверка скорости печати",
+      "онлайн тест печати",
+      "скорость печати",
+      "интерактивный тест печати",
+      "анимированный тест печати",
+      "wpm тест",
+      "проверить скорость печати онлайн",
+    ],
+  },
+};
+
+export async function generateMetadata({ params }: { params: Promise<{ lang: Language }> }): Promise<Metadata> {
+  const { lang } = await params;
+  const currentLang = lang || "uz";
+  const seo = seoContent[currentLang];
+
+  return {
+    title: seo.title,
+    description: seo.description,
+    keywords: seo.keywords,
+    alternates: {
+      canonical: `https://uzbektype.vercel.app/${currentLang}`,
+      languages: {
+        "uz": "/uz",
+        "en": "/en",
+        "ru": "/ru",
+      },
+    },
+    openGraph: {
+      title: seo.title,
+      description: seo.description,
+      url: `https://uzbektype.vercel.app/${currentLang}`,
+      locale: currentLang === "uz" ? "uz_UZ" : currentLang === "en" ? "en_US" : "ru_RU",
+    },
+  };
+}
 
 const content = {
   uz: {

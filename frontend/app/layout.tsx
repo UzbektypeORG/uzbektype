@@ -24,7 +24,7 @@ const poppins = Poppins({
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://uzbektype.vercel.app"),
-  title: "Uzbektype - Yozish Tezligini Aniqlash | Typing Speed Test | Тест Скорости Печати",
+  title: "Uzbektype - Interaktiv Typing Test | Yozish Tezligini Aniqlash | Тест Печати",
   description: "Yozish tezligini interaktiv tarzda aniqlang. Interactive typing speed test with real-time WPM. Интерактивный тест скорости печати в реальном времени.",
   keywords: [
     // Uzbek
@@ -59,8 +59,8 @@ export const metadata: Metadata = {
     "проверить скорость печати онлайн",
   ],
   openGraph: {
-    title: "Uzbektype - Yozish Tezligini Aniqlash",
-    description: "Interaktiv typing test. WPM ni real vaqtda aniqlang. O'zbek, ingliz, rus tillarida.",
+    title: "Uzbektype - Interaktiv Typing Test",
+    description: "Interaktiv typing test - yozish tezligini aniqlang. WPM ni real vaqtda ko'ring. O'zbek, ingliz, rus tillarida.",
     type: "website",
     locale: "uz_UZ",
     alternateLocale: ["en_US", "ru_RU"],
