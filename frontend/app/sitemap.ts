@@ -1,7 +1,7 @@
 import { MetadataRoute } from 'next'
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = 'https://uzbektype.uz'
+  const baseUrl = 'https://www.uzbektype.uz'
   const languages = ['uz', 'en', 'ru']
 
   // Test types
@@ -16,13 +16,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
       lastModified: new Date(),
       changeFrequency: 'daily' as const,
       priority: 1,
-    },
-    // Tests page for each language
-    {
-      url: `${baseUrl}/${lang}/tests`,
-      lastModified: new Date(),
-      changeFrequency: 'weekly' as const,
-      priority: 0.9,
     },
     // All test combinations for each language
     ...testTypes.flatMap(type =>

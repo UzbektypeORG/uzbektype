@@ -23,7 +23,7 @@ const poppins = Poppins({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://uzbektype.uz"),
+  metadataBase: new URL("https://www.uzbektype.uz"),
   title: "Uzbektype - Interaktiv Typing Test | Yozish Tezligini Aniqlash | Тест Печати",
   description: "Yozish tezligini interaktiv tarzda aniqlang. Interactive typing speed test with real-time WPM. Интерактивный тест скорости печати в реальном времени.",
   keywords: [

@@ -2,4 +2,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://uzbektype.uz/sitemap.xml
+Sitemap: https://www.uzbektype.uz/sitemap.xml
