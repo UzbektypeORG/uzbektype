@@ -25,6 +25,7 @@ export default function StructuredData({ lang }: StructuredDataProps) {
     "description": descriptions[lang],
     "applicationCategory": "EducationalApplication",
     "operatingSystem": "Web Browser",
+    "image": "https://uzbektype.uz/logo.png",
     "offers": {
       "@type": "Offer",
       "price": "0",
@@ -44,6 +45,14 @@ export default function StructuredData({ lang }: StructuredDataProps) {
           "http://schema.org/DesktopWebPlatform",
           "http://schema.org/MobileWebPlatform"
         ]
+      }
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": "Uzbektype",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://uzbektype.uz/logo.png"
       }
     }
   }

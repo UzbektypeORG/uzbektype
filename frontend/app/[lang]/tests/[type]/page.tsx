@@ -45,6 +45,24 @@ const labels = {
   }
 };
 
+const mobileWarning = {
+  uz: {
+    title: "Diqqat",
+    message: "Kompyuter orqali kirish tavsiya etiladi",
+    ok: "Tushunarli"
+  },
+  en: {
+    title: "Notice",
+    message: "We recommend using a computer for the best experience",
+    ok: "OK"
+  },
+  ru: {
+    title: "Внимание",
+    message: "Рекомендуется использовать компьютер",
+    ok: "Понятно"
+  }
+};
+
 const difficultyOptions: Difficulty[] = ["easy", "medium", "hard"];
 
 const timeOptions = ["10s", "30s", "60s"] as const;
@@ -62,6 +80,7 @@ export default function TestPage() {
   const [correctCharColor, setCorrectCharColor] = useState<'default' | 'blue' | 'yellow' | 'green'>('default');
   const [animationMode, setAnimationMode] = useState<'bounce' | 'fade'>('bounce');
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
+  const [showMobileWarning, setShowMobileWarning] = useState(false);
 
   // Restore fullscreen if it was active before navigation
   useEffect(() => {
@@ -74,6 +93,15 @@ export default function TestPage() {
           // Fullscreen request failed, ignore
         });
       }, 100);
+    }
+  }, []);
+
+  // Show mobile warning on page load
+  useEffect(() => {
+    const isMobile = window.innerWidth < 768;
+    const hasSeenWarning = sessionStorage.getItem("uzbektype_mobile_warning_seen");
+    if (isMobile && !hasSeenWarning) {
+      setShowMobileWarning(true);
     }
   }, []);
 
@@ -431,6 +459,25 @@ export default function TestPage() {
         onSubmit={handleFeedbackSubmit}
         lang={lang}
       />
+
+      {/* Mobile Warning Modal */}
+      {showMobileWarning && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm animate-fade-in">
+          <div className="bg-background border border-border rounded-lg p-6 mx-4 max-w-sm w-full space-y-4 animate-scale-in">
+            <h3 className="text-lg font-semibold text-center">{mobileWarning[lang].title}</h3>
+            <p className="text-muted-foreground text-center">{mobileWarning[lang].message}</p>
+            <button
+              onClick={() => {
+                setShowMobileWarning(false);
+                sessionStorage.setItem("uzbektype_mobile_warning_seen", "true");
+              }}
+              className="w-full px-4 py-3 bg-primary text-primary-foreground rounded-lg hover:opacity-90 transition-all duration-200 font-medium"
+            >
+              {mobileWarning[lang].ok}
+            </button>
+          </div>
+        </div>
+      )}
     </main>
   );
 }

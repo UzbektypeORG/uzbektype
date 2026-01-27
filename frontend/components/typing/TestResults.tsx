@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { Share2 } from "lucide-react";
 import {
   LineChart,
   Line,
@@ -57,6 +58,8 @@ const labels = {
     consistency: "Barqarorlik",
     time: "Vaqt",
     tryAgain: "Qaytadan",
+    share: "Ulashish",
+    copied: "Nusxalandi!",
     easy: "Oson",
     medium: "O'rta",
     hard: "Qiyin",
@@ -69,6 +72,8 @@ const labels = {
     consistency: "Consistency",
     time: "Time",
     tryAgain: "Try Again",
+    share: "Share",
+    copied: "Copied!",
     easy: "Easy",
     medium: "Medium",
     hard: "Hard",
@@ -81,6 +86,8 @@ const labels = {
     consistency: "Стабильность",
     time: "Время",
     tryAgain: "Ещё раз",
+    share: "Поделиться",
+    copied: "Скопировано!",
     easy: "Лёгкий",
     medium: "Средний",
     hard: "Сложный",
@@ -93,6 +100,43 @@ export default function TestResults({
   onRetry,
 }: TestResultsProps) {
   const t = labels[config.language];
+  const [showCopied, setShowCopied] = useState(false);
+
+  const handleShare = async () => {
+    const shareText = `Uzbektype - ${stats.wpm} WPM | ${stats.accuracy}% ${t.accuracy} | ${config.testType.toUpperCase()} ${t[config.difficulty]}\n\nhttps://uzbektype.uz`;
+
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: "Uzbektype",
+          text: shareText,
+        });
+      } catch {
+        // User cancelled or share failed, fallback to copy
+        copyToClipboard(shareText);
+      }
+    } else {
+      copyToClipboard(shareText);
+    }
+  };
+
+  const copyToClipboard = async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setShowCopied(true);
+      setTimeout(() => setShowCopied(false), 2000);
+    } catch {
+      // Fallback for older browsers
+      const textarea = document.createElement("textarea");
+      textarea.value = text;
+      document.body.appendChild(textarea);
+      textarea.select();
+      document.execCommand("copy");
+      document.body.removeChild(textarea);
+      setShowCopied(true);
+      setTimeout(() => setShowCopied(false), 2000);
+    }
+  };
 
   // Animated values
   const animatedWpm = useCountUp(stats.wpm, 1500);
@@ -236,7 +280,14 @@ export default function TestResults({
       </div>
 
       {/* Actions */}
-      <div className="flex justify-center pb-20 md:pb-0">
+      <div className="flex justify-center gap-3 pb-20 md:pb-0">
+        <button
+          onClick={handleShare}
+          className="px-6 py-3 border border-border rounded-lg hover:border-foreground transition-all duration-200 font-medium flex items-center gap-2"
+        >
+          <Share2 size={18} />
+          {showCopied ? t.copied : t.share}
+        </button>
         <button
           onClick={onRetry}
           className="px-8 py-3 bg-primary text-primary-foreground rounded-lg hover:opacity-90 transition-all duration-200 font-medium"

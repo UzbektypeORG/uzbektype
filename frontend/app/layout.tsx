@@ -65,6 +65,14 @@ export const metadata: Metadata = {
     locale: "uz_UZ",
     alternateLocale: ["en_US", "ru_RU"],
     siteName: "Uzbektype",
+    images: [
+      {
+        url: "/logo.png",
+        width: 512,
+        height: 512,
+        alt: "Uzbektype Logo",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
@@ -76,8 +84,11 @@ export const metadata: Metadata = {
     follow: true,
   },
   icons: {
-    icon: "/icon.svg",
-    apple: "/icon.svg",
+    icon: [
+      { url: "/logo.png", type: "image/png" },
+      { url: "/icon.svg", type: "image/svg+xml" },
+    ],
+    apple: "/logo.png",
   },
 };
 
