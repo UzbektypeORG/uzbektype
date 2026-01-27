@@ -9,6 +9,6 @@ export default function robots(): MetadataRoute.Robots {
         disallow: ['/api/', '/_next/'],
       },
     ],
-    sitemap: 'https://uzbektype.vercel.app/sitemap.xml',
+    sitemap: 'https://uzbektype.uz/sitemap.xml',
   }
 }

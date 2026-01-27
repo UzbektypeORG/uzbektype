@@ -1,7 +1,7 @@
 import { MetadataRoute } from 'next'
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = 'https://uzbektype.vercel.app'
+  const baseUrl = 'https://uzbektype.uz'
   const languages = ['uz', 'en', 'ru']
 
   // Test types
