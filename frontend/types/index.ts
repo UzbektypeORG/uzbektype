@@ -23,6 +23,7 @@ export interface TestResult {
   accuracy: number;
   stars: number;
   correctChars: number;
+  correctedChars: number; // Characters that were wrong but then fixed
   incorrectChars: number;
   totalChars: number;
   createdAt?: Date;
@@ -33,6 +34,7 @@ export interface TypingStats {
   wpm: number;
   accuracy: number;
   correctChars: number;
+  correctedChars: number; // Characters that were wrong but then fixed
   incorrectChars: number;
   totalChars: number;
 }

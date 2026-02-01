@@ -23,14 +23,18 @@ export default function TypingTest({ config, text: initialText, onComplete, anim
   const [lineOffsets, setLineOffsets] = useState<number[]>([0]);
   const lastRecordedSecond = useRef(0);
 
+  // Track positions where errors occurred (for corrected chars tracking)
+  const errorPositions = useRef<Set<number>>(new Set());
+
   // For time-based tests: extend text when user reaches the end
   const [text, setText] = useState(initialText);
   const baseTextRef = useRef(initialText);
 
-  // Reset text when initialText changes (e.g., on retry)
+  // Reset text and error tracking when initialText changes (e.g., on retry)
   useEffect(() => {
     setText(initialText);
     baseTextRef.current = initialText;
+    errorPositions.current.clear();
   }, [initialText]);
 
   const currentCharRef = useRef<HTMLSpanElement>(null);
@@ -50,20 +54,38 @@ export default function TypingTest({ config, text: initialText, onComplete, anim
   }, [userInput.length, text.length, isTimeBased, isFinished]);
 
   const calculateStats = useCallback((): TypingStats => {
-    const correctChars = userInput
-      .split("")
-      .filter((char, i) => char === text[i]).length;
-    const incorrectChars = userInput.length - correctChars;
+    let pureCorrectChars = 0; // Correct on first try (never had error)
+    let correctedChars = 0;   // Was wrong, then fixed
+    let incorrectChars = 0;   // Still wrong
+
+    userInput.split("").forEach((char, i) => {
+      const isCorrectNow = char === text[i];
+      const hadError = errorPositions.current.has(i);
+
+      if (isCorrectNow) {
+        if (hadError) {
+          correctedChars++;
+        } else {
+          pureCorrectChars++;
+        }
+      } else {
+        incorrectChars++;
+      }
+    });
+
     const totalChars = userInput.length;
-    const accuracy = totalChars > 0 ? (correctChars / totalChars) * 100 : 100;
+    // Only pure correct chars count for accuracy (not corrected ones)
+    const accuracy = totalChars > 0 ? (pureCorrectChars / totalChars) * 100 : 100;
 
     const timeElapsed = startTime ? (currentTime - startTime) / 1000 : 0;
-    const wpm = timeElapsed > 0 ? (correctChars / 5 / timeElapsed) * 60 : 0;
+    // For WPM, use pure correct + corrected (all currently correct chars)
+    const wpm = timeElapsed > 0 ? ((pureCorrectChars + correctedChars) / 5 / timeElapsed) * 60 : 0;
 
     return {
       wpm: Math.round(wpm),
       accuracy: Math.round(accuracy * 10) / 10,
-      correctChars,
+      correctChars: pureCorrectChars,
+      correctedChars,
       incorrectChars,
       totalChars,
     };
@@ -80,13 +102,14 @@ export default function TypingTest({ config, text: initialText, onComplete, anim
       if (elapsedSeconds > lastRecordedSecond.current && elapsedSeconds > 0) {
         lastRecordedSecond.current = elapsedSeconds;
 
-        const correctChars = userInput
+        // Count all currently correct chars (pure + corrected)
+        const currentlyCorrectChars = userInput
           .split("")
           .filter((char, i) => char === text[i]).length;
         const totalChars = userInput.length;
         const timeInMinutes = elapsedSeconds / 60;
 
-        const wpm = Math.round((correctChars / 5) / timeInMinutes);
+        const wpm = Math.round((currentlyCorrectChars / 5) / timeInMinutes);
         const rawWpm = Math.round((totalChars / 5) / timeInMinutes);
 
         setWpmHistory(prev => [...prev, { time: elapsedSeconds, wpm, rawWpm }]);
@@ -156,6 +179,13 @@ export default function TypingTest({ config, text: initialText, onComplete, anim
     if (e.key.length === 1) {
       e.preventDefault();
       if (!isTimeBased && userInput.length >= text.length) return;
+
+      // Track error positions
+      const currentPos = userInput.length;
+      if (e.key !== text[currentPos]) {
+        errorPositions.current.add(currentPos);
+      }
+
       setUserInput((prev) => prev + e.key);
     }
   };
@@ -170,6 +200,13 @@ export default function TypingTest({ config, text: initialText, onComplete, anim
     if (!startTime && newValue.length > 0) {
       setStartTime(Date.now());
       setCurrentTime(Date.now());
+    }
+
+    // Track error positions for newly typed characters
+    for (let i = userInput.length; i < newValue.length; i++) {
+      if (newValue[i] !== text[i]) {
+        errorPositions.current.add(i);
+      }
     }
 
     // For non-time-based tests, limit input length

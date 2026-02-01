@@ -138,11 +138,22 @@ export default function TestResults({
     }
   };
 
+  const [retryEnabled, setRetryEnabled] = useState(false);
+
+  // Enable retry button after 1.5s delay
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setRetryEnabled(true);
+    }, 1500);
+    return () => clearTimeout(timer);
+  }, []);
+
   // Animated values
   const animatedWpm = useCountUp(stats.wpm, 1500);
   const animatedAccuracy = useCountUp(stats.accuracy, 1500, 1);
   const animatedRawWpm = useCountUp(stats.rawWpm, 1200);
   const animatedCorrect = useCountUp(stats.correctChars, 1200);
+  const animatedCorrected = useCountUp(stats.correctedChars ?? 0, 1200);
   const animatedIncorrect = useCountUp(stats.incorrectChars, 1200);
   const animatedConsistency = useCountUp(stats.consistency, 1200);
   const animatedTime = useCountUp(Math.round(stats.timeElapsed), 1200);
@@ -261,6 +272,8 @@ export default function TestResults({
           <div className="text-base md:text-xl lg:text-2xl font-semibold tabular-nums text-muted-foreground">
             <span className="text-green-500">{animatedCorrect}</span>
             <span className="mx-0.5 md:mx-1">/</span>
+            <span className="text-orange-500">{animatedCorrected}</span>
+            <span className="mx-0.5 md:mx-1">/</span>
             <span className="text-red-500">{animatedIncorrect}</span>
           </div>
           <div className="text-[10px] md:text-xs text-muted-foreground mt-0.5 md:mt-1">{t.characters}</div>
@@ -290,7 +303,10 @@ export default function TestResults({
         </button>
         <button
           onClick={onRetry}
-          className="px-8 py-3 bg-primary text-primary-foreground rounded-lg hover:opacity-90 transition-all duration-200 font-medium"
+          disabled={!retryEnabled}
+          className={`px-8 py-3 bg-primary text-primary-foreground rounded-lg transition-all duration-200 font-medium ${
+            retryEnabled ? 'hover:opacity-90' : 'opacity-50 cursor-not-allowed'
+          }`}
         >
           {t.tryAgain}
         </button>

@@ -175,6 +175,7 @@ export default function TestPage() {
       accuracy: stats.accuracy,
       stars: calculatedStars,
       correctChars: stats.correctChars,
+      correctedChars: stats.correctedChars,
       incorrectChars: stats.incorrectChars,
       totalChars: stats.totalChars,
     });
