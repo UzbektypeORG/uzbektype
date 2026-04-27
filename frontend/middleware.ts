@@ -16,11 +16,12 @@ export function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // Special handling for API routes, static files, and Next.js internals
+  // Special handling for API routes, static files, admin panel, and Next.js internals
   if (
     pathname.startsWith('/_next') ||
     pathname.startsWith('/api') ||
     pathname.startsWith('/_api') ||
+    pathname.startsWith('/admode') ||
     pathname.includes('.') || // files like .svg, .png, etc.
     pathname === '/manifest.json' ||
     pathname === '/robots.txt' ||
