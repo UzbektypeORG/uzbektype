@@ -6,6 +6,8 @@ export interface User {
   email: string;
   username: string;
   displayName: string;
+  firstName?: string;
+  lastName?: string;
   avatarUrl: string;
   isAdmin: boolean;
 }
@@ -72,5 +74,30 @@ export function loginAsAdmin(username: string, password: string): Promise<User |
 // Logout
 export function logout(): void {
   localStorage.removeItem('uzbektype_user');
+  window.dispatchEvent(new Event('auth-change'));
+}
+
+// Update avatar URL for the current user
+export function updateAvatarUrl(url: string): void {
+  const current = getCurrentUser();
+  if (!current) return;
+  const updated: User = { ...current, avatarUrl: url };
+  localStorage.setItem('uzbektype_user', JSON.stringify(updated));
+  window.dispatchEvent(new Event('auth-change'));
+}
+
+// Update first name and last name (also keeps displayName in sync)
+export function updateProfile(firstName: string, lastName: string): void {
+  const current = getCurrentUser();
+  if (!current) return;
+  const f = firstName.trim();
+  const l = lastName.trim();
+  const updated: User = {
+    ...current,
+    firstName: f,
+    lastName: l,
+    displayName: `${f} ${l}`.trim() || current.displayName,
+  };
+  localStorage.setItem('uzbektype_user', JSON.stringify(updated));
   window.dispatchEvent(new Event('auth-change'));
 }

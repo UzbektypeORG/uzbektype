@@ -3,8 +3,8 @@
 import Link from "next/link";
 import { useState, useEffect, useRef } from "react";
 import { useRouter, usePathname } from "next/navigation";
-// Backend temporarily disabled
-// import { getCurrentUser, loginWithGoogle, logout, type User } from "@/lib/mockAuth";
+import { getCurrentUser, logout, type User } from "@/lib/mockAuth";
+import { useGoogleLogin } from "@/lib/useGoogleLogin";
 
 type Language = "uz" | "en" | "ru";
 
@@ -24,6 +24,7 @@ const navContent = {
     features: "Imkoniyatlar",
     blog: "Bloglar",
     results: "Natijalar",
+    leaderboard: "Reyting",
     login: "Kirish",
     logout: "Chiqish",
     profile: "Profil",
@@ -34,6 +35,7 @@ const navContent = {
     features: "Features",
     blog: "Blog",
     results: "Results",
+    leaderboard: "Leaderboard",
     login: "Login",
     logout: "Logout",
     profile: "Profile",
@@ -44,6 +46,7 @@ const navContent = {
     features: "Возможности",
     blog: "Блог",
     results: "Результаты",
+    leaderboard: "Рейтинг",
     login: "Войти",
     logout: "Выйти",
     profile: "Профиль",
@@ -57,10 +60,11 @@ export default function Header({ lang }: HeaderProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isDark, setIsDark] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  // Backend temporarily disabled
-  // const [user, setUser] = useState<User | null>(null);
-  // const [isLoggingIn, setIsLoggingIn] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
+  const { handleLogin: handleGoogleLogin, isLoggingIn } = useGoogleLogin(lang);
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const userMenuRef = useRef<HTMLDivElement>(null);
 
   // Check if we're on a test page
   const isTestPage = pathname.includes('/tests/');
@@ -81,33 +85,33 @@ export default function Header({ lang }: HeaderProps) {
       document.documentElement.classList.toggle("dark", prefersDark);
     }
 
-    // Backend temporarily disabled
-    // Load current user
-    // setUser(getCurrentUser());
+    setUser(getCurrentUser());
 
-    // Listen for auth changes
-    // const handleAuthChange = () => {
-    //   setUser(getCurrentUser());
-    // };
+    const handleAuthChange = () => {
+      setUser(getCurrentUser());
+    };
 
-    // window.addEventListener('auth-change', handleAuthChange);
-    // return () => window.removeEventListener('auth-change', handleAuthChange);
+    window.addEventListener('auth-change', handleAuthChange);
+    return () => window.removeEventListener('auth-change', handleAuthChange);
   }, []);
 
-  // Close dropdown when clicking outside or scrolling
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setIsOpen(false);
       }
+      if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
+        setIsUserMenuOpen(false);
+      }
     };
 
     const handleScroll = () => {
       setIsOpen(false);
+      setIsUserMenuOpen(false);
       setIsMobileMenuOpen(false);
     };
 
-    if (isOpen || isMobileMenuOpen) {
+    if (isOpen || isUserMenuOpen || isMobileMenuOpen) {
       document.addEventListener("mousedown", handleClickOutside);
       window.addEventListener("scroll", handleScroll);
     }
@@ -116,7 +120,7 @@ export default function Header({ lang }: HeaderProps) {
       document.removeEventListener("mousedown", handleClickOutside);
       window.removeEventListener("scroll", handleScroll);
     };
-  }, [isOpen, isMobileMenuOpen]);
+  }, [isOpen, isUserMenuOpen, isMobileMenuOpen]);
 
   const changeLang = (newLang: Language) => {
     setIsOpen(false);
@@ -157,21 +161,18 @@ export default function Header({ lang }: HeaderProps) {
     }
   };
 
-  // Backend temporarily disabled
-  // const handleGoogleLogin = async () => {
-  //   setIsLoggingIn(true);
-  //   try {
-  //     await loginWithGoogle();
-  //   } catch (error) {
-  //     console.error('Login failed:', error);
-  //   } finally {
-  //     setIsLoggingIn(false);
-  //   }
-  // };
+  const handleLogout = () => {
+    logout();
+    setIsUserMenuOpen(false);
+    router.push(`/${lang}`);
+  };
 
-  // const handleLogout = () => {
-  //   logout();
-  // };
+  const userMenuContent = {
+    uz: { dashboard: "Natijalarim", leaderboard: "Reyting", profile: "Profil", logout: "Chiqish", loading: "Kuting..." },
+    en: { dashboard: "My results", leaderboard: "Leaderboard", profile: "Profile", logout: "Logout", loading: "Loading..." },
+    ru: { dashboard: "Мои результаты", leaderboard: "Рейтинг", profile: "Профиль", logout: "Выйти", loading: "Загрузка..." },
+  };
+  const um = userMenuContent[lang];
 
   return (
     <header className="backdrop-blur-md bg-background/15 sticky top-0 z-50 relative">
@@ -182,6 +183,21 @@ export default function Header({ lang }: HeaderProps) {
 
         {/* Desktop Navigation */}
         <nav className="hidden md:flex items-center gap-6">
+          <Link
+            href={`/${lang}/leaderboard/monthly/medium`}
+            className="text-sm hover:text-foreground transition-colors flex items-center gap-1.5"
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6" />
+              <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18" />
+              <path d="M4 22h16" />
+              <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22" />
+              <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22" />
+              <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z" />
+            </svg>
+            {navContent[lang].leaderboard}
+          </Link>
+
           <a
             href={`/${lang}#hero`}
             onClick={(e) => handleHashNavigation(e, 'hero')}
@@ -217,18 +233,18 @@ export default function Header({ lang }: HeaderProps) {
             </span>
           </button>
 
-          {/* Language Selector */}
+          {/* Language Selector — icon only */}
           <div className="relative" ref={dropdownRef}>
             <button
               onClick={() => setIsOpen(!isOpen)}
-              className="px-3 py-1.5 text-sm border border-border rounded hover:border-foreground transition-colors flex items-center gap-2"
+              className="w-8 h-8 flex items-center justify-center rounded hover:bg-accent transition-colors text-base"
+              aria-label="Change language"
             >
-              <span>{languages[lang].flag}</span>
-              <span>{languages[lang].name}</span>
+              {languages[lang].flag}
             </button>
 
             {isOpen && (
-              <div className="absolute right-0 mt-2 w-40 border border-border rounded-lg bg-background/25 backdrop-blur-md">
+              <div className="absolute right-0 mt-2 w-40 border border-border rounded-lg bg-background/95 backdrop-blur-md z-50">
                 {(Object.keys(languages) as Language[]).map((langOption) => (
                   <button
                     key={langOption}
@@ -255,53 +271,111 @@ export default function Header({ lang }: HeaderProps) {
             </Link>
           )}
 
-          {/* Auth Section - Backend temporarily disabled */}
-          {/* {user ? (
-            <div className="flex items-center gap-3">
-              <Link
-                href="/profile"
-                className="flex items-center gap-2 px-3 py-1.5 text-sm border border-border rounded hover:border-foreground dark:hover:border-white transition-colors"
-              >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                  <circle cx="12" cy="7" r="4"></circle>
-                </svg>
-                <span className="hidden sm:inline">{user.displayName}</span>
-              </Link>
+          {/* Auth Section */}
+          {user ? (
+            <div className="relative" ref={userMenuRef}>
               <button
-                onClick={handleLogout}
-                className="px-3 py-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
+                onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+                className="flex items-center gap-2 px-2 py-1 rounded hover:bg-accent transition-colors"
+                aria-label="User menu"
               >
-                {navContent[currentLang].logout}
+                <img
+                  src={user.avatarUrl}
+                  alt={user.displayName}
+                  className="w-7 h-7 rounded-full border border-border"
+                />
+                <span className="text-sm hidden lg:inline">{user.displayName}</span>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`transition-transform ${isUserMenuOpen ? 'rotate-180' : ''}`}>
+                  <polyline points="6 9 12 15 18 9"/>
+                </svg>
               </button>
+
+              {isUserMenuOpen && (
+                <div className="absolute right-0 mt-2 w-56 border border-border rounded-lg bg-background/95 backdrop-blur-md shadow-lg overflow-hidden">
+                  <div className="px-4 py-3 border-b border-border">
+                    <p className="text-sm font-medium truncate">{user.displayName}</p>
+                    <p className="text-xs text-muted-foreground truncate">{user.email}</p>
+                  </div>
+                  <Link
+                    href={`/${lang}/dashboard`}
+                    onClick={() => setIsUserMenuOpen(false)}
+                    className="flex items-center gap-2 px-4 py-2 text-sm hover:bg-accent transition-colors"
+                  >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <rect x="3" y="3" width="7" height="9"/>
+                      <rect x="14" y="3" width="7" height="5"/>
+                      <rect x="14" y="12" width="7" height="9"/>
+                      <rect x="3" y="16" width="7" height="5"/>
+                    </svg>
+                    <span>{um.dashboard}</span>
+                  </Link>
+                  <Link
+                    href={`/${lang}/leaderboard/monthly/medium`}
+                    onClick={() => setIsUserMenuOpen(false)}
+                    className="flex items-center gap-2 px-4 py-2 text-sm hover:bg-accent transition-colors"
+                  >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/>
+                      <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/>
+                      <path d="M4 22h16"/>
+                      <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/>
+                      <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/>
+                      <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/>
+                    </svg>
+                    <span>{um.leaderboard}</span>
+                  </Link>
+                  <Link
+                    href={`/${lang}/profile`}
+                    onClick={() => setIsUserMenuOpen(false)}
+                    className="flex items-center gap-2 px-4 py-2 text-sm hover:bg-accent transition-colors"
+                  >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <circle cx="12" cy="8" r="4"/>
+                      <path d="M5 21a7 7 0 0 1 14 0"/>
+                    </svg>
+                    <span>{um.profile}</span>
+                  </Link>
+                  <button
+                    onClick={handleLogout}
+                    className="w-full flex items-center gap-2 px-4 py-2 text-sm hover:bg-accent transition-colors text-left border-t border-border"
+                  >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                      <polyline points="16 17 21 12 16 7"/>
+                      <line x1="21" y1="12" x2="9" y2="12"/>
+                    </svg>
+                    <span>{um.logout}</span>
+                  </button>
+                </div>
+              )}
             </div>
           ) : (
             <button
               onClick={handleGoogleLogin}
               disabled={isLoggingIn}
-              className="px-4 py-1.5 text-sm rounded bg-primary text-primary-foreground hover:opacity-90 transition-all font-medium disabled:opacity-50 flex items-center gap-2"
+              className="px-4 py-1.5 text-sm rounded border border-border hover:border-foreground transition-all font-medium disabled:opacity-50 flex items-center gap-2"
             >
               {isLoggingIn ? (
                 <>
                   <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
                   </svg>
-                  <span>{currentLang === 'uz' ? 'Kuting...' : currentLang === 'ru' ? 'Загрузка...' : 'Loading...'}</span>
+                  <span>{um.loading}</span>
                 </>
               ) : (
                 <>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                    <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                    <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
-                    <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                  <svg width="16" height="16" viewBox="0 0 24 24">
+                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
                   </svg>
-                  <span>{navContent[currentLang].login}</span>
+                  <span>{navContent[lang].login}</span>
                 </>
               )}
             </button>
-          )} */}
+          )}
         </nav>
 
         {/* Mobile Menu Button */}
@@ -376,6 +450,23 @@ export default function Header({ lang }: HeaderProps) {
             {navContent[lang].home}
           </a>
 
+          {/* Leaderboard link for Mobile */}
+          <Link
+            href={`/${lang}/leaderboard/monthly/medium`}
+            onClick={() => setIsMobileMenuOpen(false)}
+            className="text-sm hover:text-foreground transition-colors py-2 flex items-center gap-2"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6" />
+              <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18" />
+              <path d="M4 22h16" />
+              <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22" />
+              <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22" />
+              <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z" />
+            </svg>
+            {navContent[lang].leaderboard}
+          </Link>
+
           {/* Start Button for Mobile - only show on landing page */}
           {!isTestPage && (
             <Link
@@ -385,6 +476,60 @@ export default function Header({ lang }: HeaderProps) {
             >
               {navContent[lang].start}
             </Link>
+          )}
+
+          {/* Auth section for Mobile */}
+          {user ? (
+            <div className="border-t border-border pt-4 mt-2">
+              <div className="flex items-center gap-3 px-2 mb-3">
+                <img src={user.avatarUrl} alt={user.displayName} className="w-9 h-9 rounded-full border border-border" />
+                <div className="min-w-0">
+                  <p className="text-sm font-medium truncate">{user.displayName}</p>
+                  <p className="text-xs text-muted-foreground truncate">{user.email}</p>
+                </div>
+              </div>
+              <Link
+                href={`/${lang}/dashboard`}
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="block px-4 py-2 text-sm hover:bg-accent transition-colors rounded"
+              >
+                {um.dashboard}
+              </Link>
+              <Link
+                href={`/${lang}/leaderboard/monthly/medium`}
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="block px-4 py-2 text-sm hover:bg-accent transition-colors rounded"
+              >
+                {um.leaderboard}
+              </Link>
+              <Link
+                href={`/${lang}/profile`}
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="block px-4 py-2 text-sm hover:bg-accent transition-colors rounded"
+              >
+                {um.profile}
+              </Link>
+              <button
+                onClick={() => { handleLogout(); setIsMobileMenuOpen(false); }}
+                className="w-full text-left px-4 py-2 text-sm hover:bg-accent transition-colors rounded"
+              >
+                {um.logout}
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={() => { handleGoogleLogin(); setIsMobileMenuOpen(false); }}
+              disabled={isLoggingIn}
+              className="px-4 py-2.5 text-sm rounded border border-border hover:border-foreground transition-all font-medium disabled:opacity-50 flex items-center justify-center gap-2"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24">
+                <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+              </svg>
+              <span>{isLoggingIn ? um.loading : navContent[lang].login}</span>
+            </button>
           )}
 
           {/* Language Selector for Mobile */}
