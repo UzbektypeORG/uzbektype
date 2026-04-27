@@ -4,6 +4,7 @@ import FeatureIcon from "@/components/FeatureIcon";
 import Noise from "@/components/Noise";
 import StartButton from "@/components/StartButton";
 import FooterFeedback from "@/components/FooterFeedback";
+import LeaderboardWidget from "@/components/LeaderboardWidget";
 
 type Language = "uz" | "en" | "ru";
 
@@ -283,31 +284,37 @@ export default async function LandingPage({ params }: { params: Promise<{ lang: 
 
       {/* Hero Section - Full screen */}
       <section id="hero" className="min-h-screen flex items-center justify-center px-4 sm:px-6 -mt-[73px]">
-        <div className="max-w-5xl mx-auto text-center space-y-4 md:space-y-6 animate-fade-in pt-0 md:pt-28" style={{ position: 'relative', zIndex: 2 }}>
-          <div className="space-y-2 md:space-y-3">
-            {/* Secondary text */}
-            <p className="text-xs sm:text-base md:text-xl lg:text-2xl text-muted-foreground font-medium whitespace-nowrap">
-              {t.hero.subtitle}
-            </p>
-            {/* Title - 2 lines on mobile, 1 line on desktop */}
-            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold tracking-tight leading-tight px-2">
-              <span className="md:hidden block">{t.hero.titleLine1}</span>
-              <span className="md:hidden block">{t.hero.titleLine2}</span>
-              <span className="hidden md:inline">{t.hero.titleLine1} {t.hero.titleLine2}</span>
-            </h1>
-          </div>
-          {/* Tertiary text */}
-          <p className="text-sm sm:text-base md:text-lg text-muted-foreground/80 max-w-[280px] md:max-w-xl mx-auto leading-relaxed">
-            {t.hero.description}
-          </p>
-          <div className="flex justify-center pt-2 md:pt-4 px-4">
-            <StartButton
-              href={`/${currentLang}/tests/30s-easy`}
-              lang={currentLang}
-              className="px-12 py-4 md:px-16 md:py-5 bg-primary text-primary-foreground rounded-lg hover:opacity-90 transition-all duration-200 font-semibold text-lg md:text-xl"
-            >
-              {t.hero.startBtn}
-            </StartButton>
+        <div className="w-full max-w-7xl mx-auto pt-24 md:pt-28" style={{ position: 'relative', zIndex: 2 }}>
+          <div className="grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-8 lg:gap-12 items-center">
+            {/* Hero text content */}
+            <div className="text-center lg:text-left space-y-4 md:space-y-6 animate-fade-in">
+              <div className="space-y-2 md:space-y-3">
+                <p className="text-xs sm:text-base md:text-xl lg:text-xl text-muted-foreground font-medium">
+                  {t.hero.subtitle}
+                </p>
+                <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-6xl xl:text-7xl font-bold tracking-tight leading-tight">
+                  <span className="block">{t.hero.titleLine1}</span>
+                  <span className="block">{t.hero.titleLine2}</span>
+                </h1>
+              </div>
+              <p className="text-sm sm:text-base md:text-lg text-muted-foreground/80 max-w-[280px] md:max-w-xl mx-auto lg:mx-0 leading-relaxed">
+                {t.hero.description}
+              </p>
+              <div className="flex justify-center lg:justify-start pt-2 md:pt-4 px-4 lg:px-0">
+                <StartButton
+                  href={`/${currentLang}/tests/30s-easy`}
+                  lang={currentLang}
+                  className="px-12 py-4 md:px-16 md:py-5 bg-primary text-primary-foreground rounded-lg hover:opacity-90 transition-all duration-200 font-semibold text-lg md:text-xl"
+                >
+                  {t.hero.startBtn}
+                </StartButton>
+              </div>
+            </div>
+
+            {/* Leaderboard widget */}
+            <div className="w-full max-w-md mx-auto lg:mx-0 animate-fade-in" style={{ animationDelay: '150ms' }}>
+              <LeaderboardWidget lang={currentLang} />
+            </div>
           </div>
         </div>
       </section>

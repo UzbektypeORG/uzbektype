@@ -7,6 +7,8 @@ import { Timer, RotateCcw, MoveVertical, Blend } from "lucide-react";
 import TypingTest from "@/components/typing/TypingTest";
 import TestResults from "@/components/typing/TestResults";
 import FeedbackModal from "@/components/FeedbackModal";
+import LeaderboardWidget from "@/components/LeaderboardWidget";
+import LoginCtaBanner from "@/components/LoginCtaBanner";
 import { getTestText } from "@/lib/getTestText";
 import { calculateStars } from "@/lib/calculateStars";
 import { saveTestResult } from "@/lib/localStorage";
@@ -184,10 +186,9 @@ export default function TestPage() {
     const completedTests = parseInt(localStorage.getItem("uzbektype_completed_tests") || "0") + 1;
     localStorage.setItem("uzbektype_completed_tests", completedTests.toString());
 
-    // Show feedback modal at 5, 15, 30 tests (if not already submitted)
+    // Show feedback modal after 3 completed tests (if not already submitted)
     const feedbackSubmitted = localStorage.getItem("uzbektype_feedback_submitted");
-    const feedbackMilestones = [5, 15, 30];
-    if (feedbackMilestones.includes(completedTests) && !feedbackSubmitted) {
+    if (completedTests === 3 && !feedbackSubmitted) {
       setTimeout(() => {
         setShowFeedbackModal(true);
       }, 1500); // Show after results appear
@@ -442,13 +443,23 @@ export default function TestPage() {
           <div className="flex-1 md:flex-1"></div>
         </>
       ) : (
-        <div className="flex-1 flex items-center justify-center px-4 md:px-0">
-          <div className="max-w-[95vw] md:max-w-[80vw] w-full">
-            <TestResults
-              config={config}
-              stats={result}
-              onRetry={handleRetry}
-            />
+        <div className="flex-1 flex items-start justify-center px-4 md:px-6 py-6 md:py-8 overflow-y-auto">
+          <div className="w-full max-w-[95vw] md:max-w-[1200px] space-y-4 md:space-y-6">
+            <LoginCtaBanner lang={lang} />
+            <div className="grid grid-cols-1 xl:grid-cols-[1fr_320px] gap-6 xl:gap-8 items-start">
+              {/* Left: Statistics */}
+              <div className="min-w-0">
+                <TestResults
+                  config={config}
+                  stats={result}
+                  onRetry={handleRetry}
+                />
+              </div>
+              {/* Right: Leaderboard widget */}
+              <div className="w-full">
+                <LeaderboardWidget lang={lang} />
+              </div>
+            </div>
           </div>
         </div>
       )}
