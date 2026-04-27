@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, JetBrains_Mono, Poppins } from "next/font/google";
 import Script from "next/script";
+import Providers from "@/components/Providers";
 import "./globals.css";
 
 const inter = Inter({
@@ -111,7 +112,7 @@ export default function RootLayout({
         </Script>
       </head>
       <body className="antialiased font-sans">
-        {children}
+        <Providers>{children}</Providers>
       </body>
     </html>
   );
