@@ -1,9 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
-import { getCurrentUser, updateAvatarUrl, updateProfile, type User } from "@/lib/mockAuth";
+import { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 import { useGoogleLogin } from "@/lib/useGoogleLogin";
+import { displayName, avatarSrc } from "@/lib/userDisplay";
 
 type Language = "uz" | "en" | "ru";
 
@@ -16,12 +18,11 @@ const content = {
     lastName: "Familiya",
     firstNamePlaceholder: "Masalan: Akmal",
     lastNamePlaceholder: "Masalan: Karimov",
-    saveName: "Saqlash",
-    nameSaved: "Saqlandi!",
+    save: "Saqlash",
+    saved: "Saqlandi!",
     avatarSection: "Avatar",
-    avatarHint: "Sizga yoqqan piksel ko'rinishni bosing — avtomatik saqlanadi",
+    avatarHint: "Sizga yoqqan piksel ko'rinishni bosing",
     refresh: "Boshqa variantlar",
-    avatarSaved: "Saqlandi!",
     backToDashboard: "Natijalarim",
     backToHome: "Asosiy",
     loginRequired: "Profilni o'zgartirish uchun avval Google bilan kiring",
@@ -36,12 +37,11 @@ const content = {
     lastName: "Last name",
     firstNamePlaceholder: "e.g. John",
     lastNamePlaceholder: "e.g. Smith",
-    saveName: "Save",
-    nameSaved: "Saved!",
+    save: "Save",
+    saved: "Saved!",
     avatarSection: "Avatar",
-    avatarHint: "Click a pixel look you like — saves automatically",
+    avatarHint: "Click a pixel look you like",
     refresh: "Other variants",
-    avatarSaved: "Saved!",
     backToDashboard: "My results",
     backToHome: "Home",
     loginRequired: "Sign in with Google to edit your profile",
@@ -56,12 +56,11 @@ const content = {
     lastName: "Фамилия",
     firstNamePlaceholder: "Например: Иван",
     lastNamePlaceholder: "Например: Петров",
-    saveName: "Сохранить",
-    nameSaved: "Сохранено!",
+    save: "Сохранить",
+    saved: "Сохранено!",
     avatarSection: "Аватар",
-    avatarHint: "Нажмите понравившийся пиксельный стиль — сохраняется автоматически",
+    avatarHint: "Нажмите понравившийся пиксельный стиль",
     refresh: "Другие варианты",
-    avatarSaved: "Сохранено!",
     backToDashboard: "Мои результаты",
     backToHome: "Главная",
     loginRequired: "Войдите через Google, чтобы редактировать профиль",
@@ -101,65 +100,114 @@ function GoogleIcon() {
   );
 }
 
+async function patchProfile(payload: { firstName?: string; lastName?: string; avatarUrl?: string }) {
+  const res = await fetch("/api/profile", {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) throw new Error(`profile_update_failed_${res.status}`);
+}
+
 export default function ProfileClient({ lang }: { lang: Language }) {
-  const [user, setUser] = useState<User | null>(null);
-  const [mounted, setMounted] = useState(false);
+  const router = useRouter();
+  const { data: session, status, update } = useSession();
+  const user = session?.user ?? null;
+  const mounted = status !== "loading";
   const { handleLogin, isLoggingIn } = useGoogleLogin(lang);
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [seeds, setSeeds] = useState<string[]>([]);
-  const [nameSavedFlash, setNameSavedFlash] = useState(false);
-  const [avatarSavedSeed, setAvatarSavedSeed] = useState<string | null>(null);
+  const [seedAnimKey, setSeedAnimKey] = useState(0);
+  const [pickedSeed, setPickedSeed] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [redirecting, setRedirecting] = useState(false);
+  const initialSyncDone = useRef(false);
   const t = content[lang];
 
   useEffect(() => {
-    setMounted(true);
-    const u = getCurrentUser();
-    setUser(u);
-    if (u) {
-      setFirstName(u.firstName || "");
-      setLastName(u.lastName || "");
-    }
     setSeeds(generateRandomSeeds(6));
-
-    const handleAuthChange = () => {
-      const cu = getCurrentUser();
-      setUser(cu);
-      if (cu) {
-        setFirstName(cu.firstName || "");
-        setLastName(cu.lastName || "");
-      }
-    };
-    window.addEventListener("auth-change", handleAuthChange);
-    return () => window.removeEventListener("auth-change", handleAuthChange);
   }, []);
+
+  // Sync local form state from session ONCE on first load. Don't keep re-syncing
+  // on every session update (would clobber the user's in-progress typing).
+  useEffect(() => {
+    if (user && !initialSyncDone.current) {
+      setFirstName(user.firstName || "");
+      setLastName(user.lastName || "");
+      initialSyncDone.current = true;
+    }
+  }, [user]);
 
   const canSaveName = firstName.trim().length > 0 && lastName.trim().length > 0;
 
-  const handleSaveName = () => {
-    if (!user || !canSaveName) return;
-    const f = normalizeName(firstName);
-    const l = normalizeName(lastName);
-    setFirstName(f);
-    setLastName(l);
-    updateProfile(f, l);
-    setNameSavedFlash(true);
-    setTimeout(() => setNameSavedFlash(false), 1500);
+  // Avatar click = local preview only. Header keeps showing the saved value.
+  const handlePickAvatar = (seed: string) => {
+    setPickedSeed(seed);
   };
 
-  const handlePickAvatar = (seed: string) => {
-    if (!user) return;
-    updateAvatarUrl(dicebearUrl(seed));
-    setAvatarSavedSeed(seed);
-    setTimeout(() => setAvatarSavedSeed(null), 1500);
+  const handleSave = async () => {
+    if (!user || saving) return;
+
+    const payload: { firstName?: string; lastName?: string; avatarUrl?: string } = {};
+
+    if (canSaveName) {
+      const f = normalizeName(firstName);
+      const l = normalizeName(lastName);
+      const nameChanged = f !== (user.firstName || "") || l !== (user.lastName || "");
+      if (nameChanged) {
+        payload.firstName = f;
+        payload.lastName = l;
+        setFirstName(f);
+        setLastName(l);
+      }
+    }
+
+    if (pickedSeed) {
+      payload.avatarUrl = dicebearUrl(pickedSeed);
+    }
+
+    if (Object.keys(payload).length === 0) return;
+
+    setSaving(true);
+    try {
+      await patchProfile(payload);
+      await update({
+        user: {
+          ...session?.user,
+          ...(payload.firstName !== undefined && { firstName: payload.firstName }),
+          ...(payload.lastName !== undefined && { lastName: payload.lastName }),
+          ...(payload.avatarUrl !== undefined && { avatarUrl: payload.avatarUrl }),
+        },
+      });
+      router.refresh();
+      setRedirecting(true);
+      setPickedSeed(null);
+      router.push(`/${lang}/tests/30s-medium`);
+    } catch (err) {
+      console.error("Failed to save profile:", err);
+      setSaving(false);
+    }
   };
+
+  const hasUnsavedChanges = (() => {
+    if (!user) return false;
+    if (pickedSeed) return true;
+    if (!canSaveName) return false;
+    const f = normalizeName(firstName);
+    const l = normalizeName(lastName);
+    return f !== (user.firstName || "") || l !== (user.lastName || "");
+  })();
 
   const handleRefresh = () => {
     setSeeds(generateRandomSeeds(6));
+    setSeedAnimKey((k) => k + 1);
+    setPickedSeed(null);
   };
 
   const currentAvatarSeed = mounted && user
     ? seeds.find((s) => dicebearUrl(s) === user.avatarUrl)
+    // (user.avatarUrl may be null if not set yet)
     : null;
 
   // Login gate
@@ -191,6 +239,17 @@ export default function ProfileClient({ lang }: { lang: Language }) {
     return <main className="min-h-screen" />;
   }
 
+  if (redirecting) {
+    return (
+      <main className="min-h-screen flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+          <p className="text-sm text-muted-foreground">…</p>
+        </div>
+      </main>
+    );
+  }
+
   return (
     <main className="min-h-screen px-4 sm:px-6 py-8 md:py-12">
       <div className="max-w-3xl mx-auto space-y-8">
@@ -199,13 +258,24 @@ export default function ProfileClient({ lang }: { lang: Language }) {
           <p className="text-sm text-muted-foreground">{t.subtitle}</p>
         </div>
 
-        {/* Current avatar preview */}
+        {/* Preview: shows the picked avatar (before save) or the saved one */}
         <div className="flex flex-col items-center gap-3">
-          <div className="w-24 h-24 md:w-28 md:h-28 rounded-full overflow-hidden bg-accent/30 border-2 border-border" style={{ imageRendering: "pixelated" }}>
-            <img src={user.avatarUrl} alt={user.displayName} className="w-full h-full" style={{ imageRendering: "pixelated" }} />
+          <div
+            className={`w-24 h-24 md:w-28 md:h-28 rounded-full overflow-hidden border-2 transition-all duration-300 ${
+              pickedSeed ? "border-primary ring-4 ring-primary/20" : "border-border bg-accent/30"
+            }`}
+            style={{ imageRendering: "pixelated" }}
+          >
+            <img
+              key={pickedSeed ?? "saved"}
+              src={pickedSeed ? dicebearUrl(pickedSeed) : avatarSrc(user)}
+              alt={displayName(user)}
+              className="w-full h-full animate-fade-in"
+              style={{ imageRendering: "pixelated" }}
+            />
           </div>
           <div className="text-center">
-            <p className="font-semibold">{user.displayName || "—"}</p>
+            <p className="font-semibold">{displayName(user)}</p>
             <p className="text-xs text-muted-foreground">{user.email}</p>
           </div>
         </div>
@@ -240,26 +310,9 @@ export default function ProfileClient({ lang }: { lang: Language }) {
                 placeholder={t.lastNamePlaceholder}
                 maxLength={30}
                 className="w-full px-4 py-2.5 rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/50 text-sm"
-                onKeyDown={(e) => { if (e.key === "Enter" && canSaveName) handleSaveName(); }}
+                onKeyDown={(e) => { if (e.key === "Enter" && hasUnsavedChanges) handleSave(); }}
               />
             </div>
-          </div>
-          <div className="flex items-center gap-3">
-            <button
-              onClick={handleSaveName}
-              disabled={!canSaveName}
-              className="px-5 py-2.5 rounded-lg bg-primary text-primary-foreground hover:opacity-90 transition-all text-sm font-medium disabled:opacity-40 disabled:cursor-not-allowed"
-            >
-              {t.saveName}
-            </button>
-            {nameSavedFlash && (
-              <span className="text-xs text-green-600 font-medium animate-fade-in flex items-center gap-1">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                  <polyline points="20 6 9 17 4 12" />
-                </svg>
-                {t.nameSaved}
-              </span>
-            )}
           </div>
         </section>
 
@@ -285,29 +338,27 @@ export default function ProfileClient({ lang }: { lang: Language }) {
           </div>
 
           <div className="grid grid-cols-3 md:grid-cols-6 gap-3">
-            {seeds.map((seed) => {
-              const isCurrent = currentAvatarSeed === seed;
-              const isJustSaved = avatarSavedSeed === seed;
+            {seeds.map((seed, i) => {
+              const isPicked = pickedSeed === seed;
+              const isSavedCurrent = !pickedSeed && currentAvatarSeed === seed;
               return (
                 <button
-                  key={seed}
+                  key={`${seedAnimKey}-${seed}`}
                   onClick={() => handlePickAvatar(seed)}
-                  className={`group relative flex flex-col items-center p-2 md:p-3 rounded-xl border-2 transition-all ${
-                    isCurrent
-                      ? "border-primary bg-primary/5 scale-[1.02]"
+                  className={`group relative flex flex-col items-center p-2 md:p-3 rounded-xl border-2 transition-all animate-pixel-pop ${
+                    isPicked
+                      ? "border-primary bg-primary/10 scale-[1.05] ring-2 ring-primary/30"
+                      : isSavedCurrent
+                      ? "border-primary/50 bg-primary/5"
                       : "border-border hover:border-foreground/50 hover:bg-accent/30 hover:scale-[1.03]"
                   }`}
+                  style={{ animationDelay: `${i * 60}ms` }}
                 >
-                  {isCurrent && (
+                  {(isPicked || isSavedCurrent) && (
                     <div className="absolute top-1.5 right-1.5 w-5 h-5 rounded-full bg-primary text-primary-foreground flex items-center justify-center z-10 shadow">
                       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
                         <polyline points="20 6 9 17 4 12" />
                       </svg>
-                    </div>
-                  )}
-                  {isJustSaved && (
-                    <div className="absolute inset-0 flex items-center justify-center bg-green-500/90 text-white text-xs font-bold rounded-xl z-20 animate-fade-in">
-                      {t.avatarSaved}
                     </div>
                   )}
                   <div className="w-16 h-16 md:w-20 md:h-20 rounded-lg overflow-hidden bg-accent/30 flex items-center justify-center" style={{ imageRendering: "pixelated" }}>
@@ -323,7 +374,19 @@ export default function ProfileClient({ lang }: { lang: Language }) {
               );
             })}
           </div>
+
         </section>
+
+        {/* Single save button — saves both name and avatar */}
+        <div className="flex items-center justify-center gap-3 pt-2">
+          <button
+            onClick={handleSave}
+            disabled={!hasUnsavedChanges || saving}
+            className="px-8 py-3 rounded-lg bg-primary text-primary-foreground hover:opacity-90 transition-all text-sm font-medium disabled:opacity-40 disabled:cursor-not-allowed min-w-[140px]"
+          >
+            {saving ? "…" : t.save}
+          </button>
+        </div>
 
         <div className="flex flex-col sm:flex-row justify-center gap-3 pt-2">
           <Link

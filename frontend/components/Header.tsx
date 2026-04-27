@@ -3,8 +3,9 @@
 import Link from "next/link";
 import { useState, useEffect, useRef } from "react";
 import { useRouter, usePathname } from "next/navigation";
-import { getCurrentUser, logout, type User } from "@/lib/mockAuth";
+import { useSession, signOut } from "next-auth/react";
 import { useGoogleLogin } from "@/lib/useGoogleLogin";
+import { displayName, avatarSrc } from "@/lib/userDisplay";
 
 type Language = "uz" | "en" | "ru";
 
@@ -60,7 +61,8 @@ export default function Header({ lang }: HeaderProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isDark, setIsDark] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [user, setUser] = useState<User | null>(null);
+  const { data: session } = useSession();
+  const user = session?.user ?? null;
   const { handleLogin: handleGoogleLogin, isLoggingIn } = useGoogleLogin(lang);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -85,14 +87,6 @@ export default function Header({ lang }: HeaderProps) {
       document.documentElement.classList.toggle("dark", prefersDark);
     }
 
-    setUser(getCurrentUser());
-
-    const handleAuthChange = () => {
-      setUser(getCurrentUser());
-    };
-
-    window.addEventListener('auth-change', handleAuthChange);
-    return () => window.removeEventListener('auth-change', handleAuthChange);
   }, []);
 
   useEffect(() => {
@@ -161,10 +155,9 @@ export default function Header({ lang }: HeaderProps) {
     }
   };
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
     setIsUserMenuOpen(false);
-    router.push(`/${lang}`);
+    await signOut({ callbackUrl: `/${lang}` });
   };
 
   const userMenuContent = {
@@ -280,11 +273,11 @@ export default function Header({ lang }: HeaderProps) {
                 aria-label="User menu"
               >
                 <img
-                  src={user.avatarUrl}
-                  alt={user.displayName}
+                  src={avatarSrc(user)}
+                  alt={displayName(user)}
                   className="w-7 h-7 rounded-full border border-border"
                 />
-                <span className="text-sm hidden lg:inline">{user.displayName}</span>
+                <span className="text-sm hidden lg:inline">{displayName(user)}</span>
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`transition-transform ${isUserMenuOpen ? 'rotate-180' : ''}`}>
                   <polyline points="6 9 12 15 18 9"/>
                 </svg>
@@ -293,7 +286,7 @@ export default function Header({ lang }: HeaderProps) {
               {isUserMenuOpen && (
                 <div className="absolute right-0 mt-2 w-56 border border-border rounded-lg bg-background/95 backdrop-blur-md shadow-lg overflow-hidden">
                   <div className="px-4 py-3 border-b border-border">
-                    <p className="text-sm font-medium truncate">{user.displayName}</p>
+                    <p className="text-sm font-medium truncate">{displayName(user)}</p>
                     <p className="text-xs text-muted-foreground truncate">{user.email}</p>
                   </div>
                   <Link
@@ -435,28 +428,47 @@ export default function Header({ lang }: HeaderProps) {
       {/* Mobile Menu */}
       <div
         className={`md:hidden absolute left-0 right-0 top-full border-t border-border bg-background/95 backdrop-blur-md overflow-hidden transition-all duration-300 ease-in-out ${
-          isMobileMenuOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0 pointer-events-none'
+          isMobileMenuOpen ? 'max-h-[85vh] opacity-100 overflow-y-auto' : 'max-h-0 opacity-0 pointer-events-none'
         }`}
       >
-        <div className="max-w-6xl mx-auto px-4 py-4 flex flex-col gap-4">
+        <div className="max-w-6xl mx-auto px-4 py-4 flex flex-col gap-1">
+          {/* User card at top when logged in */}
+          {user && (
+            <Link
+              href={`/${lang}/profile`}
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="flex items-center gap-3 p-3 rounded-lg bg-accent/50 mb-2"
+            >
+              <img src={avatarSrc(user)} alt={displayName(user)} className="w-10 h-10 rounded-full border border-border" style={{ imageRendering: "pixelated" }} />
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-semibold truncate">{displayName(user)}</p>
+                <p className="text-xs text-muted-foreground truncate">{user.email}</p>
+              </div>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-muted-foreground flex-shrink-0">
+                <polyline points="9 18 15 12 9 6" />
+              </svg>
+            </Link>
+          )}
+
+          {/* Primary navigation */}
           <a
             href={`/${lang}#hero`}
-            className="text-sm hover:text-foreground transition-colors py-2 cursor-pointer"
-            onClick={(e) => {
-              handleHashNavigation(e, 'hero');
-              setIsMobileMenuOpen(false);
-            }}
+            onClick={(e) => { handleHashNavigation(e, 'hero'); setIsMobileMenuOpen(false); }}
+            className="px-3 py-2.5 text-sm rounded-lg hover:bg-accent transition-colors flex items-center gap-3"
           >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-muted-foreground">
+              <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+              <polyline points="9 22 9 12 15 12 15 22" />
+            </svg>
             {navContent[lang].home}
           </a>
 
-          {/* Leaderboard link for Mobile */}
           <Link
             href={`/${lang}/leaderboard/monthly/medium`}
             onClick={() => setIsMobileMenuOpen(false)}
-            className="text-sm hover:text-foreground transition-colors py-2 flex items-center gap-2"
+            className="px-3 py-2.5 text-sm rounded-lg hover:bg-accent transition-colors flex items-center gap-3"
           >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-muted-foreground">
               <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6" />
               <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18" />
               <path d="M4 22h16" />
@@ -467,60 +479,51 @@ export default function Header({ lang }: HeaderProps) {
             {navContent[lang].leaderboard}
           </Link>
 
-          {/* Start Button for Mobile - only show on landing page */}
+          {user && (
+            <Link
+              href={`/${lang}/dashboard`}
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="px-3 py-2.5 text-sm rounded-lg hover:bg-accent transition-colors flex items-center gap-3"
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-muted-foreground">
+                <rect x="3" y="3" width="7" height="9"/>
+                <rect x="14" y="3" width="7" height="5"/>
+                <rect x="14" y="12" width="7" height="9"/>
+                <rect x="3" y="16" width="7" height="5"/>
+              </svg>
+              {um.dashboard}
+            </Link>
+          )}
+
+          {/* Start Button - only on non-test pages */}
           {!isTestPage && (
             <Link
-              href={`/${lang}/tests/30s-easy`}
-              className="px-4 py-2.5 text-sm rounded bg-primary text-primary-foreground hover:opacity-90 transition-all font-medium text-center"
+              href={`/${lang}/tests/30s-medium`}
               onClick={() => setIsMobileMenuOpen(false)}
+              className="px-4 py-3 mt-2 text-sm rounded-lg bg-primary text-primary-foreground hover:opacity-90 transition-all font-medium text-center"
             >
               {navContent[lang].start}
             </Link>
           )}
 
-          {/* Auth section for Mobile */}
+          {/* Auth — login button when signed out, logout link when signed in */}
           {user ? (
-            <div className="border-t border-border pt-4 mt-2">
-              <div className="flex items-center gap-3 px-2 mb-3">
-                <img src={user.avatarUrl} alt={user.displayName} className="w-9 h-9 rounded-full border border-border" />
-                <div className="min-w-0">
-                  <p className="text-sm font-medium truncate">{user.displayName}</p>
-                  <p className="text-xs text-muted-foreground truncate">{user.email}</p>
-                </div>
-              </div>
-              <Link
-                href={`/${lang}/dashboard`}
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="block px-4 py-2 text-sm hover:bg-accent transition-colors rounded"
-              >
-                {um.dashboard}
-              </Link>
-              <Link
-                href={`/${lang}/leaderboard/monthly/medium`}
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="block px-4 py-2 text-sm hover:bg-accent transition-colors rounded"
-              >
-                {um.leaderboard}
-              </Link>
-              <Link
-                href={`/${lang}/profile`}
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="block px-4 py-2 text-sm hover:bg-accent transition-colors rounded"
-              >
-                {um.profile}
-              </Link>
-              <button
-                onClick={() => { handleLogout(); setIsMobileMenuOpen(false); }}
-                className="w-full text-left px-4 py-2 text-sm hover:bg-accent transition-colors rounded"
-              >
-                {um.logout}
-              </button>
-            </div>
+            <button
+              onClick={() => { handleLogout(); setIsMobileMenuOpen(false); }}
+              className="px-3 py-2.5 mt-2 text-sm rounded-lg hover:bg-accent transition-colors flex items-center gap-3 text-left text-muted-foreground"
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                <polyline points="16 17 21 12 16 7"/>
+                <line x1="21" y1="12" x2="9" y2="12"/>
+              </svg>
+              {um.logout}
+            </button>
           ) : (
             <button
               onClick={() => { handleGoogleLogin(); setIsMobileMenuOpen(false); }}
               disabled={isLoggingIn}
-              className="px-4 py-2.5 text-sm rounded border border-border hover:border-foreground transition-all font-medium disabled:opacity-50 flex items-center justify-center gap-2"
+              className="px-4 py-3 mt-2 text-sm rounded-lg border border-border hover:border-foreground transition-all font-medium disabled:opacity-50 flex items-center justify-center gap-2"
             >
               <svg width="16" height="16" viewBox="0 0 24 24">
                 <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>

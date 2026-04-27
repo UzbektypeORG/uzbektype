@@ -3,8 +3,9 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
-import { getCurrentUser, type User } from "@/lib/mockAuth";
+import { useSession } from "next-auth/react";
 import { useGoogleLogin } from "@/lib/useGoogleLogin";
+import { displayName, avatarSrc } from "@/lib/userDisplay";
 import { getTestResults } from "@/lib/localStorage";
 import type { TestResult } from "@/types";
 
@@ -110,23 +111,16 @@ const content = {
 };
 
 export default function DashboardClient({ lang }: { lang: Language }) {
-  const [user, setUser] = useState<User | null>(null);
+  const { data: session, status } = useSession();
+  const user = session?.user ?? null;
+  const mounted = status !== "loading";
   const [results, setResults] = useState<TestResult[]>([]);
   const { handleLogin: handleGoogleLogin, isLoggingIn } = useGoogleLogin(lang);
-  const [mounted, setMounted] = useState(false);
   const t = content[lang];
 
   useEffect(() => {
-    setMounted(true);
-    setUser(getCurrentUser());
     setResults(getTestResults());
-
-    const handleAuthChange = () => {
-      setUser(getCurrentUser());
-    };
-    window.addEventListener("auth-change", handleAuthChange);
-    return () => window.removeEventListener("auth-change", handleAuthChange);
-  }, []);
+  }, [user]);
 
   const stats = useMemo(() => {
     if (results.length === 0) {
@@ -190,10 +184,10 @@ export default function DashboardClient({ lang }: { lang: Language }) {
     <main className="min-h-screen px-4 sm:px-6 py-8 md:py-12">
       <div className="max-w-6xl mx-auto space-y-8">
         <div className="flex items-center gap-4">
-          <img src={user.avatarUrl} alt={user.displayName} className="w-14 h-14 rounded-full border border-border" />
+          <img src={avatarSrc(user)} alt={displayName(user)} className="w-14 h-14 rounded-full border border-border" />
           <div>
             <h1 className="text-2xl md:text-3xl font-bold">{t.title}</h1>
-            <p className="text-sm text-muted-foreground">{user.displayName} — {t.subtitle}</p>
+            <p className="text-sm text-muted-foreground">{displayName(user)} — {t.subtitle}</p>
           </div>
         </div>
 

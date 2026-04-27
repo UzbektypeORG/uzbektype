@@ -2,9 +2,14 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import { getCurrentUser, type User } from "@/lib/mockAuth";
+import { useSession } from "next-auth/react";
 import { useGoogleLogin } from "@/lib/useGoogleLogin";
 import { getTestResults } from "@/lib/localStorage";
+import { displayName, avatarSrc } from "@/lib/userDisplay";
+
+type SessionUser = ReturnType<typeof useSession>["data"] extends infer T
+  ? T extends { user: infer U } ? U : null
+  : null;
 
 type Language = "uz" | "en" | "ru";
 type Period = "weekly" | "monthly" | "alltime";
@@ -100,9 +105,10 @@ function calculateMockRank(userBestWpm: number, difficulty: Difficulty): number 
 }
 
 export default function LeaderboardClient({ lang, period, difficulty }: { lang: Language; period: Period; difficulty: Difficulty }) {
-  const [user, setUser] = useState<User | null>(null);
+  const { data: session, status } = useSession();
+  const user = session?.user ?? null;
+  const mounted = status !== "loading";
   const { handleLogin: handleGoogleLogin, isLoggingIn } = useGoogleLogin(lang);
-  const [mounted, setMounted] = useState(false);
   const [userBestWpm, setUserBestWpm] = useState(0);
   const t = content[lang];
   const entries = generateEntries(period, difficulty);
@@ -111,29 +117,15 @@ export default function LeaderboardClient({ lang, period, difficulty }: { lang: 
   const tableSize = entries.length;
 
   useEffect(() => {
-    setMounted(true);
-    setUser(getCurrentUser());
     const results = getTestResults();
     if (results.length > 0) {
-      // For mock: only count results that match the current difficulty filter
       const filtered = results.filter((r) => r.difficulty === difficulty);
       const source = filtered.length > 0 ? filtered : results;
       setUserBestWpm(Math.max(...source.map((r) => r.wpm)));
     } else {
       setUserBestWpm(0);
     }
-    const handleAuthChange = () => {
-      setUser(getCurrentUser());
-      const r = getTestResults();
-      if (r.length > 0) {
-        const filtered = r.filter((x) => x.difficulty === difficulty);
-        const source = filtered.length > 0 ? filtered : r;
-        setUserBestWpm(Math.max(...source.map((x) => x.wpm)));
-      }
-    };
-    window.addEventListener("auth-change", handleAuthChange);
-    return () => window.removeEventListener("auth-change", handleAuthChange);
-  }, [difficulty]);
+  }, [difficulty, user]);
 
   const userRank = useMemo(() => {
     if (!user) return null;
@@ -152,14 +144,14 @@ export default function LeaderboardClient({ lang, period, difficulty }: { lang: 
           <p className="text-sm text-muted-foreground">{t.subtitle}</p>
         </div>
 
-        {/* Filters: difficulty + period side by side */}
-        <div className="flex flex-wrap items-center justify-center gap-3">
-          <div className="inline-flex border border-border rounded-lg p-1 gap-1">
+        {/* Filters: difficulty + period side by side (always horizontal) */}
+        <div className="flex items-center justify-center gap-2 md:gap-3">
+          <div className="inline-flex border border-border rounded-lg p-1 gap-0.5">
             {(Object.keys(t.difficulties) as Difficulty[]).map((d) => (
               <Link
                 key={d}
                 href={`/${lang}/leaderboard/${period}/${d}`}
-                className={`px-3 md:px-4 py-2 text-sm rounded-md transition-colors ${
+                className={`px-2 md:px-4 py-1.5 md:py-2 text-xs md:text-sm rounded-md transition-colors whitespace-nowrap ${
                   difficulty === d ? "bg-primary text-primary-foreground" : "hover:bg-accent"
                 }`}
               >
@@ -167,12 +159,12 @@ export default function LeaderboardClient({ lang, period, difficulty }: { lang: 
               </Link>
             ))}
           </div>
-          <div className="inline-flex border border-border rounded-lg p-1 gap-1">
+          <div className="inline-flex border border-border rounded-lg p-1 gap-0.5">
             {(Object.keys(t.periods) as Period[]).map((p) => (
               <Link
                 key={p}
                 href={`/${lang}/leaderboard/${p}/${difficulty}`}
-                className={`px-3 md:px-4 py-2 text-sm rounded-md transition-colors ${
+                className={`px-2 md:px-4 py-1.5 md:py-2 text-xs md:text-sm rounded-md transition-colors whitespace-nowrap ${
                   period === p ? "bg-primary text-primary-foreground" : "hover:bg-accent"
                 }`}
               >
@@ -209,8 +201,8 @@ export default function LeaderboardClient({ lang, period, difficulty }: { lang: 
                         <td className="py-3 px-4 font-mono font-bold text-primary">{entry.rank}</td>
                         <td className="py-3 px-4">
                           <div className="flex items-center gap-3">
-                            <img src={user.avatarUrl} alt={user.displayName} className="w-8 h-8 rounded-full bg-accent border border-primary/40" />
-                            <span className="font-semibold">{user.displayName}</span>
+                            <img src={avatarSrc(user)} alt={displayName(user)} className="w-8 h-8 rounded-full bg-accent border border-primary/40" />
+                            <span className="font-semibold">{displayName(user)}</span>
                             <span className="text-[9px] uppercase tracking-wide bg-primary text-primary-foreground px-1.5 py-px rounded font-bold">{t.you}</span>
                           </div>
                         </td>
@@ -254,8 +246,8 @@ export default function LeaderboardClient({ lang, period, difficulty }: { lang: 
                       <td className="py-3 px-4 font-mono font-bold text-primary">#{userRank}</td>
                       <td className="py-3 px-4">
                         <div className="flex items-center gap-3">
-                          <img src={user.avatarUrl} alt={user.displayName} className="w-8 h-8 rounded-full bg-accent border border-primary/40" />
-                          <span className="font-semibold">{user.displayName}</span>
+                          <img src={avatarSrc(user)} alt={displayName(user)} className="w-8 h-8 rounded-full bg-accent border border-primary/40" />
+                          <span className="font-semibold">{displayName(user)}</span>
                           <span className="text-[9px] uppercase tracking-wide bg-primary text-primary-foreground px-1.5 py-px rounded font-bold">{t.you}</span>
                         </div>
                       </td>
@@ -304,23 +296,23 @@ export default function LeaderboardClient({ lang, period, difficulty }: { lang: 
   );
 }
 
-function PodiumCard({ entry, place, medal, tall, isUser, user, userBestWpm, youLabel }: { entry?: Entry; place: number; medal: string; tall?: boolean; isUser?: boolean; user?: User | null; userBestWpm?: number; youLabel: string }) {
+function PodiumCard({ entry, place, medal, tall, isUser, user, userBestWpm, youLabel }: { entry?: Entry; place: number; medal: string; tall?: boolean; isUser?: boolean; user?: SessionUser | null; userBestWpm?: number; youLabel: string }) {
   if (!entry) return <div />;
   const showUser = isUser && user;
-  const avatarSrc = showUser ? user!.avatarUrl : `https://api.dicebear.com/7.x/avataaars/svg?seed=${entry.avatarSeed}`;
-  const displayName = showUser ? user!.displayName : entry.userName;
+  const cardAvatar = showUser ? avatarSrc(user) : `https://api.dicebear.com/7.x/avataaars/svg?seed=${entry.avatarSeed}`;
+  const cardName = showUser ? displayName(user) : entry.userName;
   const wpmValue = showUser && userBestWpm ? userBestWpm : entry.bestWpm;
   return (
     <div className={`flex flex-col items-center text-center ${tall ? "order-first md:order-none" : ""}`}>
       <div className="text-3xl md:text-4xl mb-2">{medal}</div>
       <img
-        src={avatarSrc}
-        alt={displayName}
+        src={cardAvatar}
+        alt={cardName}
         className={`rounded-full bg-accent border-2 ${
           showUser ? "border-primary ring-2 ring-primary/30" : place === 1 ? "border-yellow-400" : "border-border"
         } ${place === 1 ? "w-20 h-20 md:w-24 md:h-24" : "w-16 h-16 md:w-20 md:h-20"} mb-2`}
       />
-      <p className="text-sm md:text-base font-semibold truncate max-w-full mb-1">{displayName}</p>
+      <p className="text-sm md:text-base font-semibold truncate max-w-full mb-1">{cardName}</p>
       {showUser && (
         <span className="text-[9px] uppercase tracking-wide bg-primary text-primary-foreground px-1.5 py-px rounded font-bold mb-1">{youLabel}</span>
       )}

@@ -2,9 +2,10 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import { getCurrentUser, type User } from "@/lib/mockAuth";
+import { useSession } from "next-auth/react";
 import { useGoogleLogin } from "@/lib/useGoogleLogin";
 import { getTestResults } from "@/lib/localStorage";
+import { displayName, avatarSrc } from "@/lib/userDisplay";
 
 type Language = "uz" | "en" | "ru";
 type Period = "weekly" | "monthly" | "alltime";
@@ -131,34 +132,24 @@ export default function LeaderboardWidget({
 }) {
   const [period, setPeriod] = useState<Period>("monthly");
   const [difficulty, setDifficulty] = useState<Difficulty>("medium");
-  const [user, setUser] = useState<User | null>(null);
-  const [mounted, setMounted] = useState(false);
+  const { data: session, status } = useSession();
+  const user = session?.user ?? null;
+  const mounted = status !== "loading";
   const { handleLogin, isLoggingIn } = useGoogleLogin(lang);
   const [userBestWpm, setUserBestWpm] = useState(0);
   const t = content[lang];
   const entries = generateTop(period, difficulty, limit);
 
   useEffect(() => {
-    setMounted(true);
-    setUser(getCurrentUser());
-    const refresh = () => {
-      const r = getTestResults();
-      if (r.length > 0) {
-        const filtered = r.filter((x) => x.difficulty === difficulty);
-        const source = filtered.length > 0 ? filtered : r;
-        setUserBestWpm(Math.max(...source.map((x) => x.wpm)));
-      } else {
-        setUserBestWpm(0);
-      }
-    };
-    refresh();
-    const handleAuthChange = () => {
-      setUser(getCurrentUser());
-      refresh();
-    };
-    window.addEventListener("auth-change", handleAuthChange);
-    return () => window.removeEventListener("auth-change", handleAuthChange);
-  }, [difficulty]);
+    const r = getTestResults();
+    if (r.length > 0) {
+      const filtered = r.filter((x) => x.difficulty === difficulty);
+      const source = filtered.length > 0 ? filtered : r;
+      setUserBestWpm(Math.max(...source.map((x) => x.wpm)));
+    } else {
+      setUserBestWpm(0);
+    }
+  }, [difficulty, user]);
 
   const userRank = useMemo(() => {
     if (!user) return null;
@@ -231,12 +222,12 @@ export default function LeaderboardWidget({
                   {rankPrefix(entry.rank)}
                 </span>
                 <img
-                  src={user.avatarUrl}
-                  alt={user.displayName}
+                  src={avatarSrc(user)}
+                  alt={displayName(user)}
                   className="w-6 h-6 rounded-full bg-accent flex-shrink-0 border border-primary/40"
                 />
                 <span className="text-sm flex-1 truncate font-semibold flex items-center gap-1.5">
-                  <span className="truncate">{user.displayName}</span>
+                  <span className="truncate">{displayName(user)}</span>
                   <span className="text-[9px] uppercase tracking-wide bg-primary text-primary-foreground px-1 py-px rounded font-bold">
                     {t.youLabel}
                   </span>
@@ -283,12 +274,12 @@ export default function LeaderboardWidget({
               {userRank ? `#${userRank}` : "—"}
             </span>
             <img
-              src={user.avatarUrl}
-              alt={user.displayName}
+              src={avatarSrc(user)}
+              alt={displayName(user)}
               className="w-6 h-6 rounded-full bg-accent flex-shrink-0 border border-primary/40"
             />
             <span className="text-sm flex-1 truncate font-semibold flex items-center gap-1.5">
-              <span className="truncate">{user.displayName}</span>
+              <span className="truncate">{displayName(user)}</span>
               <span className="text-[9px] uppercase tracking-wide bg-primary text-primary-foreground px-1 py-px rounded font-bold">
                 {t.youLabel}
               </span>

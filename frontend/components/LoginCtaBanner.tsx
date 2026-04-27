@@ -1,7 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { getCurrentUser, type User } from "@/lib/mockAuth";
+import { useSession } from "next-auth/react";
 import { useGoogleLogin } from "@/lib/useGoogleLogin";
 
 type Language = "uz" | "en" | "ru";
@@ -28,20 +27,11 @@ const content = {
 };
 
 export default function LoginCtaBanner({ lang }: { lang: Language }) {
-  const [user, setUser] = useState<User | null>(null);
-  const [mounted, setMounted] = useState(false);
+  const { data: session, status } = useSession();
   const { handleLogin, isLoggingIn } = useGoogleLogin(lang);
   const t = content[lang];
 
-  useEffect(() => {
-    setMounted(true);
-    setUser(getCurrentUser());
-    const handleAuthChange = () => setUser(getCurrentUser());
-    window.addEventListener("auth-change", handleAuthChange);
-    return () => window.removeEventListener("auth-change", handleAuthChange);
-  }, []);
-
-  if (!mounted || user) return null;
+  if (status === "loading" || session?.user) return null;
 
   return (
     <div className="border border-primary/30 bg-primary/5 rounded-xl p-4 md:p-5 flex flex-col sm:flex-row sm:items-center gap-3 md:gap-4 animate-fade-in">
