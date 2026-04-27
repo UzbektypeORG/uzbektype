@@ -1,10 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { useGoogleLogin } from "@/lib/useGoogleLogin";
-import { getTestResults } from "@/lib/localStorage";
 import { displayName, avatarSrc } from "@/lib/userDisplay";
 
 type Language = "uz" | "en" | "ru";
@@ -12,15 +11,23 @@ type Period = "weekly" | "monthly" | "alltime";
 type Difficulty = "easy" | "medium" | "hard";
 
 interface Entry {
+  userId: string;
+  firstName: string | null;
+  lastName: string | null;
+  name: string | null;
+  avatarUrl: string | null;
+  bestWpm: number;
   rank: number;
-  userName: string;
-  avatarSeed: string;
+}
+
+interface MeRank {
+  rank: number;
   bestWpm: number;
 }
 
 const content = {
   uz: {
-    title: "Top yozuvchilar",
+    title: "Eng kuchlilar",
     periods: { weekly: "Hafta", monthly: "Oy", alltime: "Doimiy" },
     difficulties: { easy: "Oson", medium: "O'rta", hard: "Qiyin" },
     viewAll: "Barchasini ko'rish",
@@ -66,34 +73,15 @@ const content = {
   },
 };
 
-const mockNames = [
-  "Akmal", "Dilnoza", "Sardor", "Shahzoda", "Bekzod", "Madina",
-  "Rustam", "Nilufar", "Aziz", "Gulnora", "Jasur", "Kamola",
-];
-
-const DIFFICULTY_BASE_WPM: Record<Difficulty, number> = { easy: 155, medium: 140, hard: 120 };
-
-function generateTop(period: Period, difficulty: Difficulty, limit: number): Entry[] {
-  const baseSeed = period === "weekly" ? 1 : period === "monthly" ? 2 : 3;
-  const baseWpm = DIFFICULTY_BASE_WPM[difficulty];
-  return mockNames.slice(0, limit).map((name, i) => {
-    const seed = (i + 1) * baseSeed;
-    return {
-      rank: i + 1,
-      userName: name,
-      avatarSeed: name.toLowerCase(),
-      bestWpm: Math.max(Math.round(baseWpm - i * 3 - (seed % 5)), 25),
-    };
-  });
+function entryName(e: Entry): string {
+  const parts = [e.firstName, e.lastName].filter(Boolean);
+  if (parts.length > 0) return parts.join(" ");
+  return e.name ?? "—";
 }
 
-// Mock rank calculation — matches generateTop pattern (rank N has WPM ≈ baseWpm - N*3)
-function calculateMockRank(userBestWpm: number, difficulty: Difficulty): number {
-  if (userBestWpm <= 0) return 0;
-  const baseWpm = DIFFICULTY_BASE_WPM[difficulty];
-  if (userBestWpm >= baseWpm) return 1;
-  const rank = Math.ceil((baseWpm - userBestWpm) / 3) + 1;
-  return Math.max(1, Math.min(rank, 999));
+function entryAvatar(e: Entry): string {
+  if (e.avatarUrl) return e.avatarUrl;
+  return `https://api.dicebear.com/7.x/pixel-art/svg?seed=${encodeURIComponent(e.userId)}`;
 }
 
 function GoogleIcon({ size = 16 }: { size?: number }) {
@@ -136,26 +124,25 @@ export default function LeaderboardWidget({
   const user = session?.user ?? null;
   const mounted = status !== "loading";
   const { handleLogin, isLoggingIn } = useGoogleLogin(lang);
-  const [userBestWpm, setUserBestWpm] = useState(0);
+  const [entries, setEntries] = useState<Entry[]>([]);
+  const [me, setMe] = useState<MeRank | null>(null);
   const t = content[lang];
-  const entries = generateTop(period, difficulty, limit);
 
   useEffect(() => {
-    const r = getTestResults();
-    if (r.length > 0) {
-      const filtered = r.filter((x) => x.difficulty === difficulty);
-      const source = filtered.length > 0 ? filtered : r;
-      setUserBestWpm(Math.max(...source.map((x) => x.wpm)));
-    } else {
-      setUserBestWpm(0);
-    }
-  }, [difficulty, user]);
+    fetch(`/api/leaderboard?period=${period}&difficulty=${difficulty}`, { cache: "no-store" })
+      .then((r) => (r.ok ? r.json() : Promise.reject(r.status)))
+      .then((data: { top: Entry[]; me: MeRank | null }) => {
+        setEntries(data.top.slice(0, limit));
+        setMe(data.me);
+      })
+      .catch(() => {
+        setEntries([]);
+        setMe(null);
+      });
+  }, [period, difficulty, user, limit]);
 
-  const userRank = useMemo(() => {
-    if (!user) return null;
-    return calculateMockRank(userBestWpm, difficulty);
-  }, [user, userBestWpm, difficulty]);
-
+  const userRank = me?.rank ?? null;
+  const userBestWpm = me?.bestWpm ?? 0;
   const userInTop = userRank !== null && userRank > 0 && userRank <= limit;
 
   const containerClass =
@@ -208,53 +195,39 @@ export default function LeaderboardWidget({
         </div>
       </div>
 
-      <ol className="space-y-1 mb-3">
+      <ol className="space-y-1 mb-3 min-h-[40px]">
+        {entries.length === 0 && (
+          <li className="text-center text-[11px] text-muted-foreground py-4">
+            {t.noResults}
+          </li>
+        )}
         {entries.map((entry) => {
-          const isUserSlot = mounted && userInTop && userRank === entry.rank;
-
-          if (isUserSlot && user) {
-            return (
-              <li
-                key={entry.rank}
-                className="flex items-center gap-2 px-2 py-1.5 rounded-md bg-primary/10 border border-primary/40 ring-1 ring-primary/20"
-              >
-                <span className={`w-5 text-center text-xs font-mono ${rankColorClass(entry.rank)}`}>
-                  {rankPrefix(entry.rank)}
-                </span>
-                <img
-                  src={avatarSrc(user)}
-                  alt={displayName(user)}
-                  className="w-6 h-6 rounded-full bg-accent flex-shrink-0 border border-primary/40"
-                />
-                <span className="text-sm flex-1 truncate font-semibold flex items-center gap-1.5">
-                  <span className="truncate">{displayName(user)}</span>
-                  <span className="text-[9px] uppercase tracking-wide bg-primary text-primary-foreground px-1 py-px rounded font-bold">
-                    {t.youLabel}
-                  </span>
-                </span>
-                <span className="font-mono text-sm font-bold text-primary">{userBestWpm}</span>
-                <span className="text-[10px] text-muted-foreground">{t.wpm}</span>
-              </li>
-            );
-          }
-
+          const isUserSlot = mounted && user !== null && entry.userId === user.id;
           return (
             <li
-              key={entry.rank}
+              key={entry.userId}
               className={`flex items-center gap-2 px-2 py-1.5 rounded-md ${
-                entry.rank <= 3 ? "bg-accent/40" : ""
+                isUserSlot ? "bg-primary/10 border border-primary/40 ring-1 ring-primary/20" : entry.rank <= 3 ? "bg-accent/40" : ""
               }`}
             >
               <span className={`w-5 text-center text-xs font-mono ${rankColorClass(entry.rank)}`}>
                 {rankPrefix(entry.rank)}
               </span>
               <img
-                src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${entry.avatarSeed}`}
-                alt={entry.userName}
-                className="w-6 h-6 rounded-full bg-accent flex-shrink-0"
+                src={entryAvatar(entry)}
+                alt={entryName(entry)}
+                className={`w-6 h-6 rounded-full bg-accent flex-shrink-0 ${isUserSlot ? "border border-primary/40" : ""}`}
+                style={{ imageRendering: "pixelated" }}
               />
-              <span className="text-sm flex-1 truncate">{entry.userName}</span>
-              <span className="font-mono text-sm font-semibold">{entry.bestWpm}</span>
+              <span className={`text-sm flex-1 truncate ${isUserSlot ? "font-semibold flex items-center gap-1.5" : ""}`}>
+                <span className="truncate">{entryName(entry)}</span>
+                {isUserSlot && (
+                  <span className="text-[9px] uppercase tracking-wide bg-primary text-primary-foreground px-1 py-px rounded font-bold">
+                    {t.youLabel}
+                  </span>
+                )}
+              </span>
+              <span className={`font-mono text-sm ${isUserSlot ? "font-bold text-primary" : "font-semibold"}`}>{entry.bestWpm}</span>
               <span className="text-[10px] text-muted-foreground">{t.wpm}</span>
             </li>
           );

@@ -92,8 +92,8 @@ const getMetadata = (lang: Language): Metadata => {
     robots: "index, follow",
     manifest: "/manifest.json",
     icons: {
-      icon: "/icon.svg",
-      apple: "/icon.svg",
+      icon: "/favicon.svg",
+      apple: "/favicon.svg",
     },
     alternates: {
       canonical: `https://uzbektype.uz/${lang}`,

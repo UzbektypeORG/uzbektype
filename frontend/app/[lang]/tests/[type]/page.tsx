@@ -168,7 +168,7 @@ export default function TestPage() {
       testType: config.testType,
     });
 
-    // Save to localStorage
+    // Save to localStorage (always — anonymous and signed-in users alike)
     saveTestResult({
       language: config.language,
       testType: config.testType,
@@ -181,6 +181,25 @@ export default function TestPage() {
       incorrectChars: stats.incorrectChars,
       totalChars: stats.totalChars,
     });
+
+    // Best-effort save to DB (only succeeds when signed in; ignored otherwise)
+    fetch("/api/results", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        language: config.language,
+        testType: config.testType,
+        difficulty: config.difficulty,
+        wpm: stats.wpm,
+        accuracy: stats.accuracy,
+        stars: calculatedStars,
+        correctChars: stats.correctChars,
+        correctedChars: stats.correctedChars,
+        incorrectChars: stats.incorrectChars,
+        totalChars: stats.totalChars,
+        timeElapsed: stats.timeElapsed,
+      }),
+    }).catch(() => {});
 
     // Track completed tests count for feedback modal
     const completedTests = parseInt(localStorage.getItem("uzbektype_completed_tests") || "0") + 1;

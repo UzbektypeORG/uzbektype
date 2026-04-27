@@ -6,7 +6,6 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import { useSession } from "next-auth/react";
 import { useGoogleLogin } from "@/lib/useGoogleLogin";
 import { displayName, avatarSrc } from "@/lib/userDisplay";
-import { getTestResults } from "@/lib/localStorage";
 import type { TestResult } from "@/types";
 
 type Language = "uz" | "en" | "ru";
@@ -110,30 +109,49 @@ const content = {
   },
 };
 
+interface Totals {
+  totalTests: number;
+  avgWpm: number;
+  bestWpm: number;
+  avgAccuracy: number;
+}
+
 export default function DashboardClient({ lang }: { lang: Language }) {
   const { data: session, status } = useSession();
   const user = session?.user ?? null;
   const mounted = status !== "loading";
   const [results, setResults] = useState<TestResult[]>([]);
+  const [totals, setTotals] = useState<Totals>({ totalTests: 0, avgWpm: 0, bestWpm: 0, avgAccuracy: 0 });
+  const [loadingStats, setLoadingStats] = useState(false);
   const { handleLogin: handleGoogleLogin, isLoggingIn } = useGoogleLogin(lang);
   const t = content[lang];
 
   useEffect(() => {
-    setResults(getTestResults());
+    if (!user) {
+      setResults([]);
+      setTotals({ totalTests: 0, avgWpm: 0, bestWpm: 0, avgAccuracy: 0 });
+      return;
+    }
+    setLoadingStats(true);
+    fetch("/api/me/stats", { cache: "no-store" })
+      .then((r) => (r.ok ? r.json() : Promise.reject(r.status)))
+      .then((data: { totals: Totals; recent: Array<TestResult & { createdAt: string }> }) => {
+        setTotals(data.totals);
+        setResults(
+          data.recent.map((r) => ({
+            ...r,
+            createdAt: new Date(r.createdAt),
+          }))
+        );
+      })
+      .catch((err) => console.error("Failed to load stats:", err))
+      .finally(() => setLoadingStats(false));
   }, [user]);
 
-  const stats = useMemo(() => {
-    if (results.length === 0) {
-      return { totalTests: 0, avgWpm: 0, bestWpm: 0, avgAccuracy: 0 };
-    }
-    const totalTests = results.length;
-    const avgWpm = Math.round(results.reduce((s, r) => s + r.wpm, 0) / totalTests);
-    const bestWpm = Math.max(...results.map((r) => r.wpm));
-    const avgAccuracy = Math.round(results.reduce((s, r) => s + r.accuracy, 0) / totalTests);
-    return { totalTests, avgWpm, bestWpm, avgAccuracy };
-  }, [results]);
+  const stats = totals;
 
   const chartData = useMemo(() => {
+    // Server returns recent in DESC order; reverse to plot oldest → newest.
     return [...results]
       .reverse()
       .slice(-20)

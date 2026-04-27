@@ -1,10 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { useGoogleLogin } from "@/lib/useGoogleLogin";
-import { getTestResults } from "@/lib/localStorage";
 import { displayName, avatarSrc } from "@/lib/userDisplay";
 
 type SessionUser = ReturnType<typeof useSession>["data"] extends infer T
@@ -16,12 +15,18 @@ type Period = "weekly" | "monthly" | "alltime";
 type Difficulty = "easy" | "medium" | "hard";
 
 interface Entry {
-  rank: number;
-  userName: string;
-  avatarSeed: string;
+  userId: string;
+  firstName: string | null;
+  lastName: string | null;
+  name: string | null;
+  avatarUrl: string | null;
   bestWpm: number;
-  avgAccuracy: number;
-  testCount: number;
+  rank: number;
+}
+
+interface MeRank {
+  rank: number;
+  bestWpm: number;
 }
 
 const content = {
@@ -66,42 +71,16 @@ const content = {
   },
 };
 
-const mockNames = [
-  "Akmal", "Dilnoza", "Sardor", "Shahzoda", "Bekzod", "Madina", "Rustam", "Nilufar",
-  "Aziz", "Gulnora", "Jasur", "Kamola", "Otabek", "Munisa", "Farrux", "Zarina",
-  "Sherzod", "Aliya", "Bobur", "Diyora", "Husniddin", "Lola", "Mirzo", "Nargiza",
-  "Odil",
-];
 
-// Difficulty multiplier matches calculateStars.ts: easy=0.8, medium=1.0, hard=1.2
-const DIFFICULTY_BASE_WPM: Record<Difficulty, number> = { easy: 155, medium: 140, hard: 120 };
-
-function generateEntries(period: Period, difficulty: Difficulty): Entry[] {
-  const baseSeed = period === "weekly" ? 1 : period === "monthly" ? 2 : 3;
-  const baseWpm = DIFFICULTY_BASE_WPM[difficulty];
-
-  return mockNames.map((name, i) => {
-    const seed = (i + 1) * baseSeed;
-    const wpm = Math.round(baseWpm - i * 2.5 - (seed % 5));
-    const accuracy = Math.round(99 - i * 0.3 - (seed % 3) * 0.5);
-    const testCount = period === "weekly" ? 5 + (seed % 15) : period === "monthly" ? 20 + (seed % 60) : 80 + (seed % 200);
-    return {
-      rank: i + 1,
-      userName: name,
-      avatarSeed: name.toLowerCase(),
-      bestWpm: Math.max(wpm, 25),
-      avgAccuracy: Math.max(accuracy, 85),
-      testCount,
-    };
-  });
+function entryName(e: Entry): string {
+  const parts = [e.firstName, e.lastName].filter(Boolean);
+  if (parts.length > 0) return parts.join(" ");
+  return e.name ?? "—";
 }
 
-function calculateMockRank(userBestWpm: number, difficulty: Difficulty): number {
-  if (userBestWpm <= 0) return 0;
-  const baseWpm = DIFFICULTY_BASE_WPM[difficulty];
-  if (userBestWpm >= baseWpm) return 1;
-  const rank = Math.ceil((baseWpm - userBestWpm) / 2.5) + 1;
-  return Math.max(1, Math.min(rank, 9999));
+function entryAvatar(e: Entry): string {
+  if (e.avatarUrl) return e.avatarUrl;
+  return `https://api.dicebear.com/7.x/pixel-art/svg?seed=${encodeURIComponent(e.userId)}`;
 }
 
 export default function LeaderboardClient({ lang, period, difficulty }: { lang: Language; period: Period; difficulty: Difficulty }) {
@@ -109,30 +88,29 @@ export default function LeaderboardClient({ lang, period, difficulty }: { lang: 
   const user = session?.user ?? null;
   const mounted = status !== "loading";
   const { handleLogin: handleGoogleLogin, isLoggingIn } = useGoogleLogin(lang);
-  const [userBestWpm, setUserBestWpm] = useState(0);
+  const [entries, setEntries] = useState<Entry[]>([]);
+  const [me, setMe] = useState<MeRank | null>(null);
+  const [loading, setLoading] = useState(true);
   const t = content[lang];
-  const entries = generateEntries(period, difficulty);
   const top3 = entries.slice(0, 3);
   const rest = entries.slice(3);
   const tableSize = entries.length;
 
   useEffect(() => {
-    const results = getTestResults();
-    if (results.length > 0) {
-      const filtered = results.filter((r) => r.difficulty === difficulty);
-      const source = filtered.length > 0 ? filtered : results;
-      setUserBestWpm(Math.max(...source.map((r) => r.wpm)));
-    } else {
-      setUserBestWpm(0);
-    }
-  }, [difficulty, user]);
+    setLoading(true);
+    fetch(`/api/leaderboard?period=${period}&difficulty=${difficulty}`, { cache: "no-store" })
+      .then((r) => (r.ok ? r.json() : Promise.reject(r.status)))
+      .then((data: { top: Entry[]; me: MeRank | null }) => {
+        setEntries(data.top);
+        setMe(data.me);
+      })
+      .catch((err) => console.error("Failed to load leaderboard:", err))
+      .finally(() => setLoading(false));
+  }, [period, difficulty, user]);
 
-  const userRank = useMemo(() => {
-    if (!user) return null;
-    return calculateMockRank(userBestWpm, difficulty);
-  }, [user, userBestWpm, difficulty]);
+  const userRank = me?.rank ?? null;
+  const userBestWpm = me?.bestWpm ?? 0;
 
-  const userInTop3 = userRank !== null && userRank > 0 && userRank <= 3;
   const userInTable = userRank !== null && userRank > 3 && userRank <= tableSize;
   const userBelowTable = userRank !== null && userRank > tableSize;
 
@@ -175,9 +153,9 @@ export default function LeaderboardClient({ lang, period, difficulty }: { lang: 
         </div>
 
         <div className="grid grid-cols-3 gap-3 md:gap-4 max-w-3xl mx-auto">
-          <PodiumCard entry={top3[1]} place={2} medal="🥈" isUser={userRank === 2} user={user} userBestWpm={userBestWpm} youLabel={t.you} />
-          <PodiumCard entry={top3[0]} place={1} medal="🥇" tall isUser={userRank === 1} user={user} userBestWpm={userBestWpm} youLabel={t.you} />
-          <PodiumCard entry={top3[2]} place={3} medal="🥉" isUser={userRank === 3} user={user} userBestWpm={userBestWpm} youLabel={t.you} />
+          <PodiumCard entry={top3[1]} place={2} medal="🥈" currentUserId={user?.id} youLabel={t.you} />
+          <PodiumCard entry={top3[0]} place={1} medal="🥇" tall currentUserId={user?.id} youLabel={t.you} />
+          <PodiumCard entry={top3[2]} place={3} medal="🥉" currentUserId={user?.id} youLabel={t.you} />
         </div>
 
         <section className="border border-border rounded-lg overflow-hidden">
@@ -193,41 +171,37 @@ export default function LeaderboardClient({ lang, period, difficulty }: { lang: 
                 </tr>
               </thead>
               <tbody>
+                {!loading && rest.length === 0 && (
+                  <tr>
+                    <td colSpan={5} className="py-12 text-center text-sm text-muted-foreground">
+                      {t.noResults}
+                    </td>
+                  </tr>
+                )}
                 {rest.map((entry) => {
-                  const isUserSlot = mounted && userInTable && user && userRank === entry.rank;
-                  if (isUserSlot && user) {
-                    return (
-                      <tr key={entry.rank} className="border-b border-border/50 last:border-0 bg-primary/10 ring-1 ring-primary/30">
-                        <td className="py-3 px-4 font-mono font-bold text-primary">{entry.rank}</td>
-                        <td className="py-3 px-4">
-                          <div className="flex items-center gap-3">
-                            <img src={avatarSrc(user)} alt={displayName(user)} className="w-8 h-8 rounded-full bg-accent border border-primary/40" />
-                            <span className="font-semibold">{displayName(user)}</span>
-                            <span className="text-[9px] uppercase tracking-wide bg-primary text-primary-foreground px-1.5 py-px rounded font-bold">{t.you}</span>
-                          </div>
-                        </td>
-                        <td className="py-3 px-4 text-right font-mono font-bold text-primary">{userBestWpm}</td>
-                        <td className="py-3 px-4 text-right font-mono hidden sm:table-cell">—</td>
-                        <td className="py-3 px-4 text-right font-mono text-muted-foreground hidden md:table-cell">—</td>
-                      </tr>
-                    );
-                  }
+                  const isUserSlot = mounted && user && entry.userId === user.id;
                   return (
-                    <tr key={entry.rank} className="border-b border-border/50 last:border-0 hover:bg-accent/30 transition-colors">
-                      <td className="py-3 px-4 font-mono text-muted-foreground">{entry.rank}</td>
+                    <tr key={entry.userId} className={`border-b border-border/50 last:border-0 ${isUserSlot ? "bg-primary/10 ring-1 ring-primary/30" : "hover:bg-accent/30"} transition-colors`}>
+                      <td className={`py-3 px-4 font-mono ${isUserSlot ? "font-bold text-primary" : "text-muted-foreground"}`}>
+                        {entry.rank}
+                      </td>
                       <td className="py-3 px-4">
                         <div className="flex items-center gap-3">
                           <img
-                            src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${entry.avatarSeed}`}
-                            alt={entry.userName}
-                            className="w-8 h-8 rounded-full bg-accent"
+                            src={entryAvatar(entry)}
+                            alt={entryName(entry)}
+                            className={`w-8 h-8 rounded-full bg-accent ${isUserSlot ? "border border-primary/40" : ""}`}
+                            style={{ imageRendering: "pixelated" }}
                           />
-                          <span className="font-medium">{entry.userName}</span>
+                          <span className={isUserSlot ? "font-semibold" : "font-medium"}>{entryName(entry)}</span>
+                          {isUserSlot && (
+                            <span className="text-[9px] uppercase tracking-wide bg-primary text-primary-foreground px-1.5 py-px rounded font-bold">{t.you}</span>
+                          )}
                         </div>
                       </td>
-                      <td className="py-3 px-4 text-right font-mono font-semibold">{entry.bestWpm}</td>
-                      <td className="py-3 px-4 text-right font-mono hidden sm:table-cell">{entry.avgAccuracy}%</td>
-                      <td className="py-3 px-4 text-right font-mono text-muted-foreground hidden md:table-cell">{entry.testCount}</td>
+                      <td className={`py-3 px-4 text-right font-mono ${isUserSlot ? "font-bold text-primary" : "font-semibold"}`}>{entry.bestWpm}</td>
+                      <td className="py-3 px-4 text-right font-mono hidden sm:table-cell">—</td>
+                      <td className="py-3 px-4 text-right font-mono text-muted-foreground hidden md:table-cell">—</td>
                     </tr>
                   );
                 })}
@@ -246,7 +220,7 @@ export default function LeaderboardClient({ lang, period, difficulty }: { lang: 
                       <td className="py-3 px-4 font-mono font-bold text-primary">#{userRank}</td>
                       <td className="py-3 px-4">
                         <div className="flex items-center gap-3">
-                          <img src={avatarSrc(user)} alt={displayName(user)} className="w-8 h-8 rounded-full bg-accent border border-primary/40" />
+                          <img src={avatarSrc(user)} alt={displayName(user)} className="w-8 h-8 rounded-full bg-accent border border-primary/40" style={{ imageRendering: "pixelated" }} />
                           <span className="font-semibold">{displayName(user)}</span>
                           <span className="text-[9px] uppercase tracking-wide bg-primary text-primary-foreground px-1.5 py-px rounded font-bold">{t.you}</span>
                         </div>
@@ -296,30 +270,28 @@ export default function LeaderboardClient({ lang, period, difficulty }: { lang: 
   );
 }
 
-function PodiumCard({ entry, place, medal, tall, isUser, user, userBestWpm, youLabel }: { entry?: Entry; place: number; medal: string; tall?: boolean; isUser?: boolean; user?: SessionUser | null; userBestWpm?: number; youLabel: string }) {
-  if (!entry) return <div />;
-  const showUser = isUser && user;
-  const cardAvatar = showUser ? avatarSrc(user) : `https://api.dicebear.com/7.x/avataaars/svg?seed=${entry.avatarSeed}`;
-  const cardName = showUser ? displayName(user) : entry.userName;
-  const wpmValue = showUser && userBestWpm ? userBestWpm : entry.bestWpm;
+function PodiumCard({ entry, place, medal, tall, currentUserId, youLabel }: { entry?: Entry; place: number; medal: string; tall?: boolean; currentUserId?: string; youLabel: string }) {
+  if (!entry) return <div className={tall ? "order-first md:order-none" : ""} />;
+  const showUser = currentUserId !== undefined && entry.userId === currentUserId;
   return (
     <div className={`flex flex-col items-center text-center ${tall ? "order-first md:order-none" : ""}`}>
       <div className="text-3xl md:text-4xl mb-2">{medal}</div>
       <img
-        src={cardAvatar}
-        alt={cardName}
+        src={entryAvatar(entry)}
+        alt={entryName(entry)}
         className={`rounded-full bg-accent border-2 ${
           showUser ? "border-primary ring-2 ring-primary/30" : place === 1 ? "border-yellow-400" : "border-border"
         } ${place === 1 ? "w-20 h-20 md:w-24 md:h-24" : "w-16 h-16 md:w-20 md:h-20"} mb-2`}
+        style={{ imageRendering: "pixelated" }}
       />
-      <p className="text-sm md:text-base font-semibold truncate max-w-full mb-1">{cardName}</p>
+      <p className="text-sm md:text-base font-semibold truncate max-w-full mb-1">{entryName(entry)}</p>
       {showUser && (
         <span className="text-[9px] uppercase tracking-wide bg-primary text-primary-foreground px-1.5 py-px rounded font-bold mb-1">{youLabel}</span>
       )}
       <div className={`w-full rounded-t-lg flex items-center justify-center ${
         showUser ? "bg-primary/20" : place === 1 ? "bg-yellow-400/20" : place === 2 ? "bg-muted" : "bg-muted/50"
       } ${place === 1 ? "h-20" : place === 2 ? "h-14" : "h-10"}`}>
-        <span className={`font-mono font-bold text-lg md:text-xl ${showUser ? "text-primary" : ""}`}>{wpmValue}</span>
+        <span className={`font-mono font-bold text-lg md:text-xl ${showUser ? "text-primary" : ""}`}>{entry.bestWpm}</span>
       </div>
     </div>
   );
