@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Header from "@/components/Header";
+import VisitTracker from "@/components/VisitTracker";
 import KeyboardShortcuts from "@/components/KeyboardShortcuts";
 import KeyboardShortcutsInfo from "@/components/KeyboardShortcutsInfo";
 import StructuredData from "@/components/StructuredData";
@@ -146,6 +147,7 @@ export default async function LangLayout({ children, params }: Props) {
   return (
     <>
       <StructuredData lang={currentLang} />
+      <VisitTracker />
       <KeyboardShortcuts />
       <KeyboardShortcutsInfo />
       <Header lang={currentLang} />

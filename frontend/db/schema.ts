@@ -8,6 +8,9 @@ import {
   decimal,
   varchar,
   index,
+  uniqueIndex,
+  date,
+  boolean,
 } from "drizzle-orm/pg-core";
 import type { AdapterAccount } from "next-auth/adapters";
 
@@ -105,5 +108,22 @@ export const testResults = pgTable(
       table.difficulty,
       table.wpm
     ),
+  ]
+);
+
+// One row per browser per day. Anonymous and signed-in browsers both ping;
+// the signedIn flag lets the admin panel break down totals.
+export const dailyVisits = pgTable(
+  "daily_visit",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    anonId: varchar("anon_id", { length: 64 }).notNull(),
+    visitDate: date("visit_date").notNull(),
+    signedIn: boolean("signed_in").notNull().default(false),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (table) => [
+    uniqueIndex("daily_visit_anon_date_idx").on(table.anonId, table.visitDate),
+    index("daily_visit_date_idx").on(table.visitDate),
   ]
 );

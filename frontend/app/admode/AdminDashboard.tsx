@@ -8,6 +8,15 @@ import ThemeToggle from "@/components/ThemeToggle";
 interface Stats {
   totals: { users: number; results: number; last24h: number; last7d: number; last30d: number };
   daily: Array<{ day: string; count: number }>;
+  dailyVisitors: Array<{ day: string; total: number; signedIn: number; guests: number }>;
+  visitorTotals: {
+    today: number;
+    last7d: number;
+    last30d: number;
+    todayGuests: number;
+    last7dGuests: number;
+    last30dGuests: number;
+  };
   topUsers: Array<{
     userId: string;
     email: string;
@@ -216,6 +225,7 @@ export default function AdminDashboard() {
 }
 
 function OverviewSection({ stats }: { stats: Stats }) {
+  const v = stats.visitorTotals;
   return (
     <div className="space-y-6">
       <section className="grid grid-cols-2 md:grid-cols-5 gap-3">
@@ -224,6 +234,39 @@ function OverviewSection({ stats }: { stats: Stats }) {
         <StatCard label="So'nggi 24 soat" value={stats.totals.last24h} />
         <StatCard label="So'nggi 7 kun" value={stats.totals.last7d} />
         <StatCard label="So'nggi 30 kun" value={stats.totals.last30d} />
+      </section>
+
+      <section className="grid grid-cols-1 md:grid-cols-3 gap-3">
+        <VisitorCard label="Bugun" total={v.today} guests={v.todayGuests} />
+        <VisitorCard label="So'nggi 7 kun" total={v.last7d} guests={v.last7dGuests} />
+        <VisitorCard label="So'nggi 30 kun" total={v.last30d} guests={v.last30dGuests} />
+      </section>
+
+      <section className="border border-border rounded-xl p-5 md:p-6">
+        <h3 className="text-base font-semibold mb-4">Kunlik tashriflar (oxirgi 14 kun)</h3>
+        {stats.dailyVisitors.length > 0 ? (
+          <div className="w-full h-64">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={stats.dailyVisitors} margin={{ top: 10, right: 10, bottom: 0, left: -20 }}>
+                <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
+                <XAxis dataKey="day" tick={{ fontSize: 11 }} stroke="currentColor" className="text-muted-foreground" />
+                <YAxis tick={{ fontSize: 11 }} stroke="currentColor" className="text-muted-foreground" />
+                <Tooltip
+                  contentStyle={{
+                    background: "hsl(var(--background))",
+                    border: "1px solid hsl(var(--border))",
+                    borderRadius: "8px",
+                    fontSize: "12px",
+                  }}
+                />
+                <Bar dataKey="signedIn" stackId="visits" fill="currentColor" className="text-primary" name="Ro'yxatdan o'tgan" />
+                <Bar dataKey="guests" stackId="visits" fill="currentColor" className="text-muted-foreground" name="Mehmon" radius={[4, 4, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        ) : (
+          <p className="text-sm text-muted-foreground text-center py-8">Hali ma&apos;lumot yo&apos;q</p>
+        )}
       </section>
 
       <section className="border border-border rounded-xl p-5 md:p-6">
@@ -425,6 +468,20 @@ function StatCard({ label, value }: { label: string; value: number }) {
     <div className="border border-border rounded-lg p-3 md:p-4">
       <p className="text-xs text-muted-foreground mb-1">{label}</p>
       <p className="text-2xl md:text-3xl font-bold font-mono">{value}</p>
+    </div>
+  );
+}
+
+function VisitorCard({ label, total, guests }: { label: string; total: number; guests: number }) {
+  const signedIn = Math.max(0, total - guests);
+  return (
+    <div className="border border-border rounded-lg p-4">
+      <p className="text-xs text-muted-foreground mb-1">{label} — tashriflar</p>
+      <p className="text-2xl md:text-3xl font-bold font-mono">{total}</p>
+      <p className="text-xs text-muted-foreground mt-2">
+        <span className="font-mono text-foreground">{signedIn}</span> ro&apos;yxatdan o&apos;tgan ·{" "}
+        <span className="font-mono text-foreground">{guests}</span> mehmon
+      </p>
     </div>
   );
 }
