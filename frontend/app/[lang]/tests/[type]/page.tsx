@@ -2,11 +2,13 @@
 
 import { useState, useEffect } from "react";
 import { notFound, useParams } from "next/navigation";
+import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { Timer, RotateCcw, MoveVertical, Blend } from "lucide-react";
 import TypingTest from "@/components/typing/TypingTest";
 import TestResults from "@/components/typing/TestResults";
 import FeedbackModal from "@/components/FeedbackModal";
+import TelegramJoinModal from "@/components/TelegramJoinModal";
 import LeaderboardWidget from "@/components/LeaderboardWidget";
 import LoginCtaBanner from "@/components/LoginCtaBanner";
 import { getTestText } from "@/lib/getTestText";
@@ -82,7 +84,9 @@ export default function TestPage() {
   const [correctCharColor, setCorrectCharColor] = useState<'default' | 'blue' | 'yellow' | 'green'>('default');
   const [animationMode, setAnimationMode] = useState<'bounce' | 'fade'>('bounce');
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
+  const [showTelegramModal, setShowTelegramModal] = useState(false);
   const [showMobileWarning, setShowMobileWarning] = useState(false);
+  const { data: session } = useSession();
 
   // Restore fullscreen if it was active before navigation
   useEffect(() => {
@@ -213,7 +217,26 @@ export default function TestPage() {
       }, 1500); // Show after results appear
     }
 
+    // Telegram join modal: only for signed-in (Google) users, after 3 tests post-login
+    if (session) {
+      const loggedInTests = parseInt(localStorage.getItem("uzbektype_logged_in_tests") || "0") + 1;
+      localStorage.setItem("uzbektype_logged_in_tests", loggedInTests.toString());
+
+      const telegramShown = localStorage.getItem("uzbektype_telegram_invited");
+      if (loggedInTests === 3 && !telegramShown) {
+        // Stagger after feedback modal so they don't stack on the same frame
+        setTimeout(() => {
+          setShowTelegramModal(true);
+        }, 1700);
+      }
+    }
+
     setResult(stats);
+  };
+
+  const handleTelegramClose = () => {
+    setShowTelegramModal(false);
+    localStorage.setItem("uzbektype_telegram_invited", "true");
   };
 
   const handleFeedbackSubmit = async (feedback: string) => {
@@ -488,6 +511,13 @@ export default function TestPage() {
         isOpen={showFeedbackModal}
         onClose={handleFeedbackClose}
         onSubmit={handleFeedbackSubmit}
+        lang={lang}
+      />
+
+      {/* Telegram Join Modal — only for Google-signed-in users at 3 post-login tests */}
+      <TelegramJoinModal
+        isOpen={showTelegramModal}
+        onClose={handleTelegramClose}
         lang={lang}
       />
 

@@ -20,8 +20,8 @@ const sampleTexts: Record<Language, Record<Difficulty, string[]>> = {
       "do'st hayotda eng qimmat boylik yaxshi do'st quvonchda quvonadi qayg'uda yordam beradi do'stga yolg'on gapirma vada bersang bajar uni hurmat qil va tinglashga harakat qil agar do'st xato qilsa dushmanga aylanma to'g'ri so'z ayt yaxshilik tila do'stlik yillar bilan chuqurlashadi yangi do'st topish oson eski do'st topish qiyin shu uchun har bir do'stni e'zoz",
       // Oila
       "oila eng qadrli joy uy ichida sevgi va g'amxo'rlik bo'lsin ota va ona bolasiga vaqt ajratsin gaplashsin tinglasin ovqat birga yeyilsin har kuni qanday o'tganini so'rang yomon kun bo'lsa yordam bering ko'mak qiling oilada hurmat va sabr bo'lsin yangi avlod oiladan o'rganadi shu uchun namuna ko'rsat oila kuchli bo'lsa hayot ham kuchli bo'ladi har bir kun uchun shukur",
-      // Musiqa
-      "musiqa kayfiyatni o'zgartiradi sekin musiqa esa tinchlantiradi ish vaqtida sokin ohang miyani jamlashga yordam beradi xafa kun sevimli qo'shiq quvonch qaytaradi musiqa eshitish dam olishning eng oson yo'li sport vaqtida tez ohang energiya beradi har kim o'z didiga mos qo'shiq tanlasin yangi qo'shiqlar tinglash ham qiziq turli xalq musiqasi boy va chiroyli har kun bir oz musiqa bilan o'tkaz",
+      // Sport
+      "sport tana va aqlni mustahkamlaydi har kun bir oz harakat qilish kerak yugurish piyoda yurish yoki suzish foydali sport stress kamaytiradi kayfiyatni yaxshilaydi tana sog'lom bo'lsa ish ham yaxshi yurishadi sportni odat qilib har kun davom et yarim soat ham kifoya kuchli mushak va chidamli yurak shu mashqlardan keladi yangi kun uchun energiya beradi sportga vaqt ajrating",
       // Sayohat
       "sayohat dunyoni ko'rishning eng yaxshi yo'li yangi joyga borsang yangi narsa o'rganasan tabiat ko'r odamlar bilan tanish ovqatini ta'tib ko'r har shahar va qishloqning o'z qiziqligi bor sayohat oldin reja tuz kerakli narsalarni ol pul tejab harajat qil rasmga ol esda saqlash uchun til bilmasang ham qo'l harakat bilan gaplashish mumkin sayohat fikrni ochadi qalbni yangilaydi",
 ],
@@ -88,8 +88,8 @@ const sampleTexts: Record<Language, Record<Difficulty, string[]>> = {
       "a true friend is the most valuable thing in life a good friend shares your joy and helps in hard times never lie to your friend keep your promise show respect and listen with care if a friend makes a mistake do not turn away speak the truth and wish them well friendship grows over years new friends are easy old ones are rare value each friend you have",
       // Family
       "family is the most precious thing in life let your home be full of love and care parents should give time to their kids talk to them and listen eat meals together each day ask how their day was help them when things are hard show respect and patience kids learn from family be a good example strong family makes life strong say thanks for each day",
-      // Music
-      "music can change your mood slow music helps you relax soft tunes during work help you focus on a sad day a favorite song brings back joy listening to music is the easiest way to rest fast beats give energy during sport choose songs that match your taste try new songs the world has many kinds of music each is rich and full of beauty spend a bit of your day with music",
+      // Sport
+      "sport keeps your body and mind strong move a little every day running walking or swimming all help sport reduces stress and lifts your mood when your body feels good your work goes well too make it a habit to move every day even thirty minutes is enough strong muscles and a healthy heart come from regular practice it gives you fresh energy for a new day so make time for sport",
       // Travel
       "travel is the best way to see the world when you visit a new place you learn new things see nature meet people and try local food every city has its own charm before you travel make a plan pack what you need spend money wisely take photos to keep memories travel opens your mind and refreshes your soul each day brings a new experience and story",
     ],
@@ -156,8 +156,8 @@ const sampleTexts: Record<Language, Record<Difficulty, string[]>> = {
       "настоящий друг это самое ценное в жизни хороший друг радуется с тобой и помогает в трудные минуты не лги другу если дал слово держи уважай и умей слушать если друг ошибся не отворачивайся скажи правду и пожелай добра дружба растет с годами новых друзей найти легко а старых трудно поэтому цени каждого друга",
       // Семья
       "семья это самое ценное в жизни пусть в доме будет любовь и забота родители должны уделять время детям говорить и слушать ешьте вместе каждый день спрашивай как прошел день помогай в трудные моменты в семье нужны уважение и терпение дети учатся в семье будь хорошим примером сильная семья делает сильной жизнь говори спасибо за каждый день",
-      // Музыка
-      "музыка меняет настроение в одно мгновение медленная музыка помогает расслабиться тихая мелодия во время работы помогает сосредоточиться в грустный день любимая песня возвращает радость слушать музыку самый простой отдых быстрый ритм дает энергию во время спорта выбирай песни по вкусу пробуй новые песни в мире много видов музыки каждая красива и богата проводи часть дня с музыкой",
+      // Спорт
+      "спорт делает тело и ум сильнее двигайся немного каждый день бег ходьба или плавание полезны спорт снимает стресс и улучшает настроение когда тело здоровое работа тоже идет лучше сделай движение привычкой даже полчаса в день достаточно сильные мышцы и крепкое сердце приходят с регулярной практикой это дает свежую силу для нового дня",
       // Путешествия
       "путешествие лучший способ узнать мир в новом месте ты узнаешь новое видишь природу знакомишься с людьми и пробуешь местную еду у каждого города свой характер перед поездкой составь план и возьми нужное трать деньги с умом снимай фото на память путешествие открывает ум и освежает душу каждый день дарит новый опыт",
     ],
