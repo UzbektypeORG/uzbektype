@@ -22,6 +22,7 @@ export function middleware(request: NextRequest) {
     pathname.startsWith('/api') ||
     pathname.startsWith('/_api') ||
     pathname.startsWith('/admode') ||
+    pathname.startsWith('/check') ||
     pathname.includes('.') || // files like .svg, .png, etc.
     pathname === '/manifest.json' ||
     pathname === '/robots.txt' ||
