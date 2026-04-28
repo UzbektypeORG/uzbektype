@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { Bar, BarChart, CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import ThemeToggle from "@/components/ThemeToggle";
 
 type VisitorBucket = { total: number; signedIn: number; guests: number };
@@ -18,7 +18,7 @@ const PERIOD_LABELS: Record<VisitorPeriod, string> = {
 interface Stats {
   totals: { users: number; results: number; last24h: number; last7d: number; last30d: number };
   daily: Array<{ day: string; count: number }>;
-  dailyVisitors: Array<{ day: string; total: number; signedIn: number; guests: number }>;
+  visitorTimeline: Array<{ day: string; total: number; signedIn: number; guests: number }>;
   visitorBreakdown: {
     today: VisitorBucket;
     week: VisitorBucket;
@@ -64,10 +64,11 @@ interface Stats {
   }>;
 }
 
-type Tab = "overview" | "top" | "recent" | "users";
+type Tab = "overview" | "top" | "recent" | "users" | "visits";
 
 const TABS: { id: Tab; label: string; icon: string }[] = [
   { id: "overview", label: "Umumiy", icon: "M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z" },
+  { id: "visits", label: "Tashriflar", icon: "M3.5 18.49l6-6.01 4 4L22 6.92l-1.41-1.41-7.09 7.97-4-4L2 16.99z" },
   { id: "top", label: "Top", icon: "M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" },
   { id: "recent", label: "Oxirgi testlar", icon: "M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z" },
   { id: "users", label: "Foydalanuvchilar", icon: "M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z" },
@@ -214,6 +215,7 @@ export default function AdminDashboard() {
             </div>
 
             {activeTab === "overview" && <OverviewSection stats={stats} />}
+            {activeTab === "visits" && <VisitsSection timeline={stats.visitorTimeline} />}
             {activeTab === "top" && <TopUsersSection stats={stats} onUserClick={(id) => router.push(`/admode/users/${id}`)} />}
             {activeTab === "recent" && <RecentSection stats={stats} onUserClick={(id) => router.push(`/admode/users/${id}`)} />}
             {activeTab === "users" && (
@@ -235,6 +237,7 @@ export default function AdminDashboard() {
 
 function OverviewSection({ stats }: { stats: Stats }) {
   const v = stats.visitorBreakdown;
+  const last14 = stats.visitorTimeline.slice(-14);
   return (
     <div className="space-y-6">
       <section className="grid grid-cols-2 md:grid-cols-5 gap-3">
@@ -254,10 +257,10 @@ function OverviewSection({ stats }: { stats: Stats }) {
 
       <section className="border border-border rounded-xl p-5 md:p-6">
         <h3 className="text-base font-semibold mb-4">Kunlik tashriflar (oxirgi 14 kun)</h3>
-        {stats.dailyVisitors.length > 0 ? (
+        {last14.length > 0 ? (
           <div className="w-full h-64">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={stats.dailyVisitors} margin={{ top: 10, right: 10, bottom: 0, left: -20 }}>
+              <BarChart data={last14} margin={{ top: 10, right: 10, bottom: 0, left: -20 }}>
                 <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
                 <XAxis dataKey="day" tick={{ fontSize: 11 }} stroke="currentColor" className="text-muted-foreground" />
                 <YAxis tick={{ fontSize: 11 }} stroke="currentColor" className="text-muted-foreground" />
@@ -562,6 +565,153 @@ function VisitorCard({ label, bucket }: { label: string; bucket: VisitorBucket }
         <span className="font-mono text-foreground">{bucket.signedIn}</span> ro&apos;yxatdan o&apos;tgan ·{" "}
         <span className="font-mono text-foreground">{bucket.guests}</span> mehmon
       </p>
+    </div>
+  );
+}
+
+type VisitsRange = "week" | "month" | "year";
+type VisitsPoint = { day: string; total: number; signedIn: number; guests: number };
+
+const RANGE_LABELS: Record<VisitsRange, string> = {
+  week: "Hafta",
+  month: "Oy",
+  year: "Yil",
+};
+
+const SERIES = [
+  { key: "total" as const, label: "Jami", color: "#6366f1" },
+  { key: "signedIn" as const, label: "Ro'yxatdan o'tganlar", color: "#22c55e" },
+  { key: "guests" as const, label: "Ro'yxatdan o'tmaganlar", color: "#f97316" },
+];
+
+function aggregateMonthly(points: VisitsPoint[]): VisitsPoint[] {
+  const buckets = new Map<string, VisitsPoint>();
+  for (const p of points) {
+    const key = p.day.slice(0, 7); // YYYY-MM
+    const existing = buckets.get(key);
+    if (existing) {
+      existing.total += p.total;
+      existing.signedIn += p.signedIn;
+      existing.guests += p.guests;
+    } else {
+      buckets.set(key, { day: key, total: p.total, signedIn: p.signedIn, guests: p.guests });
+    }
+  }
+  return Array.from(buckets.values()).sort((a, b) => a.day.localeCompare(b.day));
+}
+
+function VisitsSection({ timeline }: { timeline: VisitsPoint[] }) {
+  const [range, setRange] = useState<VisitsRange>("month");
+  const [enabled, setEnabled] = useState<Record<typeof SERIES[number]["key"], boolean>>({
+    total: true,
+    signedIn: true,
+    guests: true,
+  });
+
+  const data = useMemo(() => {
+    if (range === "week") return timeline.slice(-7);
+    if (range === "month") return timeline.slice(-30);
+    // year — aggregate to monthly buckets so 365 daily points read cleanly.
+    return aggregateMonthly(timeline.slice(-365));
+  }, [timeline, range]);
+
+  const totals = useMemo(
+    () =>
+      data.reduce(
+        (acc, p) => ({
+          total: acc.total + p.total,
+          signedIn: acc.signedIn + p.signedIn,
+          guests: acc.guests + p.guests,
+        }),
+        { total: 0, signedIn: 0, guests: 0 }
+      ),
+    [data]
+  );
+
+  const visibleSeries = SERIES.filter((s) => enabled[s.key]);
+
+  return (
+    <div className="space-y-4">
+      <section className="border border-border rounded-xl p-5 md:p-6">
+        <div className="flex items-center justify-between mb-4 gap-3 flex-wrap">
+          <h3 className="text-sm font-semibold">Davr</h3>
+          <div className="flex gap-1 p-0.5 rounded-lg border border-border bg-accent/30">
+            {(Object.keys(RANGE_LABELS) as VisitsRange[]).map((r) => (
+              <button
+                key={r}
+                onClick={() => setRange(r)}
+                className={`px-3 py-1 text-xs rounded-md transition-colors ${
+                  range === r
+                    ? "bg-background shadow-sm font-medium"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                {RANGE_LABELS[r]}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="grid grid-cols-3 gap-3 mb-4">
+          {SERIES.map((s) => (
+            <button
+              key={s.key}
+              onClick={() => setEnabled((e) => ({ ...e, [s.key]: !e[s.key] }))}
+              className={`text-left rounded-lg p-3 md:p-4 border transition-all ${
+                enabled[s.key]
+                  ? "border-border bg-background"
+                  : "border-border/40 bg-muted/30 opacity-50"
+              }`}
+            >
+              <div className="flex items-center gap-2 mb-1">
+                <span
+                  className="inline-block w-2.5 h-2.5 rounded-full"
+                  style={{ background: s.color }}
+                />
+                <span className="text-xs text-muted-foreground">{s.label}</span>
+              </div>
+              <p className="text-2xl md:text-3xl font-bold font-mono">{totals[s.key]}</p>
+            </button>
+          ))}
+        </div>
+
+        {data.length > 0 && visibleSeries.length > 0 ? (
+          <div className="w-full h-72">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={data} margin={{ top: 10, right: 10, bottom: 0, left: -20 }}>
+                <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
+                <XAxis dataKey="day" tick={{ fontSize: 11 }} stroke="currentColor" className="text-muted-foreground" />
+                <YAxis tick={{ fontSize: 11 }} stroke="currentColor" className="text-muted-foreground" />
+                <Tooltip
+                  contentStyle={{
+                    background: "hsl(var(--background))",
+                    border: "1px solid hsl(var(--border))",
+                    borderRadius: "8px",
+                    fontSize: "12px",
+                  }}
+                />
+                <Legend wrapperStyle={{ fontSize: 12 }} />
+                {visibleSeries.map((s) => (
+                  <Line
+                    key={s.key}
+                    type="monotone"
+                    dataKey={s.key}
+                    name={s.label}
+                    stroke={s.color}
+                    strokeWidth={2}
+                    dot={false}
+                    activeDot={{ r: 4 }}
+                  />
+                ))}
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        ) : (
+          <p className="text-sm text-muted-foreground text-center py-12">
+            {visibleSeries.length === 0 ? "Hech qaysi seriya tanlanmagan" : "Hali ma'lumot yo'q"}
+          </p>
+        )}
+      </section>
     </div>
   );
 }

@@ -35,7 +35,9 @@ export async function GET() {
     ORDER BY day ASC
   `);
 
-  // Daily unique visitors for the last 14 days, broken down by signed-in vs guest.
+  // Daily unique visitors for the last 365 days, broken down by signed-in vs
+  // guest. Overview slices the tail to render the 14-day chart; the dedicated
+  // Tashriflar tab consumes the full range and aggregates to weekly/monthly.
   const dailyVisitorRows = await db.execute<{
     day: string;
     total: number;
@@ -48,7 +50,7 @@ export async function GET() {
       COUNT(*) FILTER (WHERE signed_in)::int AS "signedIn",
       COUNT(*) FILTER (WHERE NOT signed_in)::int AS guests
     FROM daily_visit
-    WHERE visit_date >= CURRENT_DATE - INTERVAL '13 days'
+    WHERE visit_date >= CURRENT_DATE - INTERVAL '364 days'
     GROUP BY day
     ORDER BY day ASC
   `);
@@ -168,7 +170,7 @@ export async function GET() {
       day: d.day,
       count: Number(d.count),
     })),
-    dailyVisitors: dailyVisitorRows.rows.map((d) => ({
+    visitorTimeline: dailyVisitorRows.rows.map((d) => ({
       day: d.day,
       total: Number(d.total),
       signedIn: Number(d.signedIn),
