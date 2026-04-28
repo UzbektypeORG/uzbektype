@@ -60,7 +60,9 @@ Niche — kam qidiriladi, lekin **raqobat ham juda kam.** "Long-tail" trafik. Fo
 ## Yozish bo'yicha qoidalar
 
 Har bir maqola uchun:
-- **Uzunligi:** 1500-2500 so'z (UZ); EN va RU 1200-2000 so'z
+- **🔴 MAJBURIY 3 TIL** — har maqola UZ + EN + RU sahifalarida bo'lishi shart. Hech biri tashlab ketilmaydi. Routes: `/uz/blog/[slug]`, `/en/blog/[slug]`, `/ru/blog/[slug]`. Hreflang to'g'ri bog'lanadi.
+- **Tarjima emas** — har til shu auditoriyaning tabiiy ohangida yoziladi. Mexanik tarjima taqiqlanadi.
+- **Uzunligi:** UZ 1500-2500 so'z (asosiy); EN va RU 1200-2000 so'z
 - **Tuzilma:** H1 → 4-6 ta H2 bo'lim → har bo'limda 2-3 ta H3 → xulosa
 - **Schema.org:** `Article` yoki `HowTo` (mos bo'lganda)
 - **Internal links:** kamida 3 ta (test sahifasi, leaderboard, boshqa blog'lar)
@@ -72,6 +74,8 @@ Har bir maqola uchun:
 ## Sifat mezoni
 
 Har maqola publish'dan oldin **10 mezon × 10 ball = 100 balli tizim** orqali baholash. **Faqat 90+ bo'lganda** publish. Mezonlar `memory/project_blog_quality_rubric.md`'da.
+
+**Muhim:** UZ, EN, RU — **har til alohida 100 balldan baholanadi.** 3 talasi ham 90+ bo'lmaguncha hech qaysisi publish qilinmaydi. Bu ya'ni: agar UZ 95 ball, lekin RU 82 ball bo'lsa, RU'ni qayta yozib 90+ ga olib chiqaman, keyin uchchovini birga publish qilaman.
 
 ## Rad etilgan mavzular
 
