@@ -7,6 +7,7 @@ import Link from "next/link";
 import { Timer, RotateCcw, MoveVertical, Blend } from "lucide-react";
 import TypingTest from "@/components/typing/TypingTest";
 import TestResults from "@/components/typing/TestResults";
+import RecordCelebration from "@/components/RecordCelebration";
 import FeedbackModal from "@/components/FeedbackModal";
 import TelegramJoinModal from "@/components/TelegramJoinModal";
 import LeaderboardWidget from "@/components/LeaderboardWidget";
@@ -86,6 +87,7 @@ export default function TestPage() {
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
   const [showTelegramModal, setShowTelegramModal] = useState(false);
   const [showMobileWarning, setShowMobileWarning] = useState(false);
+  const [recordType, setRecordType] = useState<"personal" | "top" | null>(null);
   const { data: session } = useSession();
 
   // Restore fullscreen if it was active before navigation
@@ -186,7 +188,8 @@ export default function TestPage() {
       totalChars: stats.totalChars,
     });
 
-    // Best-effort save to DB (only succeeds when signed in; ignored otherwise)
+    // Best-effort save to DB (only succeeds when signed in; ignored otherwise).
+    // Response carries recordType so we can fire the celebration overlay.
     fetch("/api/results", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -203,7 +206,12 @@ export default function TestPage() {
         totalChars: stats.totalChars,
         timeElapsed: stats.timeElapsed,
       }),
-    }).catch(() => {});
+    })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data: { recordType?: "personal" | "top" | null } | null) => {
+        if (data?.recordType) setRecordType(data.recordType);
+      })
+      .catch(() => {});
 
     // Track completed tests count for feedback modal
     const completedTests = parseInt(localStorage.getItem("uzbektype_completed_tests") || "0") + 1;
@@ -281,6 +289,7 @@ export default function TestPage() {
       setText(newText);
     }
     setResult(null);
+    setRecordType(null);
     setKey((prev) => prev + 1);
   };
 
@@ -504,6 +513,15 @@ export default function TestPage() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Record celebration overlay — fires when API confirms personal/top record */}
+      {recordType && (
+        <RecordCelebration
+          mode={recordType}
+          lang={lang}
+          onDone={() => setRecordType(null)}
+        />
       )}
 
       {/* Feedback Modal */}

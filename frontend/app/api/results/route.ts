@@ -102,6 +102,16 @@ export async function POST(req: Request) {
   `);
   const prevMax = Number(prevRow.rows[0]?.maxWpm ?? 0);
 
+  // Snapshot user's previous personal best for this difficulty, so we can
+  // distinguish a personal record (beats own best but not global) from a
+  // top record (beats global). Same cross-test-type logic.
+  const prevUserRow = await db.execute<{ maxWpm: number }>(sql`
+    SELECT COALESCE(MAX(wpm), 0)::int AS "maxWpm"
+    FROM test_result
+    WHERE difficulty = ${body.difficulty} AND user_id = ${session.user.id}
+  `);
+  const prevUserMax = Number(prevUserRow.rows[0]?.maxWpm ?? 0);
+
   const [row] = await db
     .insert(testResults)
     .values({
@@ -120,8 +130,16 @@ export async function POST(req: Request) {
     })
     .returning({ id: testResults.id });
 
+  const beatsGlobal = body.wpm > prevMax;
+  const beatsPersonal = body.wpm > prevUserMax;
+  const recordType: "top" | "personal" | null = beatsGlobal
+    ? "top"
+    : beatsPersonal
+    ? "personal"
+    : null;
+
   // Fire-and-forget Telegram announcement when the global record falls.
-  if (body.wpm > prevMax) {
+  if (beatsGlobal) {
     void announceRecord({
       userId: session.user.id,
       difficulty: body.difficulty as "easy" | "medium" | "hard",
@@ -129,7 +147,7 @@ export async function POST(req: Request) {
     });
   }
 
-  return NextResponse.json({ id: row.id });
+  return NextResponse.json({ id: row.id, recordType });
 }
 
 async function announceRecord(params: {
