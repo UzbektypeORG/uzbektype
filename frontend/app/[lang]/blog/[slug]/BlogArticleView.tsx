@@ -269,7 +269,7 @@ export default function BlogArticleView({ post, lang }: { post: BlogPost; lang: 
           <Link href={`/${lang}/blog`} className="hover:text-foreground">{t.backToBlog}</Link>
         </nav>
 
-        <header className="mb-10 space-y-3 animate-fade-in">
+        <header className="mb-8 space-y-3 animate-fade-in">
           <h1 className="text-3xl md:text-5xl font-bold leading-tight tracking-tight">
             {post.titles[lang]}
           </h1>
@@ -282,6 +282,17 @@ export default function BlogArticleView({ post, lang }: { post: BlogPost; lang: 
             <span>{post.readTime[lang]} {t.readTime}</span>
           </div>
         </header>
+
+        {/* Top CTA — encourages reader to start a test before they even read */}
+        <div className="mb-10 p-4 md:p-5 rounded-xl border border-primary/30 bg-primary/5 flex items-center justify-between gap-3 flex-wrap">
+          <span className="text-sm md:text-base font-medium">{t.cta}</span>
+          <Link
+            href={`/${lang}/tests/30s-easy`}
+            className="px-5 py-2 rounded-lg bg-primary text-primary-foreground hover:opacity-90 transition-all text-sm font-medium whitespace-nowrap"
+          >
+            {lang === "uz" ? "Sinab ko'rish" : lang === "ru" ? "Попробовать" : "Try it"} →
+          </Link>
+        </div>
 
         <div className="prose prose-lg dark:prose-invert max-w-none">
           <MarkdownRenderer content={post.content[lang]} />

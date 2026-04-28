@@ -199,6 +199,13 @@ export default function Header({ lang }: HeaderProps) {
             {navContent[lang].home}
           </a>
 
+          <Link
+            href={`/${lang}/blog`}
+            className="text-sm hover:text-foreground transition-colors"
+          >
+            {navContent[lang].blog}
+          </Link>
+
           {/* Dark Mode Toggle */}
           <button
             onClick={toggleTheme}
@@ -477,6 +484,21 @@ export default function Header({ lang }: HeaderProps) {
               <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z" />
             </svg>
             {navContent[lang].leaderboard}
+          </Link>
+
+          <Link
+            href={`/${lang}/blog`}
+            onClick={() => setIsMobileMenuOpen(false)}
+            className="px-3 py-2.5 text-sm rounded-lg hover:bg-accent transition-colors flex items-center gap-3"
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-muted-foreground">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+              <polyline points="14 2 14 8 20 8" />
+              <line x1="16" y1="13" x2="8" y2="13" />
+              <line x1="16" y1="17" x2="8" y2="17" />
+              <polyline points="10 9 9 9 8 9" />
+            </svg>
+            {navContent[lang].blog}
           </Link>
 
           {user && (

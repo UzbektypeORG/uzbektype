@@ -66,7 +66,7 @@ Har bir maqola uchun:
 - **Tuzilma:** H1 → 4-6 ta H2 bo'lim → har bo'limda 2-3 ta H3 → xulosa
 - **Schema.org:** `Article` yoki `HowTo` (mos bo'lganda)
 - **Internal links:** kamida 3 ta (test sahifasi, leaderboard, boshqa blog'lar)
-- **CTA:** maqola oxirida — "Sinab ko'ring" tugma /tests'ga
+- **CTA — ikkita:** yuqorida (sarlavhadan keyin, kontentdan oldin) kompakt banner + pastida to'liq card. Ikkalasi ham `/tests/30s-easy`'ga.
 - **MDX format:** `/app/[lang]/blog/[slug]/page.mdx` (yoki frontmatter bilan)
 - **Featured image:** har biri uchun unique og:image
 - **Last updated:** sana va versiya
