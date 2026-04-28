@@ -1,41 +1,61 @@
 # Blog mavzulari rejasi
 
-23 ta mavzu — har biri 3 tilda yoziladi (UZ asosiy, EN/RU bir xil ma'noda).
+23 ta mavzu — search potentiali bo'yicha tartibga solingan. **Yuqoridagi raqam = yozish tartibi.** Eng katta hajmli + pillar content birinchi yoziladi.
 
 **Status legend:**
 - `todo` — hali yozilmagan
 - `writing` — yozilmoqda
 - `done` — yozilgan va saytga qo'shilgan
 
-**Yozishni boshlash uchun:** "<mavzu raqami>-ni yoz" yoki "<mavzu nomi>-ni yoz" deyish kifoya.
+**Yozishni boshlash uchun:** "blog yoz" yoki "<raqam>-ni yoz" deyish kifoya. Default — keyingi `todo`'dagi mavzu (tartib bo'yicha).
 
-## Tanlangan mavzular
+**Volume tier'lari:**
+- 🔥 **Yuqori** — head term, broad, pillar content (target: 5K+ qidiruv/oy bo'yicha potensial)
+- 📈 **O'rta** — specific intent, action-oriented, transactional
+- 🎯 **Maxsus** — niche, kam volume lekin yuqori intent
 
-| # | Sarlavha (UZ) | Aniq qidiruv keywordlari | Status |
-|---|---|---|---|
-| 1 | Yozish tezligini oshirish: WPM nima va qanday o'lchash kerak | yozish tezligini oshirish • wpm nima • yozish tezligi qanday o'lchanadi • wpm qanday hisoblanadi • tez yozishni o'rganish | todo |
-| 2 | Yozish tezligini oshirish — 10 kun ichida 2 baravar tezroq | 10 kun ichida tez yozish • yozish tezligini ikki baravar oshirish • tez yozishni o'rganish reja • 10 kunlik typing reja | todo |
-| 3 | Klaviaturaga qaramasdan yozish — bosqichma-bosqich qo'llanma | klaviaturaga qaramasdan yozish • ko'r yozish o'rganish • touch typing nima • klaviaturaga qaramay yozish • ko'rmasdan yozish | todo |
-| 4 | Lotin alifbosida tez yozish — krill bilan taqqoslash va texnikalar | lotin alifbosida tez yozish • lotin krill yozish • kirilcha tez yozish • uzbek alifbosi yozish • lotincha klaviatura | todo |
-| 5 | Telefonda tez yozish — barmoqlar bilan 80 WPM mumkinmi? | telefonda tez yozish • telefon klaviaturasi mashqi • smartfonda tez yozish • mobile typing speed • telefonda 80 wpm | todo |
-| 6 | QWERTY va boshqa klaviatura layoutlari — qaysi tez yozish uchun yaxshi | qwerty va dvorak farqi • qaysi klaviatura tez • qwerty colemak farq • klaviatura layoutlari • dvorak afzalligi | todo |
-| 7 | Yozish tezligi va karyera: qaysi kasblar uchun WPM muhim | qaysi kasblar uchun wpm muhim • tez yozish ish • ofis xodimi wpm • kotiba yozish tezligi • dasturchi wpm | todo |
-| 8 | MonkeyType, TypingClub, UzbekType — qaysi typing test eng yaxshi? | monkeytype vs typingclub • qaysi typing test yaxshi • uzbektype va monkeytype • online typing test taqqos • tez yozish saytlari | todo |
-| 9 | 5 daqiqada o'zingizning haqiqiy WPM'ingizni aniqlang | wpm qanday aniqlash • 5 daqiqada wpm test • yozish tezligini bilish • real wpm test • wpm o'lchash | todo |
-| 10 | Mexanik klaviatura kerakmi — pul-vaqt ekonomi tahlili | mexanik klaviatura kerakmi • mexanik va oddiy klaviatura farqi • mechanical keyboard arziydimi • mexanik klaviatura narxi | todo |
-| 11 | Yozishda tezlik va aniqlik — qaysi muhim va qanday balanslash | yozishda tezlik yoki aniqlik • tez yozish accuracy • speed vs accuracy typing • yozish aniqligini oshirish | todo |
-| 12 | 100 WPM odamlar qanday yozadi — texnikalari va sirlari | 100 wpm qanday yetishiladi • 100 wpm qanday yozadi • 100 wpm sirlari • tez yozuvchilar texnikasi | todo |
-| 13 | Yozish tezligi olimpiadalari va dunyo rekordlari | yozish rekordi • dunyo eng tez yozuvchi • typing world record • eng tezkor yozish | todo |
-| 14 | Tez yozish o'rganish — boshidan oxirigacha to'liq yo'l xaritasi | tez yozish o'rganish • tez yozishni qanday o'rganish • yozishni o'rganish • yozish kursi • tez yozish o'rgatuvchi | todo |
-| 15 | 30 kunda WPM 2 baravar oshirish — kunlik amaliy reja | yozish tezligi mashqi • yozish mashqi • klaviatura mashqi 30 kun • tez yozish mashqi • wpm oshirish mashq | todo |
-| 16 | Soatda 1000 so'z mumkinmi? — dunyoning eng tez yozuvchilari sirlari | soatda necha so'z yoziladi • eng tez yozuvchi • tez yozuvchi sirlari • world's fastest typist • soatda 1000 so'z | todo |
-| 17 | WPM 50 — bu yaxshi natijami yoki yomon? | wpm 50 yaxshi yoki yomon • wpm o'rtacha qancha • wpm me'yor • qanday wpm yaxshi • average wpm | todo |
-| 18 | Yozish dasturlari taqqoslash — 2026-yilning eng yaxshi 7 tasi | tez yozish dasturi • yozish o'rgatuvchi dastur • klaviatura mashqi dasturi • tez yozish online • best typing software | todo |
-| 19 | Klaviatura mashqlari — bepul va eng samarali yo'llar | klaviatura mashqi • klaviatura mashqi onlayn • yozish mashqi bepul • tez yozish trening • bepul typing mashq | todo |
-| 20 | Soatda necha so'z yoziladi — kasblar bo'yicha me'yor | soatda necha so'z yoziladi • kotiba yozish tezligi • ofis xodimi wpm • kasblar uchun yozish me'yori | todo |
-| 21 | WPM raqamlari nima anglatadi — beginner, intermediate, expert chegarasi | wpm beginner intermediate • wpm darajasi • wpm 30 nima degani • wpm 100 darajada • wpm levels | todo |
-| 22 | Onlayn yozish tezligi sinash — bepul testlar ro'yxati | online yozish testi • yozish tezligini bepul sinash • free typing test • yozish testi onlayn • tez yozish testi online bepul | todo |
-| 23 | Tez yozish maslahatlari — professionallardan 10 ta amaliy hiyla | tez yozish maslahatlari • tez yozish hiylalari • yozish tezligini oshirish maslahatlari • professional yozuvchi maslahatlari • fast typing tips | todo |
+---
+
+## Yozish tartibi (priority)
+
+| Tartib | Sarlavha (UZ) | Volume tier | Asosiy keyword | Status |
+|---|---|---|---|---|
+| **1** | Tez yozish o'rganish — boshidan oxirigacha to'liq yo'l xaritasi | 🔥 Yuqori (HEAD TERM) | tez yozish o'rganish | todo |
+| **2** | Yozish tezligini oshirish: WPM nima va qanday o'lchash kerak | 🔥 Yuqori (PILLAR) | yozish tezligini oshirish, wpm nima | todo |
+| **3** | Klaviatura mashqlari — bepul va eng samarali yo'llar | 🔥 Yuqori | klaviatura mashqi | todo |
+| **4** | Onlayn yozish tezligi sinash — bepul testlar ro'yxati | 🔥 Yuqori | online yozish testi, bepul typing test | todo |
+| **5** | Tez yozish maslahatlari — professionallardan 10 ta amaliy hiyla | 🔥 Yuqori | tez yozish maslahatlari | todo |
+| **6** | Yozish dasturlari taqqoslash — 2026-yilning eng yaxshi 7 tasi | 📈 O'rta (transactional) | tez yozish dasturi | todo |
+| **7** | 30 kunda WPM 2 baravar oshirish — kunlik amaliy reja | 📈 O'rta (action) | yozish tezligi mashqi, 30 kun | todo |
+| **8** | Klaviaturaga qaramasdan yozish — bosqichma-bosqich qo'llanma | 📈 O'rta (rising) | ko'r yozish, touch typing | todo |
+| **9** | 5 daqiqada o'zingizning haqiqiy WPM'ingizni aniqlang | 📈 O'rta (CTA) | wpm aniqlash, 5 daqiqa wpm | todo |
+| **10** | WPM 50 — bu yaxshi natijami yoki yomon? | 📈 O'rta (comparison) | wpm 50 yaxshi, wpm me'yor | todo |
+| **11** | WPM raqamlari nima anglatadi — beginner, intermediate, expert | 📈 O'rta | wpm darajasi, wpm levels | todo |
+| **12** | Soatda necha so'z yoziladi — kasblar bo'yicha me'yor | 📈 O'rta | soatda necha so'z yoziladi | todo |
+| **13** | Lotin alifbosida tez yozish — krill bilan taqqoslash | 🎯 Maxsus (UZ niche) | lotin alifbosida tez yozish | todo |
+| **14** | Yozish tezligini oshirish — 10 kun ichida 2 baravar tezroq | 📈 O'rta | 10 kun typing, ikki baravar | todo |
+| **15** | Yozishda tezlik va aniqlik — qaysi muhim va qanday balanslash | 📈 O'rta | tezlik vs aniqlik, accuracy speed | todo |
+| **16** | 100 WPM odamlar qanday yozadi — texnikalari va sirlari | 🎯 Maxsus (aspirational) | 100 wpm sirlari | todo |
+| **17** | MonkeyType, TypingClub, UzbekType — qaysi typing test eng yaxshi? | 🎯 Maxsus (transactional) | typing test taqqos | todo |
+| **18** | Mexanik klaviatura kerakmi — pul-vaqt ekonomi tahlili | 🎯 Maxsus (product research) | mexanik klaviatura kerakmi | todo |
+| **19** | Telefonda tez yozish — barmoqlar bilan 80 WPM mumkinmi? | 🎯 Maxsus | telefonda tez yozish, mobile typing | todo |
+| **20** | QWERTY va boshqa klaviatura layoutlari — qaysi tez yozish uchun yaxshi | 🎯 Maxsus (tech enthusiast) | qwerty dvorak farq | todo |
+| **21** | Soatda 1000 so'z mumkinmi? — dunyoning eng tez yozuvchilari sirlari | 🎯 Maxsus (curiosity) | soatda 1000 so'z, eng tez yozuvchi | todo |
+| **22** | Yozish tezligi va karyera: qaysi kasblar uchun WPM muhim | 🎯 Maxsus (career) | wpm karyera, kasblar typing | todo |
+| **23** | Yozish tezligi olimpiadalari va dunyo rekordlari | 🎯 Maxsus (entertainment) | typing rekord, world record | todo |
+
+## Tartibga solishning sababi
+
+**1-5 (Yuqori tier — birinchi yozish):**
+Bu maqolalar bizning **pillar content** bo'ladi. Boshqa maqolalarning ichki linklari shularga olib boradi va shu orqali authority oshiriladi. Volume ham eng katta. Topic 1 — eng broad head term, qoldirib bo'lmaydi.
+
+**6-12 (O'rta tier):**
+Spesifik niyat — "qanday qilish", "qaysi yaxshi", "qancha". Yuqori intent, lekin volume kamroq. Yuqoridagi pillar'larga link qiladi.
+
+**13-23 (Maxsus tier):**
+Niche — kam qidiriladi, lekin **raqobat ham juda kam.** "Long-tail" trafik. Foundation tayyor bo'lgandan keyin yozamiz, chunki yuqori tier'lar ushbularga link qilib turishi kerak.
+
+---
 
 ## Yozish bo'yicha qoidalar
 
@@ -49,14 +69,10 @@ Har bir maqola uchun:
 - **Featured image:** har biri uchun unique og:image
 - **Last updated:** sana va versiya
 
-## Rad etilgan mavzular (kelajakda kerak bo'lsa qaytariladi)
+## Sifat mezoni
 
-5 (Programmistlar), 6 (Bolalar), 8 (Sekin yozish xarajat), 9 (Yozish xatolari), 11 (Ergonomika), 12 (30 yoshdan keyin), 17 (15 daqiqalik mashq).
+Har maqola publish'dan oldin **10 mezon × 10 ball = 100 balli tizim** orqali baholash. **Faqat 90+ bo'lganda** publish. Mezonlar `memory/project_blog_quality_rubric.md`'da.
 
-## Keyword tanlash mantig'i
+## Rad etilgan mavzular
 
-- **Asosiy keyword** birinchi bo'ladi (eng yuqori volume, target shu)
-- **Sinonim variantlar** keyin (foydalanuvchilar har xil ifodalaydi)
-- **Long-tail variantlar** oxirda (kam volume, lekin maxsus intent)
-- Har bir maqola sarlavhasi va H1'da asosiy keyword'ni o'z ichiga oladi
-- Body'da boshqa keyword'lar tabiiy ravishda ishlatiladi (keyword stuffing yo'q)
+5 (Programmistlar), 6 (Bolalar), 8 (Sekin yozish xarajat), 9 (Yozish xatolari), 11 (Ergonomika), 12 (30 yoshdan keyin), 17 (15 daqiqalik mashq) — birinchi to'plamning original raqamlari.
