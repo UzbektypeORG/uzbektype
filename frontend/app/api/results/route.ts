@@ -5,13 +5,36 @@ import { eq, sql } from "drizzle-orm";
 import { sendChannelMessage } from "@/lib/telegram";
 
 const DIFFICULTY_LABELS: Record<"easy" | "medium" | "hard", string> = {
-  easy: "osonda",
-  medium: "o'rtada",
-  hard: "qiyinda",
+  easy: "Oson",
+  medium: "O'rta",
+  hard: "Qiyin",
 };
 
 function htmlEscape(s: string): string {
   return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+
+// 6 different message styles — picked at random per record so the channel
+// doesn't read like the same template every time. Name, difficulty, and WPM
+// stay accurate; only the surrounding copy varies.
+function buildRecordMessage(
+  rawName: string,
+  difficulty: "easy" | "medium" | "hard",
+  wpm: number
+): string {
+  const D = DIFFICULTY_LABELS[difficulty];
+  const n = htmlEscape(rawName);
+
+  const templates = [
+    `🏆 <b>Yangi rekord — ${D} daraja</b>\n\n${n} ${wpm} WPM bilan saytdagi barcha avvalgi natijalardan o'zib ketdi.\n\nuzbektype.uz`,
+    `🥇 <b>Rekord sindirildi</b>\n\nDaraja: ${D}\nTezlik: ${wpm} WPM\nLider: ${n}\n\nTabriklaymiz! 👏\n\nuzbektype.uz`,
+    `📣 <b>${D} darajada yangi liderlik</b>\n\n${n} ${wpm} WPM ko'rsatkichi bilan saytda yangi rekord egasi bo'ldi.\n\nuzbektype.uz`,
+    `🏅 <b>Lider o'zgardi</b>\n\n${D} kategoriyasida — ${n}\nYangi natija: ${wpm} WPM\n\nuzbektype.uz`,
+    `🎯 <b>Yangi rekord</b>\n\n👤 Lider: ${n}\n🎚 Daraja: ${D}\n⌨️ Tezlik: ${wpm} WPM\n\nTabriklaymiz!\n\nuzbektype.uz`,
+    `📰 <b>${D} — saytda yangi rekord</b>\n\n${n} ${wpm} WPM ga erishib, eski natijani ortda qoldirdi.\n\nuzbektype.uz`,
+  ];
+
+  return templates[Math.floor(Math.random() * templates.length)];
 }
 
 export const dynamic = "force-dynamic";
@@ -130,12 +153,7 @@ async function announceRecord(params: {
       u?.name?.trim() ||
       "Anonim";
 
-    const text =
-      `🏆 <b>Rekord yangilandi</b>\n\n` +
-      `${htmlEscape(fullName)} ${DIFFICULTY_LABELS[params.difficulty]} rekord urdi\n` +
-      `WPM ${params.wpm}`;
-
-    await sendChannelMessage(text);
+    await sendChannelMessage(buildRecordMessage(fullName, params.difficulty, params.wpm));
   } catch {
     // Never throw out of fire-and-forget.
   }
