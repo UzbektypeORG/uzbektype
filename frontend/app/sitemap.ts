@@ -1,32 +1,70 @@
-import { MetadataRoute } from 'next'
+import { MetadataRoute } from "next";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = 'https://uzbektype.uz'
-  const languages = ['uz', 'en', 'ru']
+  const baseUrl = "https://uzbektype.uz";
+  const languages = ["uz", "en", "ru"] as const;
 
-  // Test types
-  const testTypes = ['10s', '30s', '60s', '10w', '30w', '60w']
-  const difficulties = ['easy', 'medium', 'hard']
+  const testTypes = ["10s", "30s", "60s", "10w", "30w", "60w"];
+  const difficulties = ["easy", "medium", "hard"];
+  const periods = ["weekly", "monthly", "alltime"];
 
-  // Generate language-specific URLs
-  const languageUrls = languages.flatMap(lang => [
-    // Home page for each language
-    {
+  const now = new Date();
+
+  // hreflang alternates per route — Google reads these for international targeting
+  const hreflangs = (path: string) =>
+    Object.fromEntries(
+      languages.map((l) => [l, `${baseUrl}/${l}${path}`])
+    );
+
+  const entries: MetadataRoute.Sitemap = [];
+
+  for (const lang of languages) {
+    // Landing page (highest priority — daily fresh leaderboard data)
+    entries.push({
       url: `${baseUrl}/${lang}`,
-      lastModified: new Date(),
-      changeFrequency: 'daily' as const,
-      priority: 1,
-    },
-    // All test combinations for each language
-    ...testTypes.flatMap(type =>
-      difficulties.map(difficulty => ({
-        url: `${baseUrl}/${lang}/tests/${type}-${difficulty}`,
-        lastModified: new Date(),
-        changeFrequency: 'weekly' as const,
-        priority: 0.8,
-      }))
-    ),
-  ])
+      lastModified: now,
+      changeFrequency: "daily",
+      priority: 1.0,
+      alternates: { languages: hreflangs("") },
+    });
 
-  return languageUrls
+    // Blog index
+    entries.push({
+      url: `${baseUrl}/${lang}/blog`,
+      lastModified: now,
+      changeFrequency: "weekly",
+      priority: 0.7,
+      alternates: { languages: hreflangs("/blog") },
+    });
+
+    // Test combinations (the main feature pages)
+    for (const type of testTypes) {
+      for (const difficulty of difficulties) {
+        const path = `/tests/${type}-${difficulty}`;
+        entries.push({
+          url: `${baseUrl}/${lang}${path}`,
+          lastModified: now,
+          changeFrequency: "weekly",
+          priority: 0.8,
+          alternates: { languages: hreflangs(path) },
+        });
+      }
+    }
+
+    // Leaderboard variants (period × difficulty) — content updates every test
+    for (const period of periods) {
+      for (const difficulty of difficulties) {
+        const path = `/leaderboard/${period}/${difficulty}`;
+        entries.push({
+          url: `${baseUrl}/${lang}${path}`,
+          lastModified: now,
+          changeFrequency: "daily",
+          priority: 0.6,
+          alternates: { languages: hreflangs(path) },
+        });
+      }
+    }
+  }
+
+  return entries;
 }

@@ -4,63 +4,110 @@ interface StructuredDataProps {
   lang: Language;
 }
 
+const descriptions = {
+  uz: "Bepul onlayn tez yozish testi. O'zbek, ingliz va rus tillarida.",
+  en: "Free online typing speed test in Uzbek, English, and Russian languages.",
+  ru: "Бесплатный онлайн тест скорости печати на узбекском, английском и русском языках.",
+} as const;
+
+const names = {
+  uz: "Uzbektype - Tezyozuv Testi",
+  en: "Uzbektype - Typing Speed Test",
+  ru: "Uzbektype - Тест Скорости Печати",
+} as const;
+
+const courseDescriptions = {
+  uz: "Klaviaturada tez yozishni interaktiv testlar orqali o'rganing. Real vaqt WPM, aniqlik va yulduz baholash bilan.",
+  en: "Improve your typing speed through interactive tests with real-time WPM, accuracy and star ratings.",
+  ru: "Повышайте скорость печати с помощью интерактивных тестов с WPM в реальном времени, точностью и звёздным рейтингом.",
+} as const;
+
 export default function StructuredData({ lang }: StructuredDataProps) {
-  const descriptions = {
-    uz: "Bepul onlayn tez yozish testi. O'zbek, ingliz va rus tillarida.",
-    en: "Free online typing speed test in Uzbek, English, and Russian languages",
-    ru: "Бесплатный онлайн тест скорости печати на узбекском, английском и русском языках"
-  };
+  const baseUrl = "https://uzbektype.uz";
 
-  const names = {
-    uz: "Uzbektype - Tezyozuv Testi",
-    en: "Uzbektype - Typing Speed Test",
-    ru: "Uzbektype - Тест Скорости Печати"
-  };
-
-  const structuredData = {
+  const webApp = {
     "@context": "https://schema.org",
     "@type": "WebApplication",
-    "name": names[lang],
-    "url": `https://uzbektype.uz/${lang}`,
-    "description": descriptions[lang],
-    "applicationCategory": "EducationalApplication",
-    "operatingSystem": "Web Browser",
-    "image": "https://uzbektype.uz/logo.png",
-    "offers": {
+    name: names[lang],
+    url: `${baseUrl}/${lang}`,
+    description: descriptions[lang],
+    applicationCategory: "EducationalApplication",
+    operatingSystem: "Web Browser",
+    image: `${baseUrl}/logo.png`,
+    offers: {
       "@type": "Offer",
-      "price": "0",
-      "priceCurrency": "USD"
+      price: "0",
+      priceCurrency: "USD",
     },
-    "inLanguage": [lang],
-    "audience": {
+    inLanguage: [lang],
+    audience: {
       "@type": "Audience",
-      "audienceType": "Students, Professionals, Language Learners"
+      audienceType: "Students, Professionals, Language Learners",
     },
-    "potentialAction": {
+    potentialAction: {
       "@type": "UseAction",
-      "target": {
+      target: {
         "@type": "EntryPoint",
-        "urlTemplate": `https://uzbektype.uz/${lang}/tests/{testType}`,
-        "actionPlatform": [
-          "http://schema.org/DesktopWebPlatform",
-          "http://schema.org/MobileWebPlatform"
-        ]
-      }
+        urlTemplate: `${baseUrl}/${lang}/tests/{testType}`,
+        actionPlatform: [
+          "https://schema.org/DesktopWebPlatform",
+          "https://schema.org/MobileWebPlatform",
+        ],
+      },
     },
-    "publisher": {
-      "@type": "Organization",
-      "name": "Uzbektype",
-      "logo": {
-        "@type": "ImageObject",
-        "url": "https://uzbektype.uz/logo.png"
-      }
-    }
-  }
+    publisher: {
+      "@id": `${baseUrl}/#organization`,
+    },
+  };
+
+  const organization = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "@id": `${baseUrl}/#organization`,
+    name: "Uzbektype",
+    url: baseUrl,
+    logo: {
+      "@type": "ImageObject",
+      url: `${baseUrl}/logo.png`,
+      width: 512,
+      height: 512,
+    },
+    sameAs: [
+      "https://t.me/uzbektype",
+      "https://instagram.com/uzbektype",
+    ],
+  };
+
+  // Course schema — helps Google show this as an "online course" in results
+  const course = {
+    "@context": "https://schema.org",
+    "@type": "Course",
+    name: names[lang],
+    description: courseDescriptions[lang],
+    provider: {
+      "@id": `${baseUrl}/#organization`,
+    },
+    inLanguage: lang,
+    isAccessibleForFree: true,
+    educationalLevel: "Beginner to Advanced",
+    teaches: lang === "uz"
+      ? "Klaviaturada tez yozish, WPM oshirish, aniqlik"
+      : lang === "ru"
+      ? "Быстрая печать на клавиатуре, повышение WPM, точность"
+      : "Touch typing, WPM improvement, typing accuracy",
+    hasCourseInstance: {
+      "@type": "CourseInstance",
+      courseMode: "Online",
+      courseWorkload: "PT15M",
+    },
+  };
+
+  const blob = JSON.stringify([webApp, organization, course]);
 
   return (
     <script
       type="application/ld+json"
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+      dangerouslySetInnerHTML={{ __html: blob }}
     />
-  )
+  );
 }
