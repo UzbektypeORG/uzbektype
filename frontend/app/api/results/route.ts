@@ -138,9 +138,13 @@ export async function POST(req: Request) {
     ? "personal"
     : null;
 
-  // Fire-and-forget Telegram announcement when the global record falls.
+  // Telegram announcement when the global record falls. Awaited (not
+  // fire-and-forget) because Vercel's serverless runtime kills the function
+  // as soon as the response is returned — a void/unawaited fetch never
+  // makes it out. announceRecord traps its own errors so a Telegram outage
+  // can't fail the result save.
   if (beatsGlobal) {
-    void announceRecord({
+    await announceRecord({
       userId: session.user.id,
       difficulty: body.difficulty as "easy" | "medium" | "hard",
       wpm: body.wpm,
