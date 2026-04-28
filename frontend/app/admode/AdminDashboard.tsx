@@ -5,17 +5,25 @@ import { useRouter } from "next/navigation";
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import ThemeToggle from "@/components/ThemeToggle";
 
+type VisitorBucket = { total: number; signedIn: number; guests: number };
+type VisitorPeriod = "today" | "week" | "month" | "allTime";
+
+const PERIOD_LABELS: Record<VisitorPeriod, string> = {
+  today: "Bugun",
+  week: "1 hafta",
+  month: "1 oy",
+  allTime: "Doimiy",
+};
+
 interface Stats {
   totals: { users: number; results: number; last24h: number; last7d: number; last30d: number };
   daily: Array<{ day: string; count: number }>;
   dailyVisitors: Array<{ day: string; total: number; signedIn: number; guests: number }>;
-  visitorTotals: {
-    today: number;
-    last7d: number;
-    last30d: number;
-    todayGuests: number;
-    last7dGuests: number;
-    last30dGuests: number;
+  visitorBreakdown: {
+    today: VisitorBucket;
+    week: VisitorBucket;
+    month: VisitorBucket;
+    allTime: VisitorBucket;
   };
   topUsers: Array<{
     userId: string;
@@ -215,6 +223,7 @@ export default function AdminDashboard() {
                 search={search}
                 onSearchChange={setSearch}
                 onUserClick={(id) => router.push(`/admode/users/${id}`)}
+                visitorBreakdown={stats.visitorBreakdown}
               />
             )}
           </div>
@@ -225,7 +234,7 @@ export default function AdminDashboard() {
 }
 
 function OverviewSection({ stats }: { stats: Stats }) {
-  const v = stats.visitorTotals;
+  const v = stats.visitorBreakdown;
   return (
     <div className="space-y-6">
       <section className="grid grid-cols-2 md:grid-cols-5 gap-3">
@@ -236,10 +245,11 @@ function OverviewSection({ stats }: { stats: Stats }) {
         <StatCard label="So'nggi 30 kun" value={stats.totals.last30d} />
       </section>
 
-      <section className="grid grid-cols-1 md:grid-cols-3 gap-3">
-        <VisitorCard label="Bugun" total={v.today} guests={v.todayGuests} />
-        <VisitorCard label="So'nggi 7 kun" total={v.last7d} guests={v.last7dGuests} />
-        <VisitorCard label="So'nggi 30 kun" total={v.last30d} guests={v.last30dGuests} />
+      <section className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <VisitorCard label="Bugun" bucket={v.today} />
+        <VisitorCard label="1 hafta" bucket={v.week} />
+        <VisitorCard label="1 oy" bucket={v.month} />
+        <VisitorCard label="Doimiy" bucket={v.allTime} />
       </section>
 
       <section className="border border-border rounded-xl p-5 md:p-6">
@@ -398,25 +408,56 @@ function UsersSection({
   search,
   onSearchChange,
   onUserClick,
+  visitorBreakdown,
 }: {
   users: Stats["users"];
   total: number;
   search: string;
   onSearchChange: (v: string) => void;
   onUserClick: (id: string) => void;
+  visitorBreakdown: Stats["visitorBreakdown"];
 }) {
+  const [period, setPeriod] = useState<VisitorPeriod>("today");
+  const bucket = visitorBreakdown[period];
   return (
-    <section className="border border-border rounded-xl p-5 md:p-6">
-      <div className="flex items-center justify-between mb-4 gap-3 flex-wrap">
-        <p className="text-sm text-muted-foreground">Jami: {total}</p>
-        <input
-          type="text"
-          value={search}
-          onChange={(e) => onSearchChange(e.target.value)}
-          placeholder="Email yoki ism qidirish…"
-          className="px-3 py-1.5 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/50 w-full sm:w-64"
-        />
-      </div>
+    <div className="space-y-4">
+      <section className="border border-border rounded-xl p-5 md:p-6">
+        <div className="flex items-center justify-between mb-4 gap-3 flex-wrap">
+          <h3 className="text-sm font-semibold">Foydalanuvchilar bo&apos;yicha hisob</h3>
+          <div className="flex gap-1 p-0.5 rounded-lg border border-border bg-accent/30">
+            {(Object.keys(PERIOD_LABELS) as VisitorPeriod[]).map((p) => (
+              <button
+                key={p}
+                onClick={() => setPeriod(p)}
+                className={`px-3 py-1 text-xs rounded-md transition-colors ${
+                  period === p
+                    ? "bg-background shadow-sm font-medium"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                {PERIOD_LABELS[p]}
+              </button>
+            ))}
+          </div>
+        </div>
+        <div className="grid grid-cols-3 gap-3">
+          <BreakdownTile label="Jami" value={bucket.total} accent="primary" />
+          <BreakdownTile label="Ro'yxatdan o'tgan" value={bucket.signedIn} />
+          <BreakdownTile label="Ro'yxatdan o'tmagan" value={bucket.guests} />
+        </div>
+      </section>
+
+      <section className="border border-border rounded-xl p-5 md:p-6">
+        <div className="flex items-center justify-between mb-4 gap-3 flex-wrap">
+          <p className="text-sm text-muted-foreground">Ro&apos;yxatdan o&apos;tganlar ro&apos;yxati: {total}</p>
+          <input
+            type="text"
+            value={search}
+            onChange={(e) => onSearchChange(e.target.value)}
+            placeholder="Email yoki ism qidirish…"
+            className="px-3 py-1.5 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/50 w-full sm:w-64"
+          />
+        </div>
       <div className="overflow-x-auto -mx-4 md:mx-0">
         <table className="w-full text-sm">
           <thead>
@@ -459,7 +500,17 @@ function UsersSection({
           </tbody>
         </table>
       </div>
-    </section>
+      </section>
+    </div>
+  );
+}
+
+function BreakdownTile({ label, value, accent }: { label: string; value: number; accent?: "primary" }) {
+  return (
+    <div className={`rounded-lg p-3 md:p-4 ${accent === "primary" ? "bg-primary/10 border border-primary/30" : "border border-border"}`}>
+      <p className="text-xs text-muted-foreground mb-1">{label}</p>
+      <p className={`text-2xl md:text-3xl font-bold font-mono ${accent === "primary" ? "text-primary" : ""}`}>{value}</p>
+    </div>
   );
 }
 
@@ -472,15 +523,14 @@ function StatCard({ label, value }: { label: string; value: number }) {
   );
 }
 
-function VisitorCard({ label, total, guests }: { label: string; total: number; guests: number }) {
-  const signedIn = Math.max(0, total - guests);
+function VisitorCard({ label, bucket }: { label: string; bucket: VisitorBucket }) {
   return (
     <div className="border border-border rounded-lg p-4">
       <p className="text-xs text-muted-foreground mb-1">{label} — tashriflar</p>
-      <p className="text-2xl md:text-3xl font-bold font-mono">{total}</p>
+      <p className="text-2xl md:text-3xl font-bold font-mono">{bucket.total}</p>
       <p className="text-xs text-muted-foreground mt-2">
-        <span className="font-mono text-foreground">{signedIn}</span> ro&apos;yxatdan o&apos;tgan ·{" "}
-        <span className="font-mono text-foreground">{guests}</span> mehmon
+        <span className="font-mono text-foreground">{bucket.signedIn}</span> ro&apos;yxatdan o&apos;tgan ·{" "}
+        <span className="font-mono text-foreground">{bucket.guests}</span> mehmon
       </p>
     </div>
   );

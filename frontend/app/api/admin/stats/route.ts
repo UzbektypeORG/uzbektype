@@ -53,26 +53,37 @@ export async function GET() {
     ORDER BY day ASC
   `);
 
-  // Rolling unique visitor totals (anon_id is unique per browser).
-  const visitorTotalsRow = await db.execute<{
-    today: number;
-    last7d: number;
-    last30d: number;
-    todayGuests: number;
-    last7dGuests: number;
-    last30dGuests: number;
+  // Unique visitors broken down by period and sign-in status.
+  // A browser counts as "signed-in" for the period if it has at least one
+  // signed-in row inside that period; otherwise it's a guest.
+  const visitorRow = await db.execute<{
+    todayTotal: number;
+    todaySignedIn: number;
+    weekTotal: number;
+    weekSignedIn: number;
+    monthTotal: number;
+    monthSignedIn: number;
+    allTotal: number;
+    allSignedIn: number;
   }>(sql`
     SELECT
-      COUNT(DISTINCT anon_id) FILTER (WHERE visit_date = CURRENT_DATE)::int AS today,
-      COUNT(DISTINCT anon_id) FILTER (WHERE visit_date >= CURRENT_DATE - INTERVAL '6 days')::int AS "last7d",
-      COUNT(DISTINCT anon_id) FILTER (WHERE visit_date >= CURRENT_DATE - INTERVAL '29 days')::int AS "last30d",
-      COUNT(DISTINCT anon_id) FILTER (WHERE visit_date = CURRENT_DATE AND NOT signed_in)::int AS "todayGuests",
-      COUNT(DISTINCT anon_id) FILTER (WHERE visit_date >= CURRENT_DATE - INTERVAL '6 days' AND NOT signed_in)::int AS "last7dGuests",
-      COUNT(DISTINCT anon_id) FILTER (WHERE visit_date >= CURRENT_DATE - INTERVAL '29 days' AND NOT signed_in)::int AS "last30dGuests"
+      COUNT(DISTINCT anon_id) FILTER (WHERE visit_date = CURRENT_DATE)::int AS "todayTotal",
+      COUNT(DISTINCT anon_id) FILTER (WHERE visit_date = CURRENT_DATE AND signed_in)::int AS "todaySignedIn",
+      COUNT(DISTINCT anon_id) FILTER (WHERE visit_date >= CURRENT_DATE - INTERVAL '6 days')::int AS "weekTotal",
+      COUNT(DISTINCT anon_id) FILTER (WHERE visit_date >= CURRENT_DATE - INTERVAL '6 days' AND signed_in)::int AS "weekSignedIn",
+      COUNT(DISTINCT anon_id) FILTER (WHERE visit_date >= CURRENT_DATE - INTERVAL '29 days')::int AS "monthTotal",
+      COUNT(DISTINCT anon_id) FILTER (WHERE visit_date >= CURRENT_DATE - INTERVAL '29 days' AND signed_in)::int AS "monthSignedIn",
+      COUNT(DISTINCT anon_id)::int AS "allTotal",
+      COUNT(DISTINCT anon_id) FILTER (WHERE signed_in)::int AS "allSignedIn"
     FROM daily_visit
-    WHERE visit_date >= CURRENT_DATE - INTERVAL '29 days'
   `);
-  const visitorTotals = visitorTotalsRow.rows[0];
+  const v = visitorRow.rows[0];
+
+  function bucket(total: number | undefined, signedIn: number | undefined) {
+    const t = Number(total ?? 0);
+    const s = Number(signedIn ?? 0);
+    return { total: t, signedIn: s, guests: Math.max(0, t - s) };
+  }
 
   // Top 10 users overall (any difficulty / period)
   const topUsers = await db
@@ -151,13 +162,11 @@ export async function GET() {
       signedIn: Number(d.signedIn),
       guests: Number(d.guests),
     })),
-    visitorTotals: {
-      today: visitorTotals?.today ?? 0,
-      last7d: visitorTotals?.last7d ?? 0,
-      last30d: visitorTotals?.last30d ?? 0,
-      todayGuests: visitorTotals?.todayGuests ?? 0,
-      last7dGuests: visitorTotals?.last7dGuests ?? 0,
-      last30dGuests: visitorTotals?.last30dGuests ?? 0,
+    visitorBreakdown: {
+      today: bucket(v?.todayTotal, v?.todaySignedIn),
+      week: bucket(v?.weekTotal, v?.weekSignedIn),
+      month: bucket(v?.monthTotal, v?.monthSignedIn),
+      allTime: bucket(v?.allTotal, v?.allSignedIn),
     },
     topUsers: topUsers.map((u) => ({
       ...u,
