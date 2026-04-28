@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import ThemeToggle from "@/components/ThemeToggle";
 
 export default function AdminLogin() {
   const router = useRouter();
@@ -33,7 +34,10 @@ export default function AdminLogin() {
   };
 
   return (
-    <main className="min-h-screen flex items-center justify-center px-4 bg-background">
+    <main className="min-h-screen flex items-center justify-center px-4 bg-background relative">
+      <div className="absolute top-4 right-4">
+        <ThemeToggle />
+      </div>
       <form
         onSubmit={handleSubmit}
         className="w-full max-w-sm space-y-5 border border-border rounded-2xl p-6 md:p-8 bg-background"

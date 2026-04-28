@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import ThemeToggle from "@/components/ThemeToggle";
 
 interface UserData {
   id: string;
@@ -120,12 +121,15 @@ export default function AdminUserDetail({ userId }: { userId: string }) {
   return (
     <main className="min-h-screen px-4 sm:px-6 py-6 md:py-10">
       <div className="max-w-6xl mx-auto space-y-6">
-        <Link href="/admode" className="text-sm text-muted-foreground hover:text-foreground inline-flex items-center gap-1">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <polyline points="15 18 9 12 15 6" />
-          </svg>
-          Admin paneliga qaytish
-        </Link>
+        <div className="flex items-center justify-between gap-3">
+          <Link href="/admode" className="text-sm text-muted-foreground hover:text-foreground inline-flex items-center gap-1">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="15 18 9 12 15 6" />
+            </svg>
+            Admin paneliga qaytish
+          </Link>
+          <ThemeToggle />
+        </div>
 
         {/* Profile card */}
         <section className="border border-border rounded-xl p-5 md:p-6 flex items-center gap-4 md:gap-5 flex-wrap">

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import ThemeToggle from "@/components/ThemeToggle";
 
 interface Stats {
   totals: { users: number; results: number; last24h: number; last7d: number; last30d: number };
@@ -109,12 +110,15 @@ export default function AdminDashboard() {
             <h1 className="text-2xl md:text-3xl font-bold">Admin panel</h1>
             <p className="text-xs text-muted-foreground">Uzbektype boshqaruv paneli</p>
           </div>
-          <button
-            onClick={handleLogout}
-            className="px-4 py-2 text-sm rounded-lg border border-border hover:border-foreground transition-colors"
-          >
-            Chiqish
-          </button>
+          <div className="flex items-center gap-2">
+            <ThemeToggle />
+            <button
+              onClick={handleLogout}
+              className="px-4 py-2 text-sm rounded-lg border border-border hover:border-foreground transition-colors"
+            >
+              Chiqish
+            </button>
+          </div>
         </div>
 
         {/* Totals */}
