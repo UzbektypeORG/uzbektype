@@ -1,4 +1,5 @@
 import { MetadataRoute } from "next";
+import { blogPosts } from "@/data/blogPosts";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = "https://uzbektype.uz";
@@ -63,6 +64,22 @@ export default function sitemap(): MetadataRoute.Sitemap {
           alternates: { languages: hreflangs(path) },
         });
       }
+    }
+
+    // Blog post pages — each post has language-specific slugs
+    for (const post of blogPosts) {
+      const slug = post.slugs[lang];
+      entries.push({
+        url: `${baseUrl}/${lang}/blog/${slug}`,
+        lastModified: new Date(post.updatedAt),
+        changeFrequency: "monthly",
+        priority: 0.7,
+        alternates: {
+          languages: Object.fromEntries(
+            languages.map((l) => [l, `${baseUrl}/${l}/blog/${post.slugs[l]}`])
+          ),
+        },
+      });
     }
   }
 

@@ -20,7 +20,7 @@
 
 | Tartib | Sarlavha (UZ) | Volume tier | Asosiy keyword | Status |
 |---|---|---|---|---|
-| **1** | Tez yozish o'rganish — boshidan oxirigacha to'liq yo'l xaritasi | 🔥 Yuqori (HEAD TERM) | tez yozish o'rganish | todo |
+| **1** | Tez yozish o'rganish — boshidan oxirigacha to'liq yo'l xaritasi | 🔥 Yuqori (HEAD TERM) | tez yozish o'rganish | **done** (2026-04-28, UZ:93/EN:94/RU:94) |
 | **2** | Yozish tezligini oshirish: WPM nima va qanday o'lchash kerak | 🔥 Yuqori (PILLAR) | yozish tezligini oshirish, wpm nima | todo |
 | **3** | Klaviatura mashqlari — bepul va eng samarali yo'llar | 🔥 Yuqori | klaviatura mashqi | todo |
 | **4** | Onlayn yozish tezligi sinash — bepul testlar ro'yxati | 🔥 Yuqori | online yozish testi, bepul typing test | todo |

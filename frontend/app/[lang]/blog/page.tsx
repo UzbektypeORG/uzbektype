@@ -1,218 +1,101 @@
-"use client";
-
-import { useParams } from "next/navigation";
 import Link from "next/link";
-
-type Language = "uz" | "en" | "ru";
-
-const blogArticles = {
-  uz: [
-    {
-      id: 1,
-      title: "10 Kun Ichida Yozish Tezligini Oshirish",
-      excerpt: "Yozish tezligingizni oshirish uchun samarali usullar va mashqlar to'plami.",
-      date: "2024-01-15",
-      readTime: "5 daqiqa"
-    },
-    {
-      id: 2,
-      title: "Ko'r Yozish: Boshlang'ich Qo'llanma",
-      excerpt: "Klaviaturaga qaramasdan yozishni o'rganish bo'yicha bosqichma-bosqich yo'riqnoma.",
-      date: "2024-01-10",
-      readTime: "8 daqiqa"
-    },
-    {
-      id: 3,
-      title: "Ergonomika: To'g'ri O'tirish va Yozish",
-      excerpt: "Yozish vaqtida sog'lig'ingizni saqlash uchun to'g'ri pozitsiya va ergonomik maslahatlar.",
-      date: "2024-01-05",
-      readTime: "6 daqiqa"
-    },
-    {
-      id: 4,
-      title: "WPM Nima va Uni Qanday Hisoblash Mumkin?",
-      excerpt: "Words Per Minute (WPM) ko'rsatkichini tushunish va uni to'g'ri o'lchash usullari.",
-      date: "2024-01-01",
-      readTime: "4 daqiqa"
-    },
-    {
-      id: 5,
-      title: "Eng Yaxshi Klaviatura Layoutlari",
-      excerpt: "QWERTY, Dvorak va boshqa klaviatura layoutlarining afzalliklari va kamchiliklari.",
-      date: "2023-12-28",
-      readTime: "7 daqiqa"
-    },
-    {
-      id: 6,
-      title: "Yozish Mashqlari: Kundalik Rejalar",
-      excerpt: "Har kuni 15 daqiqa mashq qilish orqali yozish ko'nikmalaringizni rivojlantiring.",
-      date: "2023-12-20",
-      readTime: "10 daqiqa"
-    }
-  ],
-  en: [
-    {
-      id: 1,
-      title: "Improve Your Typing Speed in 10 Days",
-      excerpt: "A comprehensive guide with effective methods and exercises to boost your typing speed.",
-      date: "2024-01-15",
-      readTime: "5 min read"
-    },
-    {
-      id: 2,
-      title: "Touch Typing: A Beginner's Guide",
-      excerpt: "Step-by-step instructions on how to learn typing without looking at the keyboard.",
-      date: "2024-01-10",
-      readTime: "8 min read"
-    },
-    {
-      id: 3,
-      title: "Ergonomics: Proper Posture for Typing",
-      excerpt: "Learn the correct sitting position and ergonomic tips to maintain your health while typing.",
-      date: "2024-01-05",
-      readTime: "6 min read"
-    },
-    {
-      id: 4,
-      title: "What is WPM and How to Calculate It?",
-      excerpt: "Understanding the Words Per Minute metric and how to measure it accurately.",
-      date: "2024-01-01",
-      readTime: "4 min read"
-    },
-    {
-      id: 5,
-      title: "Best Keyboard Layouts Explained",
-      excerpt: "Pros and cons of QWERTY, Dvorak, and other keyboard layouts for typing efficiency.",
-      date: "2023-12-28",
-      readTime: "7 min read"
-    },
-    {
-      id: 6,
-      title: "Daily Typing Practice Routines",
-      excerpt: "Build your typing skills with just 15 minutes of daily practice exercises.",
-      date: "2023-12-20",
-      readTime: "10 min read"
-    }
-  ],
-  ru: [
-    {
-      id: 1,
-      title: "Улучшите Скорость Печати за 10 Дней",
-      excerpt: "Комплексное руководство с эффективными методами и упражнениями для повышения скорости печати.",
-      date: "2024-01-15",
-      readTime: "5 мин чтения"
-    },
-    {
-      id: 2,
-      title: "Слепая Печать: Руководство для Начинающих",
-      excerpt: "Пошаговые инструкции о том, как научиться печатать, не глядя на клавиатуру.",
-      date: "2024-01-10",
-      readTime: "8 мин чтения"
-    },
-    {
-      id: 3,
-      title: "Эргономика: Правильная Осанка при Печати",
-      excerpt: "Узнайте правильное положение сидя и эргономичные советы для сохранения здоровья во время печати.",
-      date: "2024-01-05",
-      readTime: "6 мин чтения"
-    },
-    {
-      id: 4,
-      title: "Что Такое WPM и Как Его Рассчитать?",
-      excerpt: "Понимание метрики Words Per Minute и как точно измерить скорость печати.",
-      date: "2024-01-01",
-      readTime: "4 мин чтения"
-    },
-    {
-      id: 5,
-      title: "Лучшие Раскладки Клавиатуры",
-      excerpt: "Плюсы и минусы QWERTY, Dvorak и других раскладок клавиатуры для эффективной печати.",
-      date: "2023-12-28",
-      readTime: "7 мин чтения"
-    },
-    {
-      id: 6,
-      title: "Ежедневные Упражнения для Печати",
-      excerpt: "Развивайте навыки печати всего за 15 минут ежедневных упражнений.",
-      date: "2023-12-20",
-      readTime: "10 мин чтения"
-    }
-  ]
-};
+import type { Metadata } from "next";
+import { blogPosts, type Language } from "@/data/blogPosts";
 
 const pageContent = {
   uz: {
     title: "Foydali Maqolalar",
-    subtitle: "Yozish tezligi va ko'nikmalarini oshirish bo'yicha maslahatlar",
+    subtitle: "Yozish tezligi va ko'nikmalarini oshirish bo'yicha amaliy qo'llanmalar",
     backHome: "Bosh sahifaga qaytish",
-    read: "O'qish"
+    read: "O'qish",
+    empty: "Tez orada yangi maqolalar paydo bo'ladi",
   },
   en: {
     title: "Helpful Articles",
-    subtitle: "Tips and guides to improve your typing speed and skills",
-    backHome: "Back to Home",
-    read: "Read"
+    subtitle: "Practical guides on improving your typing speed and skills",
+    backHome: "Back to home",
+    read: "Read",
+    empty: "More articles coming soon",
   },
   ru: {
     title: "Полезные Статьи",
-    subtitle: "Советы и руководства по улучшению скорости и навыков печати",
-    backHome: "Вернуться на главную",
-    read: "Читать"
-  }
-};
+    subtitle: "Практические руководства по улучшению скорости и навыков печати",
+    backHome: "На главную",
+    read: "Читать",
+    empty: "Скоро появятся новые статьи",
+  },
+} as const;
 
-export default function BlogPage() {
-  const params = useParams();
-  const lang = (params.lang as Language) || "uz";
+const baseUrl = "https://uzbektype.uz";
 
-  const articles = blogArticles[lang];
-  const t = pageContent[lang];
+export async function generateMetadata({ params }: { params: Promise<{ lang: Language }> }): Promise<Metadata> {
+  const { lang } = await params;
+  const t = pageContent[lang] ?? pageContent.uz;
+  return {
+    title: `${t.title} | UzbekType`,
+    description: t.subtitle,
+    alternates: {
+      canonical: `${baseUrl}/${lang}/blog`,
+      languages: {
+        uz: `${baseUrl}/uz/blog`,
+        en: `${baseUrl}/en/blog`,
+        ru: `${baseUrl}/ru/blog`,
+      },
+    },
+  };
+}
+
+export default async function BlogPage({ params }: { params: Promise<{ lang: Language }> }) {
+  const { lang } = await params;
+  const t = pageContent[lang] ?? pageContent.uz;
 
   return (
     <main className="min-h-[calc(100vh-73px)]">
-      <div className="max-w-6xl mx-auto px-6 py-20">
-        {/* Header */}
-        <div className="text-center mb-16 space-y-4 animate-fade-in">
+      <div className="max-w-6xl mx-auto px-6 py-16 md:py-20">
+        <div className="text-center mb-12 md:mb-16 space-y-4 animate-fade-in">
           <Link
             href={`/${lang}`}
             className="inline-block text-sm text-muted-foreground hover:text-foreground transition-colors mb-4"
           >
             ← {t.backHome}
           </Link>
-          <h1 className="text-5xl md:text-6xl font-bold">{t.title}</h1>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold">{t.title}</h1>
+          <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">
             {t.subtitle}
           </p>
         </div>
 
-        {/* Articles Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {articles.map((article, index) => (
-            <Link
-              key={article.id}
-              href={`/${lang}/blog/${article.id}`}
-              className="group p-8 rounded-lg border border-border hover:border-foreground dark:hover:border-white hover:bg-accent/30 transition-all duration-300 space-y-4"
-              style={{
-                animation: `fade-in 0.4s ease-out ${index * 100}ms forwards`,
-                opacity: 0
-              }}
-            >
-              <div className="flex items-center justify-between text-sm text-muted-foreground">
-                <span>{article.date}</span>
-                <span>{article.readTime}</span>
-              </div>
-              <h2 className="text-2xl font-semibold group-hover:text-primary transition-colors">
-                {article.title}
-              </h2>
-              <p className="text-muted-foreground leading-relaxed">
-                {article.excerpt}
-              </p>
-              <div className="text-sm font-medium group-hover:translate-x-2 transition-transform inline-block">
-                {t.read} →
-              </div>
-            </Link>
-          ))}
-        </div>
+        {blogPosts.length === 0 ? (
+          <p className="text-center text-muted-foreground">{t.empty}</p>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+            {blogPosts.map((post, index) => (
+              <Link
+                key={post.id}
+                href={`/${lang}/blog/${post.slugs[lang]}`}
+                className="group p-6 md:p-8 rounded-xl border border-border hover:border-foreground/40 hover:bg-accent/30 transition-all duration-300 space-y-3"
+                style={{
+                  animation: `fade-in 0.4s ease-out ${index * 100}ms forwards`,
+                  opacity: 0,
+                }}
+              >
+                <div className="flex items-center justify-between text-xs text-muted-foreground">
+                  <time>{post.publishedAt}</time>
+                  <span>{post.readTime[lang]}</span>
+                </div>
+                <h2 className="text-xl md:text-2xl font-semibold leading-snug group-hover:text-primary transition-colors">
+                  {post.titles[lang]}
+                </h2>
+                <p className="text-sm md:text-base text-muted-foreground leading-relaxed line-clamp-3">
+                  {post.excerpts[lang]}
+                </p>
+                <div className="text-sm font-medium text-primary group-hover:translate-x-1 transition-transform inline-block pt-2">
+                  {t.read} →
+                </div>
+              </Link>
+            ))}
+          </div>
+        )}
       </div>
     </main>
   );
