@@ -156,10 +156,12 @@ export default function LeaderboardClient({ lang, period, difficulty }: { lang: 
           </div>
         </div>
 
-        <div className="grid grid-cols-3 gap-3 md:gap-4 max-w-3xl mx-auto">
-          <PodiumCard entry={top3[1]} place={2} medal="🥈" currentUserId={user?.id} youLabel={t.you} />
-          <PodiumCard entry={top3[0]} place={1} medal="🥇" tall currentUserId={user?.id} youLabel={t.you} />
-          <PodiumCard entry={top3[2]} place={3} medal="🥉" currentUserId={user?.id} youLabel={t.you} />
+        <div className="rounded-2xl border border-border bg-gradient-to-b from-transparent via-accent/10 to-accent/30 p-5 md:p-6 max-w-3xl mx-auto">
+          <div className="grid grid-cols-3 items-end gap-3 md:gap-4">
+            {[top3[1], top3[0], top3[2]].map((entry) => entry ? (
+              <FloatingPillar key={entry.userId} entry={entry} currentUserId={user?.id} youLabel={t.you} />
+            ) : null)}
+          </div>
         </div>
 
         <section className="border border-border rounded-lg overflow-hidden">
@@ -171,7 +173,6 @@ export default function LeaderboardClient({ lang, period, difficulty }: { lang: 
                   <th className="text-left py-3 px-4 font-medium">{t.headers.user}</th>
                   <th className="text-right py-3 px-4 font-medium">{t.headers.wpm}</th>
                   <th className="text-right py-3 px-4 font-medium hidden sm:table-cell">{t.headers.accuracy}</th>
-                  <th className="text-right py-3 px-4 font-medium hidden md:table-cell">{t.headers.tests}</th>
                 </tr>
               </thead>
               <tbody>
@@ -205,14 +206,13 @@ export default function LeaderboardClient({ lang, period, difficulty }: { lang: 
                       </td>
                       <td className={`py-3 px-4 text-right font-mono ${isUserSlot ? "font-bold text-primary" : "font-semibold"}`}>{entry.bestWpm}</td>
                       <td className="py-3 px-4 text-right font-mono hidden sm:table-cell">{entry.avgAccuracy}%</td>
-                      <td className="py-3 px-4 text-right font-mono text-muted-foreground hidden md:table-cell">{entry.testCount}</td>
                     </tr>
                   );
                 })}
                 {mounted && userBelowTable && user && (
                   <>
                     <tr>
-                      <td colSpan={5} className="py-2 px-4">
+                      <td colSpan={4} className="py-2 px-4">
                         <div className="flex items-center gap-2">
                           <div className="flex-1 border-t border-dashed border-border" />
                           <span className="text-[10px] text-muted-foreground uppercase tracking-wider">{t.yourPosition}</span>
@@ -234,9 +234,6 @@ export default function LeaderboardClient({ lang, period, difficulty }: { lang: 
                       </td>
                       <td className="py-3 px-4 text-right font-mono hidden sm:table-cell">
                         {me ? `${me.avgAccuracy}%` : "—"}
-                      </td>
-                      <td className="py-3 px-4 text-right font-mono text-muted-foreground hidden md:table-cell">
-                        {me ? me.testCount : "—"}
                       </td>
                     </tr>
                   </>
@@ -278,28 +275,59 @@ export default function LeaderboardClient({ lang, period, difficulty }: { lang: 
   );
 }
 
-function PodiumCard({ entry, place, medal, tall, currentUserId, youLabel }: { entry?: Entry; place: number; medal: string; tall?: boolean; currentUserId?: string; youLabel: string }) {
-  if (!entry) return <div className={tall ? "order-first md:order-none" : ""} />;
+function rankColor(rank: number) {
+  if (rank === 1) return { ring: "#facc15", base: "#eab308", deep: "#854d0e", text: "text-yellow-700 dark:text-yellow-400" };
+  if (rank === 2) return { ring: "#cbd5e1", base: "#94a3b8", deep: "#475569", text: "text-zinc-600 dark:text-zinc-400" };
+  return         { ring: "#d97706", base: "#b45309", deep: "#78350f", text: "text-amber-700 dark:text-amber-500" };
+}
+
+function FloatingPillar({ entry, currentUserId, youLabel }: { entry: Entry; currentUserId?: string; youLabel: string }) {
   const showUser = currentUserId !== undefined && entry.userId === currentUserId;
+  const c = rankColor(entry.rank);
+  const big = entry.rank === 1;
+  const colH = entry.rank === 1 ? 180 : entry.rank === 2 ? 130 : 95;
   return (
-    <div className={`flex flex-col items-center text-center ${tall ? "order-first md:order-none" : ""}`}>
-      <div className="text-3xl md:text-4xl mb-2">{medal}</div>
+    <div className="flex flex-col items-center text-center">
       <img
         src={entryAvatar(entry)}
         alt={entryName(entry)}
-        className={`rounded-full bg-accent border-2 ${
-          showUser ? "border-primary ring-2 ring-primary/30" : place === 1 ? "border-yellow-400" : "border-border"
-        } ${place === 1 ? "w-20 h-20 md:w-24 md:h-24" : "w-16 h-16 md:w-20 md:h-20"} mb-2`}
-        style={{ imageRendering: "pixelated" }}
+        className={`rounded-full mb-2 ${showUser ? "ring-2 ring-primary" : "ring-4"}`}
+        style={{
+          width: big ? 64 : 52,
+          height: big ? 64 : 52,
+          borderColor: showUser ? "var(--primary)" : c.ring,
+          boxShadow: showUser ? "0 0 0 4px var(--primary)" : `0 0 0 4px ${c.ring}`,
+          imageRendering: "pixelated",
+        }}
       />
-      <p className="text-sm md:text-base font-semibold truncate max-w-full mb-1">{entryName(entry)}</p>
+      <p className="text-xs md:text-sm font-semibold truncate max-w-full">{entryName(entry)}</p>
       {showUser && (
-        <span className="text-[9px] uppercase tracking-wide bg-primary text-primary-foreground px-1.5 py-px rounded font-bold mb-1">{youLabel}</span>
+        <span className="text-[9px] uppercase tracking-wide bg-primary text-primary-foreground px-1.5 py-px rounded font-bold mt-0.5">{youLabel}</span>
       )}
-      <div className={`w-full rounded-t-lg flex items-center justify-center ${
-        showUser ? "bg-primary/20" : place === 1 ? "bg-yellow-400/20" : place === 2 ? "bg-muted" : "bg-muted/50"
-      } ${place === 1 ? "h-20" : place === 2 ? "h-14" : "h-10"}`}>
-        <span className={`font-mono font-bold text-lg md:text-xl ${showUser ? "text-primary" : ""}`}>{entry.bestWpm}</span>
+      <p className={`font-mono text-base md:text-lg font-bold ${c.text} mt-0.5`}>{entry.bestWpm}</p>
+      <div className="relative w-full mt-2" style={{ height: colH + 16 }}>
+        <div
+          className="absolute inset-x-2 top-0 rounded-lg flex items-center justify-center"
+          style={{
+            height: colH,
+            background: `linear-gradient(180deg, ${c.ring} 0%, ${c.base} 70%, ${c.deep} 100%)`,
+            boxShadow: `0 12px 24px -8px ${c.base}80, inset 0 1px 0 ${c.ring}`,
+          }}
+        >
+          <span
+            className="font-black text-white"
+            style={{
+              fontSize: big ? "3.5rem" : "2.5rem",
+              textShadow: "0 2px 4px rgba(0,0,0,0.3)",
+            }}
+          >
+            {entry.rank}
+          </span>
+        </div>
+        <div
+          className="absolute bottom-0 left-1/2 -translate-x-1/2 w-3/4 h-3 rounded-full blur-md"
+          style={{ backgroundColor: c.deep, opacity: 0.3 }}
+        />
       </div>
     </div>
   );
