@@ -36,7 +36,7 @@ export const blogPosts: BlogPost[] = [
       ru: "nauchitsya-bystro-pechatat",
     },
     titles: {
-      uz: "Tez yozish o'rganish — boshidan oxirigacha to'liq yo'l xaritasi",
+      uz: "Tez yozishni o'rganish — boshidan oxirigacha to'liq yo'l xaritasi",
       en: "How to Learn Fast Typing — A Complete Beginner-to-Advanced Roadmap",
       ru: "Как научиться быстро печатать — полный путь от новичка до профи",
     },
@@ -56,7 +56,7 @@ export const blogPosts: BlogPost[] = [
       ru: "9 мин чтения",
     },
     primaryKeyword: {
-      uz: "tez yozish o'rganish",
+      uz: "tez yozishni o'rganish",
       en: "learn to type fast",
       ru: "научиться быстро печатать",
     },

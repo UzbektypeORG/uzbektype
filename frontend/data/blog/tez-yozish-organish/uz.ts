@@ -1,7 +1,7 @@
-// UZ content for blog post: "Tez yozish o'rganish — boshidan oxirigacha to'liq yo'l xaritasi"
-// Target keyword: tez yozish o'rganish (HEAD TERM)
+// UZ content for blog post: "Tez yozishni o'rganish — boshidan oxirigacha to'liq yo'l xaritasi"
+// Target keyword: tez yozishni o'rganish (HEAD TERM)
 
-export const uzContent = `## Tez yozish o'rganish nima va nima uchun kerak
+export const uzContent = `## Tez yozishni o'rganish nima va nima uchun kerak
 
 Bugungi kunda kompyuter klaviaturasi sizning eng ko'p foydalanadigan asbobingizdir. Talaba matn yozadi, dasturchi kod yozadi, ofis xodimi xat-xabar yuboradi, blogger maqola tayyorlaydi. Sekin yozish bu vaqt yo'qotish demakdir.
 
@@ -161,7 +161,7 @@ Endi nazariyani bilasiz. Vaqt amaliy qismga o'tish:
 2. **Ertaga** — 20 daqiqalik mashq, **aniqlik 95%+** maqsadi
 3. **Bir hafta keyin** — birinchi natijani ko'ring va [reytingdagi o'rningizni](/uz/leaderboard/monthly/easy) tekshiring
 
-Tez yozish o'rganish uzoq yo'l, lekin har kun bir oz tez bo'lasiz. 30 kun keyin o'zingizning farqingizni hayratomuz topasiz.
+Tez yozishni o'rganish uzoq yo'l, lekin har kun bir oz tez bo'lasiz. 30 kun keyin o'zingizning farqingizni hayratomuz topasiz.
 
 [Hoziroq sinab ko'ring →](/uz/tests/30s-easy)
 `;
