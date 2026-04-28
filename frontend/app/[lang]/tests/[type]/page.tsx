@@ -217,22 +217,30 @@ export default function TestPage() {
     const completedTests = parseInt(localStorage.getItem("uzbektype_completed_tests") || "0") + 1;
     localStorage.setItem("uzbektype_completed_tests", completedTests.toString());
 
-    // Show feedback modal after 3 completed tests (if not already submitted)
+    // Show feedback modal after 7 completed tests (if not already submitted)
     const feedbackSubmitted = localStorage.getItem("uzbektype_feedback_submitted");
-    if (completedTests === 3 && !feedbackSubmitted) {
+    if (completedTests === 7 && !feedbackSubmitted) {
       setTimeout(() => {
         setShowFeedbackModal(true);
       }, 1500); // Show after results appear
     }
 
-    // Telegram join modal: only for signed-in (Google) users, after 3 tests post-login
-    if (session) {
-      const loggedInTests = parseInt(localStorage.getItem("uzbektype_logged_in_tests") || "0") + 1;
-      localStorage.setItem("uzbektype_logged_in_tests", loggedInTests.toString());
-
-      const telegramShown = localStorage.getItem("uzbektype_telegram_invited");
-      if (loggedInTests === 3 && !telegramShown) {
-        // Stagger after feedback modal so they don't stack on the same frame
+    // Telegram join modal — shown once at the user's 3rd test, regardless of
+    // sign-in state. Signed-in users count post-login tests separately so a
+    // user who signs in after their first 3 anonymous tests still gets it
+    // (post-login test 3) instead of having missed the cutoff.
+    const telegramShown = localStorage.getItem("uzbektype_telegram_invited");
+    if (!telegramShown) {
+      let triggerTelegram = false;
+      if (session) {
+        const loggedInTests =
+          parseInt(localStorage.getItem("uzbektype_logged_in_tests") || "0") + 1;
+        localStorage.setItem("uzbektype_logged_in_tests", loggedInTests.toString());
+        if (loggedInTests === 3) triggerTelegram = true;
+      } else if (completedTests === 3) {
+        triggerTelegram = true;
+      }
+      if (triggerTelegram) {
         setTimeout(() => {
           setShowTelegramModal(true);
         }, 1700);
