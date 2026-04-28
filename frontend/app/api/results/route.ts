@@ -1,6 +1,18 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
-import { db, testResults } from "@/db";
+import { db, testResults, users } from "@/db";
+import { eq, sql } from "drizzle-orm";
+import { sendChannelMessage } from "@/lib/telegram";
+
+const DIFFICULTY_LABELS: Record<"easy" | "medium" | "hard", string> = {
+  easy: "osonda",
+  medium: "o'rtada",
+  hard: "qiyinda",
+};
+
+function htmlEscape(s: string): string {
+  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
 
 export const dynamic = "force-dynamic";
 export const fetchCache = "force-no-store";
@@ -57,6 +69,16 @@ export async function POST(req: Request) {
   if (!isInt(body.totalChars, 0, 100000)) return NextResponse.json({ error: "invalid_total_chars" }, { status: 400 });
   if (!isNum(body.timeElapsed, 0, 600)) return NextResponse.json({ error: "invalid_time_elapsed" }, { status: 400 });
 
+  // Snapshot the previous all-time max for this difficulty BEFORE inserting,
+  // so we can tell whether the incoming row breaks it. Cross-test-type
+  // (10s/30s/.../60w) — one record per difficulty, not per category.
+  const prevRow = await db.execute<{ maxWpm: number }>(sql`
+    SELECT COALESCE(MAX(wpm), 0)::int AS "maxWpm"
+    FROM test_result
+    WHERE difficulty = ${body.difficulty}
+  `);
+  const prevMax = Number(prevRow.rows[0]?.maxWpm ?? 0);
+
   const [row] = await db
     .insert(testResults)
     .values({
@@ -75,5 +97,46 @@ export async function POST(req: Request) {
     })
     .returning({ id: testResults.id });
 
+  // Fire-and-forget Telegram announcement when the global record falls.
+  if (body.wpm > prevMax) {
+    void announceRecord({
+      userId: session.user.id,
+      difficulty: body.difficulty,
+      wpm: body.wpm,
+    });
+  }
+
   return NextResponse.json({ id: row.id });
+}
+
+async function announceRecord(params: {
+  userId: string;
+  difficulty: "easy" | "medium" | "hard";
+  wpm: number;
+}) {
+  try {
+    const [u] = await db
+      .select({
+        firstName: users.firstName,
+        lastName: users.lastName,
+        name: users.name,
+      })
+      .from(users)
+      .where(eq(users.id, params.userId))
+      .limit(1);
+
+    const fullName =
+      [u?.firstName, u?.lastName].filter(Boolean).join(" ").trim() ||
+      u?.name?.trim() ||
+      "Anonim";
+
+    const text =
+      `🏆 <b>Rekord yangilandi</b>\n\n` +
+      `${htmlEscape(fullName)} ${DIFFICULTY_LABELS[params.difficulty]} rekord urdi\n` +
+      `WPM ${params.wpm}`;
+
+    await sendChannelMessage(text);
+  } catch {
+    // Never throw out of fire-and-forget.
+  }
 }
