@@ -177,7 +177,7 @@ export default function Header({ lang }: HeaderProps) {
         {/* Desktop Navigation */}
         <nav className="hidden md:flex items-center gap-6">
           <Link
-            href={`/${lang}/leaderboard/monthly/medium`}
+            href={`/${lang}/leaderboard/monthly/easy`}
             className="text-sm hover:text-foreground transition-colors flex items-center gap-1.5"
           >
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -303,7 +303,7 @@ export default function Header({ lang }: HeaderProps) {
                     <span>{um.dashboard}</span>
                   </Link>
                   <Link
-                    href={`/${lang}/leaderboard/monthly/medium`}
+                    href={`/${lang}/leaderboard/monthly/easy`}
                     onClick={() => setIsUserMenuOpen(false)}
                     className="flex items-center gap-2 px-4 py-2 text-sm hover:bg-accent transition-colors"
                   >
@@ -464,7 +464,7 @@ export default function Header({ lang }: HeaderProps) {
           </a>
 
           <Link
-            href={`/${lang}/leaderboard/monthly/medium`}
+            href={`/${lang}/leaderboard/monthly/easy`}
             onClick={() => setIsMobileMenuOpen(false)}
             className="px-3 py-2.5 text-sm rounded-lg hover:bg-accent transition-colors flex items-center gap-3"
           >
@@ -498,7 +498,7 @@ export default function Header({ lang }: HeaderProps) {
           {/* Start Button - only on non-test pages */}
           {!isTestPage && (
             <Link
-              href={`/${lang}/tests/30s-medium`}
+              href={`/${lang}/tests/30s-easy`}
               onClick={() => setIsMobileMenuOpen(false)}
               className="px-4 py-3 mt-2 text-sm rounded-lg bg-primary text-primary-foreground hover:opacity-90 transition-all font-medium text-center"
             >

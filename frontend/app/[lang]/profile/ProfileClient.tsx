@@ -183,7 +183,7 @@ export default function ProfileClient({ lang }: { lang: Language }) {
       router.refresh();
       setRedirecting(true);
       setPickedSeed(null);
-      router.push(`/${lang}/tests/30s-medium`);
+      router.push(`/${lang}/tests/30s-easy`);
     } catch (err) {
       console.error("Failed to save profile:", err);
       setSaving(false);

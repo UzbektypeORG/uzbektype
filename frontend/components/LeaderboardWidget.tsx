@@ -119,7 +119,7 @@ export default function LeaderboardWidget({
   variant?: "card" | "inline";
 }) {
   const [period, setPeriod] = useState<Period>("monthly");
-  const [difficulty, setDifficulty] = useState<Difficulty>("medium");
+  const [difficulty, setDifficulty] = useState<Difficulty>("easy");
   const { data: session, status } = useSession();
   const user = session?.user ?? null;
   const mounted = status !== "loading";

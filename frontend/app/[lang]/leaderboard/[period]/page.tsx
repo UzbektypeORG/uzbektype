@@ -3,8 +3,8 @@ import { redirect } from "next/navigation";
 type Language = "uz" | "en" | "ru";
 type Period = "weekly" | "monthly" | "alltime";
 
-// Old route — redirect to default difficulty (medium).
+// Old route — redirect to default difficulty (easy, matches the test page default).
 export default async function PeriodOnlyRedirect({ params }: { params: Promise<{ lang: Language; period: Period }> }) {
   const { lang, period } = await params;
-  redirect(`/${lang || "uz"}/leaderboard/${period || "monthly"}/medium`);
+  redirect(`/${lang || "uz"}/leaderboard/${period || "monthly"}/easy`);
 }
