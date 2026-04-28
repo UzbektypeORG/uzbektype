@@ -143,11 +143,18 @@ export async function POST(req: Request) {
   // as soon as the response is returned — a void/unawaited fetch never
   // makes it out. announceRecord traps its own errors so a Telegram outage
   // can't fail the result save.
-  if (beatsGlobal) {
+  //
+  // Debug mode: setting TELEGRAM_DEBUG_ALL=true posts every saved result
+  // to the channel (with a [DEBUG] prefix) so the pipeline can be verified
+  // without having to actually break a record. Unset the env var to return
+  // to record-only behaviour — no code change needed.
+  const debugAll = process.env.TELEGRAM_DEBUG_ALL === "true";
+  if (beatsGlobal || debugAll) {
     await announceRecord({
       userId: session.user.id,
       difficulty: body.difficulty as "easy" | "medium" | "hard",
       wpm: body.wpm,
+      debug: !beatsGlobal && debugAll,
     });
   }
 
@@ -158,6 +165,7 @@ async function announceRecord(params: {
   userId: string;
   difficulty: "easy" | "medium" | "hard";
   wpm: number;
+  debug?: boolean;
 }) {
   try {
     const [u] = await db
@@ -175,7 +183,11 @@ async function announceRecord(params: {
       u?.name?.trim() ||
       "Anonim";
 
-    await sendChannelMessage(buildRecordMessage(fullName, params.difficulty, params.wpm));
+    const message = params.debug
+      ? `🧪 <b>[DEBUG] Test natija</b>\n\nFoydalanuvchi: ${htmlEscape(fullName)}\nDaraja: ${DIFFICULTY_LABELS[params.difficulty]}\nWPM: ${params.wpm}\n\n<i>Bu rekord emas — pipeline tekshiruvi.</i>`
+      : buildRecordMessage(fullName, params.difficulty, params.wpm);
+
+    await sendChannelMessage(message);
   } catch {
     // Never throw out of fire-and-forget.
   }
