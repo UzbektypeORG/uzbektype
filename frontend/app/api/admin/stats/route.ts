@@ -101,7 +101,7 @@ export async function GET() {
     .innerJoin(testResults, eq(testResults.userId, users.id))
     .groupBy(users.id, users.email, users.firstName, users.lastName, users.name, users.avatarUrl)
     .orderBy(desc(sql`MAX(${testResults.wpm})`))
-    .limit(10);
+    .limit(200);
 
   // Recent 20 test results with user info
   const recent = await db
@@ -126,7 +126,9 @@ export async function GET() {
     .orderBy(desc(testResults.createdAt))
     .limit(20);
 
-  // All users with their counts (for user-management table)
+  // All users with their counts (for user-management table). LEFT JOIN +
+  // GROUP BY is more reliable across drivers than scalar subqueries — the
+  // earlier subquery form returned 0/null for bestWpm in production.
   const allUsers = await db
     .select({
       id: users.id,
@@ -136,10 +138,20 @@ export async function GET() {
       name: users.name,
       avatarUrl: users.avatarUrl,
       createdAt: users.createdAt,
-      testCount: sql<number>`COALESCE((SELECT COUNT(*)::int FROM test_result WHERE user_id = ${users.id}), 0)`,
-      bestWpm: sql<number>`COALESCE((SELECT MAX(wpm)::int FROM test_result WHERE user_id = ${users.id}), 0)`,
+      testCount: sql<number>`COUNT(${testResults.id})::int`,
+      bestWpm: sql<number>`COALESCE(MAX(${testResults.wpm}), 0)::int`,
     })
     .from(users)
+    .leftJoin(testResults, eq(testResults.userId, users.id))
+    .groupBy(
+      users.id,
+      users.email,
+      users.firstName,
+      users.lastName,
+      users.name,
+      users.avatarUrl,
+      users.createdAt
+    )
     .orderBy(desc(users.createdAt))
     .limit(200);
 

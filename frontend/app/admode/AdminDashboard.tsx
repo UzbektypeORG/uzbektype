@@ -68,7 +68,7 @@ type Tab = "overview" | "top" | "recent" | "users";
 
 const TABS: { id: Tab; label: string; icon: string }[] = [
   { id: "overview", label: "Umumiy", icon: "M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z" },
-  { id: "top", label: "Top 10", icon: "M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" },
+  { id: "top", label: "Top", icon: "M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" },
   { id: "recent", label: "Oxirgi testlar", icon: "M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z" },
   { id: "users", label: "Foydalanuvchilar", icon: "M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z" },
 ];
@@ -308,10 +308,40 @@ function OverviewSection({ stats }: { stats: Stats }) {
   );
 }
 
+type TopLimit = 10 | 25 | 100 | "all";
+const TOP_LIMITS: { id: TopLimit; label: string }[] = [
+  { id: 10, label: "Top 10" },
+  { id: 25, label: "Top 25" },
+  { id: 100, label: "Top 100" },
+  { id: "all", label: "Doimiy" },
+];
+
 function TopUsersSection({ stats, onUserClick }: { stats: Stats; onUserClick: (id: string) => void }) {
+  const [limit, setLimit] = useState<TopLimit>(10);
+  const visible = limit === "all" ? stats.topUsers : stats.topUsers.slice(0, limit);
   return (
     <section className="border border-border rounded-xl p-5 md:p-6">
-      {stats.topUsers.length > 0 ? (
+      <div className="flex items-center justify-between mb-4 gap-3 flex-wrap">
+        <p className="text-sm text-muted-foreground">
+          Ko&apos;rsatilmoqda: {visible.length} / {stats.topUsers.length}
+        </p>
+        <div className="flex gap-1 p-0.5 rounded-lg border border-border bg-accent/30">
+          {TOP_LIMITS.map((l) => (
+            <button
+              key={String(l.id)}
+              onClick={() => setLimit(l.id)}
+              className={`px-3 py-1 text-xs rounded-md transition-colors ${
+                limit === l.id
+                  ? "bg-background shadow-sm font-medium"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              {l.label}
+            </button>
+          ))}
+        </div>
+      </div>
+      {visible.length > 0 ? (
         <div className="overflow-x-auto -mx-4 md:mx-0">
           <table className="w-full text-sm">
             <thead>
@@ -324,7 +354,7 @@ function TopUsersSection({ stats, onUserClick }: { stats: Stats; onUserClick: (i
               </tr>
             </thead>
             <tbody>
-              {stats.topUsers.map((u, i) => (
+              {visible.map((u, i) => (
                 <tr
                   key={u.userId}
                   onClick={() => onUserClick(u.userId)}
@@ -465,7 +495,7 @@ function UsersSection({
               <th className="text-left py-2 px-3 font-medium">Foydalanuvchi</th>
               <th className="text-left py-2 px-3 font-medium hidden md:table-cell">Email</th>
               <th className="text-right py-2 px-3 font-medium">Testlar</th>
-              <th className="text-right py-2 px-3 font-medium hidden sm:table-cell">Eng yaxshi WPM</th>
+              <th className="text-right py-2 px-3 font-medium">Eng yaxshi WPM</th>
               <th className="text-right py-2 px-3 font-medium hidden md:table-cell">Qo'shilgan</th>
             </tr>
           </thead>
@@ -484,7 +514,7 @@ function UsersSection({
                 </td>
                 <td className="py-2 px-3 text-muted-foreground hidden md:table-cell">{u.email}</td>
                 <td className="py-2 px-3 text-right font-mono">{u.testCount}</td>
-                <td className="py-2 px-3 text-right font-mono hidden sm:table-cell">{u.bestWpm || "—"}</td>
+                <td className="py-2 px-3 text-right font-mono">{u.bestWpm || "—"}</td>
                 <td className="py-2 px-3 text-right text-xs text-muted-foreground hidden md:table-cell whitespace-nowrap">
                   {new Date(u.createdAt).toLocaleDateString()}
                 </td>
