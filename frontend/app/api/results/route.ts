@@ -124,7 +124,7 @@ export async function POST(req: Request) {
   if (body.wpm > prevMax) {
     void announceRecord({
       userId: session.user.id,
-      difficulty: body.difficulty,
+      difficulty: body.difficulty as "easy" | "medium" | "hard",
       wpm: body.wpm,
     });
   }
