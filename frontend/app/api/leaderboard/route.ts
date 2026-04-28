@@ -38,7 +38,8 @@ export async function GET(req: Request) {
     ? and(eq(testResults.difficulty, difficulty), gte(testResults.createdAt, start))
     : eq(testResults.difficulty, difficulty);
 
-  // Top: each user's best WPM in this period+difficulty, sorted desc.
+  // Top: each user's best WPM in this period+difficulty, plus avg accuracy
+  // and number of tests they ran in the same window.
   const top = await db
     .select({
       userId: users.id,
@@ -47,6 +48,8 @@ export async function GET(req: Request) {
       name: users.name,
       avatarUrl: users.avatarUrl,
       bestWpm: sql<number>`MAX(${testResults.wpm})::int`.as("best_wpm"),
+      avgAccuracy: sql<number>`AVG(${testResults.accuracy})::float`.as("avg_accuracy"),
+      testCount: sql<number>`COUNT(*)::int`.as("test_count"),
     })
     .from(users)
     .innerJoin(testResults, eq(testResults.userId, users.id))
@@ -55,22 +58,27 @@ export async function GET(req: Request) {
     .orderBy(desc(sql`MAX(${testResults.wpm})`))
     .limit(TOP_LIMIT);
 
-  // The current user's rank, if signed in and has at least one result.
+  // The current user's rank + same aggregates, if signed in and has results.
   const session = await auth();
   const myId = session?.user?.id ?? null;
-  let me: { rank: number; bestWpm: number } | null = null;
+  let me: { rank: number; bestWpm: number; avgAccuracy: number; testCount: number } | null = null;
 
   if (myId) {
-    const myBestRow = await db
-      .select({ best: sql<number>`MAX(${testResults.wpm})::int` })
+    const myStatsRow = await db
+      .select({
+        bestWpm: sql<number>`MAX(${testResults.wpm})::int`,
+        avgAccuracy: sql<number>`AVG(${testResults.accuracy})::float`,
+        testCount: sql<number>`COUNT(*)::int`,
+      })
       .from(testResults)
       .where(start
         ? and(eq(testResults.userId, myId), eq(testResults.difficulty, difficulty), gte(testResults.createdAt, start))
         : and(eq(testResults.userId, myId), eq(testResults.difficulty, difficulty)));
-    const myBest = myBestRow[0]?.best;
+    const myStats = myStatsRow[0];
+    const myBest = myStats?.bestWpm;
 
     if (myBest != null) {
-      // Subquery: each user's best WPM in this filter
+      // Each user's best WPM in this filter — used to count how many beat me.
       const sub = db
         .select({
           userId: testResults.userId,
@@ -87,7 +95,12 @@ export async function GET(req: Request) {
         .where(gt(sub.best, myBest));
       const better = betterRow[0]?.count ?? 0;
 
-      me = { rank: better + 1, bestWpm: myBest };
+      me = {
+        rank: better + 1,
+        bestWpm: myBest,
+        avgAccuracy: Math.round(Number(myStats?.avgAccuracy ?? 0) * 10) / 10,
+        testCount: Number(myStats?.testCount ?? 0),
+      };
     }
   }
 
@@ -99,6 +112,8 @@ export async function GET(req: Request) {
       name: row.name,
       avatarUrl: row.avatarUrl,
       bestWpm: row.bestWpm,
+      avgAccuracy: Math.round(Number(row.avgAccuracy) * 10) / 10,
+      testCount: Number(row.testCount),
       rank: i + 1,
     })),
     me,

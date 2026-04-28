@@ -21,12 +21,16 @@ interface Entry {
   name: string | null;
   avatarUrl: string | null;
   bestWpm: number;
+  avgAccuracy: number;
+  testCount: number;
   rank: number;
 }
 
 interface MeRank {
   rank: number;
   bestWpm: number;
+  avgAccuracy: number;
+  testCount: number;
 }
 
 const content = {
@@ -200,8 +204,8 @@ export default function LeaderboardClient({ lang, period, difficulty }: { lang: 
                         </div>
                       </td>
                       <td className={`py-3 px-4 text-right font-mono ${isUserSlot ? "font-bold text-primary" : "font-semibold"}`}>{entry.bestWpm}</td>
-                      <td className="py-3 px-4 text-right font-mono hidden sm:table-cell">—</td>
-                      <td className="py-3 px-4 text-right font-mono text-muted-foreground hidden md:table-cell">—</td>
+                      <td className="py-3 px-4 text-right font-mono hidden sm:table-cell">{entry.avgAccuracy}%</td>
+                      <td className="py-3 px-4 text-right font-mono text-muted-foreground hidden md:table-cell">{entry.testCount}</td>
                     </tr>
                   );
                 })}
@@ -228,8 +232,12 @@ export default function LeaderboardClient({ lang, period, difficulty }: { lang: 
                       <td className="py-3 px-4 text-right font-mono font-bold text-primary">
                         {userBestWpm > 0 ? userBestWpm : <span className="text-xs text-muted-foreground italic">{t.noResults}</span>}
                       </td>
-                      <td className="py-3 px-4 text-right font-mono hidden sm:table-cell">—</td>
-                      <td className="py-3 px-4 text-right font-mono text-muted-foreground hidden md:table-cell">—</td>
+                      <td className="py-3 px-4 text-right font-mono hidden sm:table-cell">
+                        {me ? `${me.avgAccuracy}%` : "—"}
+                      </td>
+                      <td className="py-3 px-4 text-right font-mono text-muted-foreground hidden md:table-cell">
+                        {me ? me.testCount : "—"}
+                      </td>
                     </tr>
                   </>
                 )}
