@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
@@ -169,7 +170,11 @@ export default function AdminDashboard() {
                 </thead>
                 <tbody>
                   {stats.topUsers.map((u, i) => (
-                    <tr key={u.userId} className="border-b border-border/50 last:border-0">
+                    <tr
+                      key={u.userId}
+                      onClick={() => router.push(`/admode/users/${u.userId}`)}
+                      className="border-b border-border/50 last:border-0 cursor-pointer hover:bg-accent/40 transition-colors"
+                    >
                       <td className="py-2 px-3 font-mono text-muted-foreground">{i + 1}</td>
                       <td className="py-2 px-3">
                         <div className="flex items-center gap-2">
@@ -207,7 +212,11 @@ export default function AdminDashboard() {
                 </thead>
                 <tbody>
                   {stats.recent.map((r) => (
-                    <tr key={r.id} className="border-b border-border/50 last:border-0">
+                    <tr
+                      key={r.id}
+                      onClick={() => router.push(`/admode/users/${r.userId}`)}
+                      className="border-b border-border/50 last:border-0 cursor-pointer hover:bg-accent/40 transition-colors"
+                    >
                       <td className="py-2 px-3">
                         <div className="flex items-center gap-2">
                           <img src={avatarFor(r)} alt={fullName(r)} className="w-6 h-6 rounded-full bg-accent" style={{ imageRendering: "pixelated" }} />
@@ -259,7 +268,11 @@ export default function AdminDashboard() {
               </thead>
               <tbody>
                 {filteredUsers.map((u) => (
-                  <tr key={u.id} className="border-b border-border/50 last:border-0">
+                  <tr
+                    key={u.id}
+                    onClick={() => router.push(`/admode/users/${u.id}`)}
+                    className="border-b border-border/50 last:border-0 cursor-pointer hover:bg-accent/40 transition-colors"
+                  >
                     <td className="py-2 px-3">
                       <div className="flex items-center gap-2">
                         <img src={avatarFor(u)} alt={fullName(u)} className="w-6 h-6 rounded-full bg-accent" style={{ imageRendering: "pixelated" }} />
