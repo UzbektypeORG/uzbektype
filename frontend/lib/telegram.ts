@@ -8,10 +8,13 @@
 export async function sendChannelMessage(text: string): Promise<void> {
   const token = process.env.TELEGRAM_BOT_TOKEN;
   const chatId = process.env.TELEGRAM_CHANNEL_ID;
-  if (!token || !chatId) return;
+  if (!token || !chatId) {
+    console.warn("[telegram] env vars missing — TELEGRAM_BOT_TOKEN or TELEGRAM_CHANNEL_ID not set");
+    return;
+  }
 
   try {
-    await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+    const res = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -21,7 +24,13 @@ export async function sendChannelMessage(text: string): Promise<void> {
         disable_web_page_preview: true,
       }),
     });
-  } catch {
-    // Swallowed — see comment above.
+    if (!res.ok) {
+      const body = await res.text().catch(() => "<no body>");
+      console.error(`[telegram] sendMessage HTTP ${res.status}: ${body.slice(0, 500)}`);
+      return;
+    }
+    console.log("[telegram] sendMessage ok");
+  } catch (err) {
+    console.error("[telegram] sendMessage threw:", err);
   }
 }
