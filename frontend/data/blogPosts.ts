@@ -67,8 +67,8 @@ export const blogPosts: BlogPost[] = [
   },
   {
     id: "wpm-nima-va-qanday-olchash",
-    publishedAt: "2026-04-28",
-    updatedAt: "2026-04-28",
+    publishedAt: "2026-04-30",
+    updatedAt: "2026-04-30",
     slugs: {
       uz: "wpm-nima-va-qanday-olchash",
       en: "what-is-wpm-typing-speed",
