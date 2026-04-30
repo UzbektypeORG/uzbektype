@@ -5,6 +5,9 @@
 import { uzContent as tezYozishOrganishUz } from "./blog/tez-yozish-organish/uz";
 import { enContent as tezYozishOrganishEn } from "./blog/tez-yozish-organish/en";
 import { ruContent as tezYozishOrganishRu } from "./blog/tez-yozish-organish/ru";
+import { uzContent as wpmNimaUz } from "./blog/wpm-nima-va-qanday-olchash/uz";
+import { enContent as wpmNimaEn } from "./blog/wpm-nima-va-qanday-olchash/en";
+import { ruContent as wpmNimaRu } from "./blog/wpm-nima-va-qanday-olchash/ru";
 
 export type Language = "uz" | "en" | "ru";
 
@@ -61,6 +64,42 @@ export const blogPosts: BlogPost[] = [
       ru: "научиться быстро печатать",
     },
     articleType: "HowTo",
+  },
+  {
+    id: "wpm-nima-va-qanday-olchash",
+    publishedAt: "2026-04-28",
+    updatedAt: "2026-04-28",
+    slugs: {
+      uz: "wpm-nima-va-qanday-olchash",
+      en: "what-is-wpm-typing-speed",
+      ru: "chto-takoe-wpm",
+    },
+    titles: {
+      uz: "WPM nima va qanday o'lchash kerak — yozish tezligini oshirish qo'llanmasi",
+      en: "What Is WPM and How to Measure Typing Speed — A Complete Guide",
+      ru: "Что такое WPM и как измерить скорость печати — полное руководство",
+    },
+    excerpts: {
+      uz: "WPM nima, formulasi qanday hisoblanadi, yaxshi WPM qancha va uni 5 amaliy yo'l bilan oshirish — pillar qo'llanma misol va me'yorlar bilan.",
+      en: "What WPM means, how it's calculated, what counts as a good number, and 5 practical ways to raise it — a pillar guide with examples and benchmarks.",
+      ru: "Что такое WPM, как считается формула, какой результат считается хорошим, и 5 практических способов его поднять — пилларная статья с примерами и бенчмарками.",
+    },
+    content: {
+      uz: wpmNimaUz,
+      en: wpmNimaEn,
+      ru: wpmNimaRu,
+    },
+    readTime: {
+      uz: "10 daqiqa",
+      en: "9 min read",
+      ru: "10 мин чтения",
+    },
+    primaryKeyword: {
+      uz: "wpm nima",
+      en: "what is wpm",
+      ru: "что такое wpm",
+    },
+    articleType: "Article",
   },
 ];
 
