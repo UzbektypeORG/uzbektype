@@ -8,6 +8,9 @@ import { ruContent as tezYozishOrganishRu } from "./blog/tez-yozish-organish/ru"
 import { uzContent as wpmNimaUz } from "./blog/wpm-nima-va-qanday-olchash/uz";
 import { enContent as wpmNimaEn } from "./blog/wpm-nima-va-qanday-olchash/en";
 import { ruContent as wpmNimaRu } from "./blog/wpm-nima-va-qanday-olchash/ru";
+import { uzContent as klaviaturaMashqlariUz } from "./blog/klaviatura-mashqlari/uz";
+import { enContent as klaviaturaMashqlariEn } from "./blog/klaviatura-mashqlari/en";
+import { ruContent as klaviaturaMashqlariRu } from "./blog/klaviatura-mashqlari/ru";
 
 export type Language = "uz" | "en" | "ru";
 
@@ -100,6 +103,42 @@ export const blogPosts: BlogPost[] = [
       ru: "что такое wpm",
     },
     articleType: "Article",
+  },
+  {
+    id: "klaviatura-mashqlari",
+    publishedAt: "2026-04-30",
+    updatedAt: "2026-04-30",
+    slugs: {
+      uz: "klaviatura-mashqlari",
+      en: "keyboard-typing-drills",
+      ru: "uprazhneniya-dlya-klaviatury",
+    },
+    titles: {
+      uz: "Klaviatura mashqlari — bepul va eng samarali yo'llar",
+      en: "Keyboard Typing Drills — Free and Effective Practice Routines",
+      ru: "Упражнения для клавиатуры — бесплатные и самые эффективные способы",
+    },
+    excerpts: {
+      uz: "WPM oshirish uchun maqsadli mashqlar to'plami: home row dan tezlik portlashigacha, 30 kunlik jadval va qaerda bepul mashq qilish.",
+      en: "A complete set of targeted drills to grow your WPM — from home row to speed bursts, plus a 30-day schedule and free places to practice.",
+      ru: "Полный набор целевых упражнений для роста WPM — от основного ряда до скоростных взрывов, плюс 30-дневный план и где практиковаться бесплатно.",
+    },
+    content: {
+      uz: klaviaturaMashqlariUz,
+      en: klaviaturaMashqlariEn,
+      ru: klaviaturaMashqlariRu,
+    },
+    readTime: {
+      uz: "10 daqiqa",
+      en: "10 min read",
+      ru: "10 мин чтения",
+    },
+    primaryKeyword: {
+      uz: "klaviatura mashqi",
+      en: "keyboard drills",
+      ru: "упражнения для клавиатуры",
+    },
+    articleType: "HowTo",
   },
 ];
 
