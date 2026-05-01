@@ -106,8 +106,8 @@ export const blogPosts: BlogPost[] = [
   },
   {
     id: "klaviatura-mashqlari",
-    publishedAt: "2026-04-30",
-    updatedAt: "2026-04-30",
+    publishedAt: "2026-05-01",
+    updatedAt: "2026-05-01",
     slugs: {
       uz: "klaviatura-mashqlari",
       en: "keyboard-typing-drills",
