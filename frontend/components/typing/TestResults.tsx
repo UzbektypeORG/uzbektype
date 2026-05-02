@@ -63,6 +63,9 @@ const labels = {
     easy: "Oson",
     medium: "O'rta",
     hard: "Qiyin",
+    tgTitle: "Hamjamiyatga qo'shiling",
+    tgSubtitle: "Tezkor yozuvchilar Telegram'da",
+    tgCta: "Qo'shilish",
   },
   en: {
     wpm: "WPM",
@@ -77,6 +80,9 @@ const labels = {
     easy: "Easy",
     medium: "Medium",
     hard: "Hard",
+    tgTitle: "Join the community",
+    tgSubtitle: "Fast typists on Telegram",
+    tgCta: "Join",
   },
   ru: {
     wpm: "WPM",
@@ -91,6 +97,9 @@ const labels = {
     easy: "Лёгкий",
     medium: "Средний",
     hard: "Сложный",
+    tgTitle: "Вступайте в сообщество",
+    tgSubtitle: "Быстрые машинисты в Telegram",
+    tgCta: "Вступить",
   },
 };
 
@@ -159,17 +168,17 @@ export default function TestResults({
   const animatedTime = useCountUp(Math.round(stats.timeElapsed), 1200);
 
   return (
-    <div className="w-full max-w-5xl mx-auto space-y-6 md:space-y-8 animate-fade-in">
+    <div className="w-full max-w-5xl mx-auto space-y-3 md:space-y-4 lg:space-y-5 animate-fade-in">
       {/* Main content: Stats + Graph */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 md:gap-4 lg:gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 md:gap-3 lg:gap-6">
         {/* Left: Main Statistics */}
-        <div className="flex flex-row lg:flex-col justify-between lg:justify-start items-center lg:items-start p-3 md:p-4 lg:p-0 border border-border lg:border-0 rounded-lg lg:rounded-none gap-2 md:gap-4 lg:gap-6">
+        <div className="flex flex-row lg:flex-col justify-around lg:justify-start items-center lg:items-start p-4 md:p-5 lg:p-0 border border-border lg:border-0 rounded-lg lg:rounded-none gap-3 md:gap-4 lg:gap-6">
           {/* WPM */}
-          <div className="space-y-0.5 md:space-y-1 text-left">
-            <div className="text-3xl md:text-7xl lg:text-8xl font-bold tabular-nums text-primary">
+          <div className="space-y-1 md:space-y-1.5 text-center lg:text-left">
+            <div className="text-5xl md:text-6xl lg:text-8xl font-bold tabular-nums text-primary leading-none">
               {animatedWpm}
             </div>
-            <div className="text-[10px] md:text-base text-muted-foreground uppercase tracking-wider">
+            <div className="text-xs md:text-base lg:text-lg text-muted-foreground uppercase tracking-wider">
               {t.wpm}
               <span className="mx-1 md:mx-2">·</span>
               <span className="normal-case">{config.testType.toUpperCase()}</span>
@@ -179,19 +188,19 @@ export default function TestResults({
           </div>
 
           {/* Accuracy */}
-          <div className="space-y-0.5 md:space-y-1 text-right lg:text-left">
-            <div className="text-3xl md:text-6xl lg:text-7xl font-bold tabular-nums text-primary">
+          <div className="space-y-1 md:space-y-1.5 text-center lg:text-left">
+            <div className="text-4xl md:text-5xl lg:text-7xl font-bold tabular-nums text-primary leading-none">
               {animatedAccuracy}%
             </div>
-            <div className="text-[10px] md:text-base text-muted-foreground uppercase tracking-wider">
+            <div className="text-xs md:text-base lg:text-lg text-muted-foreground uppercase tracking-wider">
               {t.accuracy}
             </div>
           </div>
         </div>
 
-        {/* Right: WPM Graph */}
-        <div className="border border-border rounded-lg p-3 md:p-4 lg:p-6 bg-card/50">
-          <div className="h-36 md:h-48 lg:h-64">
+        {/* Right: WPM Graph — hidden on mobile to save vertical space */}
+        <div className="hidden md:block border border-border rounded-lg p-2 md:p-3 lg:p-4 bg-card/50">
+          <div className="h-24 md:h-32 lg:h-44">
             {stats.wpmHistory.length > 0 ? (
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart
@@ -247,7 +256,7 @@ export default function TestResults({
               </div>
             )}
           </div>
-          <div className="flex items-center justify-center gap-4 mt-2 text-xs text-muted-foreground">
+          <div className="flex items-center justify-center gap-3 mt-1 text-[10px] md:text-xs text-muted-foreground">
             <div className="flex items-center gap-1">
               <div className="w-3 h-0.5 bg-primary" />
               <span>WPM</span>
@@ -260,51 +269,90 @@ export default function TestResults({
         </div>
       </div>
 
-      {/* Secondary Statistics */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-4">
-        <div className="text-center p-2 md:p-3 lg:p-4 border border-border rounded-lg">
-          <div className="text-base md:text-xl lg:text-2xl font-semibold tabular-nums text-muted-foreground">
+      {/* Secondary Statistics — hidden on mobile to save vertical space */}
+      <div className="hidden md:grid grid-cols-4 gap-1.5 md:gap-3">
+        <div className="text-center p-1.5 md:p-2 lg:p-3 border border-border rounded-lg">
+          <div className="text-sm md:text-lg lg:text-xl font-semibold tabular-nums text-muted-foreground leading-tight">
             {animatedRawWpm}
           </div>
-          <div className="text-[10px] md:text-xs text-muted-foreground mt-0.5 md:mt-1">{t.rawWpm}</div>
+          <div className="text-[9px] md:text-xs text-muted-foreground mt-0.5">{t.rawWpm}</div>
         </div>
-        <div className="text-center p-2 md:p-3 lg:p-4 border border-border rounded-lg">
-          <div className="text-base md:text-xl lg:text-2xl font-semibold tabular-nums text-muted-foreground">
+        <div className="text-center p-1.5 md:p-2 lg:p-3 border border-border rounded-lg">
+          <div className="text-sm md:text-lg lg:text-xl font-semibold tabular-nums text-muted-foreground leading-tight">
             <span className="text-green-500">{animatedCorrect}</span>
-            <span className="mx-0.5 md:mx-1">/</span>
+            <span className="mx-0.5">/</span>
             <span className="text-orange-500">{animatedCorrected}</span>
-            <span className="mx-0.5 md:mx-1">/</span>
+            <span className="mx-0.5">/</span>
             <span className="text-red-500">{animatedIncorrect}</span>
           </div>
-          <div className="text-[10px] md:text-xs text-muted-foreground mt-0.5 md:mt-1">{t.characters}</div>
+          <div className="text-[9px] md:text-xs text-muted-foreground mt-0.5">{t.characters}</div>
         </div>
-        <div className="text-center p-2 md:p-3 lg:p-4 border border-border rounded-lg">
-          <div className="text-base md:text-xl lg:text-2xl font-semibold tabular-nums text-muted-foreground">
+        <div className="text-center p-1.5 md:p-2 lg:p-3 border border-border rounded-lg">
+          <div className="text-sm md:text-lg lg:text-xl font-semibold tabular-nums text-muted-foreground leading-tight">
             {animatedConsistency}%
           </div>
-          <div className="text-[10px] md:text-xs text-muted-foreground mt-0.5 md:mt-1">{t.consistency}</div>
+          <div className="text-[9px] md:text-xs text-muted-foreground mt-0.5">{t.consistency}</div>
         </div>
-        <div className="text-center p-2 md:p-3 lg:p-4 border border-border rounded-lg">
-          <div className="text-base md:text-xl lg:text-2xl font-semibold tabular-nums text-muted-foreground">
+        <div className="text-center p-1.5 md:p-2 lg:p-3 border border-border rounded-lg">
+          <div className="text-sm md:text-lg lg:text-xl font-semibold tabular-nums text-muted-foreground leading-tight">
             {animatedTime}s
           </div>
-          <div className="text-[10px] md:text-xs text-muted-foreground mt-0.5 md:mt-1">{t.time}</div>
+          <div className="text-[9px] md:text-xs text-muted-foreground mt-0.5">{t.time}</div>
         </div>
       </div>
 
+      {/* Telegram CTA Banner */}
+      <a
+        href="https://t.me/uzbektype"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="group relative block w-full overflow-hidden rounded-xl min-h-[90px] md:min-h-[110px] bg-gradient-to-r from-[#229ED9]/10 via-[#229ED9]/5 to-transparent border border-[#229ED9]/30 hover:border-[#229ED9]/60 hover:shadow-lg hover:shadow-[#229ED9]/10 transition-all duration-300"
+      >
+        {/* Decorative glow */}
+        <div className="pointer-events-none absolute -right-12 -top-12 w-40 h-40 rounded-full bg-[#229ED9]/15 blur-2xl group-hover:bg-[#229ED9]/25 transition-colors duration-300" />
+
+        <div className="relative flex items-center justify-between gap-3 px-4 md:px-6 py-3 md:py-4 h-full">
+          <div className="flex items-center gap-3 md:gap-4 min-w-0">
+            {/* Telegram icon */}
+            <div className="flex-shrink-0 w-10 h-10 md:w-12 md:h-12 rounded-full bg-[#229ED9] flex items-center justify-center shadow-md shadow-[#229ED9]/30 group-hover:scale-105 transition-transform duration-300">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="white">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 0 0-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .38z" />
+              </svg>
+            </div>
+
+            <div className="min-w-0">
+              <div className="text-sm md:text-base font-semibold text-foreground truncate">
+                {t.tgTitle}
+              </div>
+              <div className="text-[11px] md:text-xs text-muted-foreground truncate">
+                {t.tgSubtitle}
+              </div>
+            </div>
+          </div>
+
+          {/* CTA pill */}
+          <div className="flex-shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 md:px-4 md:py-2 rounded-full bg-[#229ED9] text-white text-xs md:text-sm font-medium shadow-md shadow-[#229ED9]/20 group-hover:shadow-lg group-hover:shadow-[#229ED9]/40 group-hover:translate-x-0.5 transition-all duration-300">
+            {t.tgCta}
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M5 12h14M13 5l7 7-7 7" />
+            </svg>
+          </div>
+        </div>
+      </a>
+
       {/* Actions */}
-      <div className="flex justify-center gap-3 pb-20 md:pb-0">
+      <div className="flex justify-center gap-2 md:gap-3">
         <button
           onClick={handleShare}
-          className="px-6 py-3 border border-border rounded-lg hover:border-foreground transition-all duration-200 font-medium flex items-center gap-2"
+          className="px-4 py-2 md:px-6 md:py-2.5 border border-border rounded-lg hover:border-foreground transition-all duration-200 font-medium flex items-center gap-2 text-sm md:text-base"
         >
-          <Share2 size={18} />
+          <Share2 size={16} />
           {showCopied ? t.copied : t.share}
         </button>
         <button
           onClick={onRetry}
           disabled={!retryEnabled}
-          className={`px-8 py-3 bg-primary text-primary-foreground rounded-lg transition-all duration-200 font-medium ${
+          className={`px-6 py-2 md:px-8 md:py-2.5 bg-primary text-primary-foreground rounded-lg transition-all duration-200 font-medium text-sm md:text-base ${
             retryEnabled ? 'hover:opacity-90' : 'opacity-50 cursor-not-allowed'
           }`}
         >

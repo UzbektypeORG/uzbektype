@@ -327,7 +327,7 @@ export default function TestPage() {
   const t = labels[config.language];
 
   return (
-    <main className="h-[calc(100vh-73px)] flex flex-col">
+    <main className="h-[calc(100vh-73px)] md:h-[calc(100dvh-73px)] flex flex-col">
       {!result ? (
         <>
           {/* Upper flex-1 space - test header at bottom */}
@@ -502,10 +502,10 @@ export default function TestPage() {
           <div className="flex-1 md:flex-1"></div>
         </>
       ) : (
-        <div className="flex-1 flex items-start justify-center px-4 md:px-6 py-6 md:py-8 overflow-y-auto">
-          <div className="w-full max-w-[95vw] md:max-w-[1200px] space-y-4 md:space-y-6">
+        <div className="flex-1 flex items-start xl:items-center justify-center px-3 md:px-6 py-3 md:py-4 overflow-y-auto">
+          <div className="w-full max-w-[95vw] md:max-w-[1200px] space-y-3 md:space-y-4">
             <LoginCtaBanner lang={lang} />
-            <div className="grid grid-cols-1 xl:grid-cols-[1fr_320px] gap-6 xl:gap-8 items-start">
+            <div className="grid grid-cols-1 xl:grid-cols-[1fr_320px] gap-4 xl:gap-6 items-start">
               {/* Left: Statistics */}
               <div className="min-w-0">
                 <TestResults
@@ -514,9 +514,9 @@ export default function TestPage() {
                   onRetry={handleRetry}
                 />
               </div>
-              {/* Right: Leaderboard widget */}
+              {/* Right (xl) / Bottom (mobile): Leaderboard widget — top 5 in result view */}
               <div className="w-full">
-                <LeaderboardWidget lang={lang} />
+                <LeaderboardWidget lang={lang} limit={5} />
               </div>
             </div>
           </div>
