@@ -11,6 +11,15 @@ import { ruContent as wpmNimaRu } from "./blog/wpm-nima-va-qanday-olchash/ru";
 import { uzContent as klaviaturaMashqlariUz } from "./blog/klaviatura-mashqlari/uz";
 import { enContent as klaviaturaMashqlariEn } from "./blog/klaviatura-mashqlari/en";
 import { ruContent as klaviaturaMashqlariRu } from "./blog/klaviatura-mashqlari/ru";
+import { uzContent as ortachaTezlikUz } from "./blog/ortacha-yozish-tezligi/uz";
+import { enContent as ortachaTezlikEn } from "./blog/ortacha-yozish-tezligi/en";
+import { ruContent as ortachaTezlikRu } from "./blog/ortacha-yozish-tezligi/ru";
+import { uzContent as touchTypingUz } from "./blog/touch-typing-nima/uz";
+import { enContent as touchTypingEn } from "./blog/touch-typing-nima/en";
+import { ruContent as touchTypingRu } from "./blog/touch-typing-nima/ru";
+import { uzContent as engYaxshiSaytlarUz } from "./blog/eng-yaxshi-typing-test-saytlar/uz";
+import { enContent as engYaxshiSaytlarEn } from "./blog/eng-yaxshi-typing-test-saytlar/en";
+import { ruContent as engYaxshiSaytlarRu } from "./blog/eng-yaxshi-typing-test-saytlar/ru";
 
 export type Language = "uz" | "en" | "ru";
 
@@ -139,6 +148,114 @@ export const blogPosts: BlogPost[] = [
       ru: "упражнения для клавиатуры",
     },
     articleType: "HowTo",
+  },
+  {
+    id: "ortacha-yozish-tezligi",
+    publishedAt: "2026-05-03",
+    updatedAt: "2026-05-03",
+    slugs: {
+      uz: "ortacha-yozish-tezligi",
+      en: "average-typing-speed",
+      ru: "srednyaya-skorost-pechati",
+    },
+    titles: {
+      uz: "O'rtacha yozish tezligi qancha — yosh, kasb va davlatlar bo'yicha",
+      en: "Average Typing Speed — Benchmarks by Age, Profession, and Country",
+      ru: "Средняя скорость печати — бенчмарки по возрасту, профессии и странам",
+    },
+    excerpts: {
+      uz: "Global o'rtacha 45-50 WPM, lekin yosh, kasb va til bo'yicha aniq raqamlar farq qiladi. Konkret jadvallar va o'zingizni qaerga joylashtirish bo'yicha qo'llanma.",
+      en: "Global average sits around 45-50 WPM, but the real number depends on age, profession, and language. Concrete tables and a guide to placing yourself in context.",
+      ru: "Глобальное среднее — 45-50 WPM, но реальная цифра зависит от возраста, профессии и языка. Конкретные таблицы и гид по тому, как себя позиционировать.",
+    },
+    content: {
+      uz: ortachaTezlikUz,
+      en: ortachaTezlikEn,
+      ru: ortachaTezlikRu,
+    },
+    readTime: {
+      uz: "9 daqiqa",
+      en: "8 min read",
+      ru: "9 мин чтения",
+    },
+    primaryKeyword: {
+      uz: "o'rtacha yozish tezligi",
+      en: "average typing speed",
+      ru: "средняя скорость печати",
+    },
+    articleType: "Article",
+  },
+  {
+    id: "touch-typing-nima",
+    publishedAt: "2026-05-03",
+    updatedAt: "2026-05-03",
+    slugs: {
+      uz: "touch-typing-nima",
+      en: "what-is-touch-typing",
+      ru: "chto-takoe-slepaya-pechat",
+    },
+    titles: {
+      uz: "Touch typing nima — ko'r-ko'rona yozish ko'nikmasi",
+      en: "What Is Touch Typing — The Skill of Typing Without Looking",
+      ru: "Что такое touch typing — слепая печать без взгляда на клавиатуру",
+    },
+    excerpts: {
+      uz: "Touch typing — klaviaturaga qaramasdan yozish ko'nikmasi: barmoqlar joyi, mashq bosqichlari, eng katta xatolar va 6-8 haftada o'rganish rejasi.",
+      en: "Touch typing is the skill of typing without looking at the keyboard — finger placement, learning stages, common mistakes, and a 6-8 week plan to master it.",
+      ru: "Touch typing — слепая печать без взгляда на клавиатуру: расположение пальцев, этапы обучения, главные ошибки и план освоения за 6-8 недель.",
+    },
+    content: {
+      uz: touchTypingUz,
+      en: touchTypingEn,
+      ru: touchTypingRu,
+    },
+    readTime: {
+      uz: "9 daqiqa",
+      en: "9 min read",
+      ru: "9 мин чтения",
+    },
+    primaryKeyword: {
+      uz: "touch typing",
+      en: "touch typing",
+      ru: "слепая печать",
+    },
+    articleType: "HowTo",
+  },
+  {
+    id: "eng-yaxshi-typing-test-saytlar",
+    publishedAt: "2026-05-03",
+    updatedAt: "2026-05-03",
+    slugs: {
+      uz: "eng-yaxshi-typing-test-saytlar",
+      en: "best-typing-test-websites",
+      ru: "luchshie-sayty-dlya-testa-skorosti-pechati",
+    },
+    titles: {
+      uz: "Eng yaxshi typing test saytlar — 2026 reyting",
+      en: "Best Typing Test Websites — 2026 Ranking",
+      ru: "Лучшие сайты для теста скорости печати — рейтинг 2026",
+    },
+    excerpts: {
+      uz: "10 ta eng yaxshi typing test saytning to'liq solishtirmasi: UzbekType, Monkeytype, Keybr va boshqalar — har biri uchun aniq foydalanuvchi profili.",
+      en: "A complete comparison of the 10 best typing test websites — UzbekType, Monkeytype, Keybr, and more — with the right user profile for each.",
+      ru: "Полное сравнение 10 лучших сайтов для теста скорости печати — UzbekType, Monkeytype, Keybr и другие — с подходящим профилем пользователя для каждого.",
+    },
+    content: {
+      uz: engYaxshiSaytlarUz,
+      en: engYaxshiSaytlarEn,
+      ru: engYaxshiSaytlarRu,
+    },
+    readTime: {
+      uz: "10 daqiqa",
+      en: "10 min read",
+      ru: "10 мин чтения",
+    },
+    primaryKeyword: {
+      uz: "typing test sayt",
+      en: "best typing test websites",
+      ru: "тест скорости печати онлайн",
+    },
+    articleType: "Article",
   },
 ];
 
