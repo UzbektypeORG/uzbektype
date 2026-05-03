@@ -63,8 +63,8 @@ const labels = {
     easy: "Oson",
     medium: "O'rta",
     hard: "Qiyin",
-    tgTitle: "Hamjamiyatga qo'shiling",
-    tgSubtitle: "Tezkor yozuvchilar Telegram'da",
+    tgTitle: "Oylik top-10 chempionlar",
+    tgSubtitle: "Har oy g'oliblar Telegramda e'lon qilinadi",
     tgCta: "Qo'shilish",
   },
   en: {
@@ -80,8 +80,8 @@ const labels = {
     easy: "Easy",
     medium: "Medium",
     hard: "Hard",
-    tgTitle: "Join the community",
-    tgSubtitle: "Fast typists on Telegram",
+    tgTitle: "Monthly top-10 champions",
+    tgSubtitle: "Winners announced on Telegram each month",
     tgCta: "Join",
   },
   ru: {
@@ -97,8 +97,8 @@ const labels = {
     easy: "Лёгкий",
     medium: "Средний",
     hard: "Сложный",
-    tgTitle: "Вступайте в сообщество",
-    tgSubtitle: "Быстрые машинисты в Telegram",
+    tgTitle: "Топ-10 чемпионов месяца",
+    tgSubtitle: "Победителей объявляем в Telegram каждый месяц",
     tgCta: "Вступить",
   },
 };

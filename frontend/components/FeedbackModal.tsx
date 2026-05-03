@@ -18,8 +18,8 @@ const content = {
     later: "Keyinroq",
     submit: "Yuborish",
     thanks: "Fikringiz uchun rahmat!",
-    telegramTitle: "Telegram kanalimizga qo'shiling",
-    telegramSub: "Yangiliklar va maslahatlar uchun",
+    telegramTitle: "Oylik top-10 chempionlar",
+    telegramSub: "Har oy g'oliblar Telegramda e'lon qilinadi",
     telegramCta: "Kanalga o'tish",
     close: "Yopish"
   },
@@ -29,8 +29,8 @@ const content = {
     later: "Later",
     submit: "Submit",
     thanks: "Thank you for your feedback!",
-    telegramTitle: "Join our Telegram channel",
-    telegramSub: "For updates and tips",
+    telegramTitle: "Monthly top-10 champions",
+    telegramSub: "Winners announced on Telegram each month",
     telegramCta: "Open channel",
     close: "Close"
   },
@@ -40,8 +40,8 @@ const content = {
     later: "Позже",
     submit: "Отправить",
     thanks: "Спасибо за ваш отзыв!",
-    telegramTitle: "Подпишитесь на наш Telegram-канал",
-    telegramSub: "Новости и советы",
+    telegramTitle: "Топ-10 чемпионов месяца",
+    telegramSub: "Победителей объявляем в Telegram каждый месяц",
     telegramCta: "Открыть канал",
     close: "Закрыть"
   }
