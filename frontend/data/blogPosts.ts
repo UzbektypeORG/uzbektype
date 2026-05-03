@@ -20,6 +20,18 @@ import { ruContent as touchTypingRu } from "./blog/touch-typing-nima/ru";
 import { uzContent as engYaxshiSaytlarUz } from "./blog/eng-yaxshi-typing-test-saytlar/uz";
 import { enContent as engYaxshiSaytlarEn } from "./blog/eng-yaxshi-typing-test-saytlar/en";
 import { ruContent as engYaxshiSaytlarRu } from "./blog/eng-yaxshi-typing-test-saytlar/ru";
+import { uzContent as bolalarMashqiUz } from "./blog/bolalar-uchun-klaviatura-mashqi/uz";
+import { enContent as bolalarMashqiEn } from "./blog/bolalar-uchun-klaviatura-mashqi/en";
+import { ruContent as bolalarMashqiRu } from "./blog/bolalar-uchun-klaviatura-mashqi/ru";
+import { uzContent as kompyuterTezYozishUz } from "./blog/kompyuterda-tez-yozish/uz";
+import { enContent as kompyuterTezYozishEn } from "./blog/kompyuterda-tez-yozish/en";
+import { ruContent as kompyuterTezYozishRu } from "./blog/kompyuterda-tez-yozish/ru";
+import { uzContent as cpmWpmFarqiUz } from "./blog/cpm-va-wpm-farqi/uz";
+import { enContent as cpmWpmFarqiEn } from "./blog/cpm-va-wpm-farqi/en";
+import { ruContent as cpmWpmFarqiRu } from "./blog/cpm-va-wpm-farqi/ru";
+import { uzContent as yozishTestiOnlaynUz } from "./blog/yozish-testi-onlayn/uz";
+import { enContent as yozishTestiOnlaynEn } from "./blog/yozish-testi-onlayn/en";
+import { ruContent as yozishTestiOnlaynRu } from "./blog/yozish-testi-onlayn/ru";
 
 export type Language = "uz" | "en" | "ru";
 
@@ -256,6 +268,150 @@ export const blogPosts: BlogPost[] = [
       ru: "тест скорости печати онлайн",
     },
     articleType: "Article",
+  },
+  {
+    id: "bolalar-uchun-klaviatura-mashqi",
+    publishedAt: "2026-05-03",
+    updatedAt: "2026-05-03",
+    slugs: {
+      uz: "bolalar-uchun-klaviatura-mashqi",
+      en: "keyboard-practice-for-kids",
+      ru: "uprazhneniya-dlya-klaviatury-dlya-detey",
+    },
+    titles: {
+      uz: "Bolalar uchun klaviatura mashqi — yoshga qarab bosqichma-bosqich reja",
+      en: "Keyboard Practice for Kids — Age-by-Age Plan",
+      ru: "Клавиатурная практика для детей — план по возрастам",
+    },
+    excerpts: {
+      uz: "6 yoshdan boshlab to'g'ri klaviatura mashqi: yoshga qarab WPM me'yorlar, eng yaxshi bepul saytlar va ota-ona uchun 5 ta amaliy maslahat.",
+      en: "Right keyboard practice from age 6: age-by-age WPM benchmarks, best free sites, and 5 practical tips for parents.",
+      ru: "Правильная клавиатурная практика с 6 лет: нормы WPM по возрастам, лучшие бесплатные сайты и 5 практических советов родителям.",
+    },
+    content: {
+      uz: bolalarMashqiUz,
+      en: bolalarMashqiEn,
+      ru: bolalarMashqiRu,
+    },
+    readTime: {
+      uz: "9 daqiqa",
+      en: "9 min read",
+      ru: "9 мин чтения",
+    },
+    primaryKeyword: {
+      uz: "bolalar uchun klaviatura mashqi",
+      en: "keyboard practice for kids",
+      ru: "упражнения для клавиатуры для детей",
+    },
+    articleType: "HowTo",
+  },
+  {
+    id: "kompyuterda-tez-yozish",
+    publishedAt: "2026-05-03",
+    updatedAt: "2026-05-03",
+    slugs: {
+      uz: "kompyuterda-tez-yozish",
+      en: "fast-typing-on-computer",
+      ru: "bystraya-pechat-na-kompyutere",
+    },
+    titles: {
+      uz: "Kompyuterda tez yozish — 7 ta amaliy maslahat",
+      en: "Fast Typing on a Computer — 7 Practical Tips",
+      ru: "Быстрая печать на компьютере — 7 практических советов",
+    },
+    excerpts: {
+      uz: "Bugundan qo'llasangiz natija beradigan 7 ta amaliy maslahat: touch typing, klaviatura yorliqlari, burst typing, ergonomika va kunlik 15 daqiqa qoidasi.",
+      en: "7 practical tips you can apply today — touch typing, keyboard shortcuts, burst typing, ergonomics, and the 15-minutes-a-day rule.",
+      ru: "7 практических советов, которые можно применить сегодня — touch typing, горячие клавиши, burst typing, эргономика и правило 15 минут в день.",
+    },
+    content: {
+      uz: kompyuterTezYozishUz,
+      en: kompyuterTezYozishEn,
+      ru: kompyuterTezYozishRu,
+    },
+    readTime: {
+      uz: "8 daqiqa",
+      en: "8 min read",
+      ru: "8 мин чтения",
+    },
+    primaryKeyword: {
+      uz: "kompyuterda tez yozish",
+      en: "fast typing on computer",
+      ru: "быстрая печать на компьютере",
+    },
+    articleType: "Article",
+  },
+  {
+    id: "cpm-va-wpm-farqi",
+    publishedAt: "2026-05-03",
+    updatedAt: "2026-05-03",
+    slugs: {
+      uz: "cpm-va-wpm-farqi",
+      en: "cpm-vs-wpm-difference",
+      ru: "cpm-vs-wpm-raznitsa",
+    },
+    titles: {
+      uz: "CPM va WPM farqi — qaysi birini ishlatish kerak",
+      en: "CPM vs WPM — Which One Should You Use",
+      ru: "CPM vs WPM — какую метрику использовать",
+    },
+    excerpts: {
+      uz: "WPM × 5 = CPM. Lekin formulada nuanslar bor: Net vs Gross, til bo'yicha farqlar, qaysi sayt qaysini ishlatadi va ish uchun qaysi metrika kerak.",
+      en: "WPM × 5 = CPM. But the formula has nuances: Net vs Gross, language differences, which sites use which, and which metric your job needs.",
+      ru: "WPM × 5 = CPM. Но в формуле есть нюансы: Net vs Gross, различия по языкам, какой сайт что использует и какая метрика нужна для вашей работы.",
+    },
+    content: {
+      uz: cpmWpmFarqiUz,
+      en: cpmWpmFarqiEn,
+      ru: cpmWpmFarqiRu,
+    },
+    readTime: {
+      uz: "7 daqiqa",
+      en: "7 min read",
+      ru: "7 мин чтения",
+    },
+    primaryKeyword: {
+      uz: "cpm va wpm farqi",
+      en: "cpm vs wpm difference",
+      ru: "cpm vs wpm разница",
+    },
+    articleType: "Article",
+  },
+  {
+    id: "yozish-testi-onlayn",
+    publishedAt: "2026-05-03",
+    updatedAt: "2026-05-03",
+    slugs: {
+      uz: "yozish-testi-onlayn",
+      en: "online-typing-test",
+      ru: "test-skorosti-pechati-onlayn",
+    },
+    titles: {
+      uz: "Yozish testi onlayn — qanday o'tish va natijani izohlash",
+      en: "Online Typing Test — How to Take One and Read the Result",
+      ru: "Тест скорости печати онлайн — как пройти и понять результат",
+    },
+    excerpts: {
+      uz: "30 sekundda bepul testdan o'tish: qaysi vaqt va daraja sizga mos, natijani 4 ta raqam bo'yicha qanday o'qish, vaqt o'tishi bilan o'sishni kuzatish.",
+      en: "Take a free test in 30 seconds: which duration and difficulty fit you, how to read the 4-number result, and how to track growth over time.",
+      ru: "Пройдите бесплатный тест за 30 секунд: какая длительность и сложность подходят вам, как расшифровать результат и как отслеживать рост.",
+    },
+    content: {
+      uz: yozishTestiOnlaynUz,
+      en: yozishTestiOnlaynEn,
+      ru: yozishTestiOnlaynRu,
+    },
+    readTime: {
+      uz: "8 daqiqa",
+      en: "8 min read",
+      ru: "8 мин чтения",
+    },
+    primaryKeyword: {
+      uz: "yozish testi onlayn",
+      en: "typing test online",
+      ru: "тест скорости печати онлайн",
+    },
+    articleType: "HowTo",
   },
 ];
 
