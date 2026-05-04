@@ -112,6 +112,18 @@ const content = {
         { title: "Natijalarni Ko'ring", description: "Yakuniy WPM, aniqlik foizi va yulduzli bahoni ko'ring. Natijalar avtomatik saqlanadi." }
       ]
     },
+    topicTests: {
+      title: "Mavzuli testlar",
+      subtitle: "Maxsus kontent bilan typing test",
+      items: [
+        {
+          slug: "programming",
+          title: "Programming Typing Test",
+          description: "JavaScript, Python, TypeScript kodi bilan dasturchilar uchun",
+          badge: "Yangi",
+        },
+      ],
+    },
     blog: {
       title: "Foydali Maqolalar",
       readMore: "Barcha maqolalarni o'qish",
@@ -172,6 +184,18 @@ const content = {
         { title: "View Results", description: "See your final WPM, accuracy percentage, and star rating. Results are automatically saved." }
       ]
     },
+    topicTests: {
+      title: "Topic-based tests",
+      subtitle: "Typing tests with specialised content",
+      items: [
+        {
+          slug: "programming",
+          title: "Programming Typing Test",
+          description: "JavaScript, Python, and TypeScript code for developers",
+          badge: "New",
+        },
+      ],
+    },
     blog: {
       title: "Helpful Articles",
       readMore: "Read All Articles",
@@ -231,6 +255,18 @@ const content = {
         { title: "Начните Печатать", description: "Печатайте отображаемый текст как можно быстрее и точнее. Статистика в реальном времени показывает ваш прогресс." },
         { title: "Просмотр Результатов", description: "Посмотрите финальный WPM, процент точности и звездный рейтинг. Результаты сохраняются автоматически." }
       ]
+    },
+    topicTests: {
+      title: "Тематические тесты",
+      subtitle: "Тесты печати со специализированным контентом",
+      items: [
+        {
+          slug: "programming",
+          title: "Тест печати кода",
+          description: "JavaScript, Python и TypeScript для разработчиков",
+          badge: "Новое",
+        },
+      ],
     },
     blog: {
       title: "Полезные Статьи",
@@ -368,6 +404,39 @@ export default async function LandingPage({ params }: { params: Promise<{ lang: 
                   </p>
                 </div>
               </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Topic-based Tests (programmatic SEO) — appended bottom-section so existing layout is untouched */}
+      <section id="topic-tests" className="py-16 md:py-24">
+        <div className="w-full max-w-6xl mx-auto px-4 sm:px-6">
+          <div className="text-center mb-10 md:mb-14">
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-3">{t.topicTests.title}</h2>
+            <p className="text-base md:text-lg text-muted-foreground">{t.topicTests.subtitle}</p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+            {t.topicTests.items.map((item) => (
+              <Link
+                key={item.slug}
+                href={`/${currentLang}/tests/${item.slug}`}
+                className="group relative block p-6 md:p-8 border border-border rounded-xl hover:border-foreground/40 hover:shadow-md transition-all"
+              >
+                {item.badge && (
+                  <span className="absolute top-4 right-4 inline-flex items-center px-2 py-0.5 text-[10px] font-medium rounded-full bg-primary text-primary-foreground">
+                    {item.badge}
+                  </span>
+                )}
+                <div className="space-y-3">
+                  <h3 className="text-lg md:text-xl font-semibold">{item.title}</h3>
+                  <p className="text-sm md:text-base text-muted-foreground leading-relaxed">{item.description}</p>
+                  <div className="pt-2 text-sm font-medium text-primary group-hover:translate-x-1 transition-transform inline-flex items-center gap-1">
+                    →
+                  </div>
+                </div>
+              </Link>
             ))}
           </div>
         </div>

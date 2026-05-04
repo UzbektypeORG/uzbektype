@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { notFound, useParams } from "next/navigation";
+import { notFound, useParams, useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { Timer, RotateCcw, MoveVertical, Blend } from "lucide-react";
@@ -74,8 +74,12 @@ const timeOptions = ["10s", "30s", "60s"] as const;
 
 export default function TestPage() {
   const params = useParams();
+  const searchParams = useSearchParams();
   const typeParam = params.type as string;
   const lang = (params.lang as Language) || "uz";
+  // Topic flows through ?topic= from programmatic-SEO landing pages (e.g. /tests/programming)
+  const topic = searchParams.get("topic") ?? undefined;
+  const topicQuery = topic ? `?topic=${topic}` : "";
 
   const [config, setConfig] = useState<TestConfig | null>(null);
   const [text, setText] = useState("");
@@ -158,11 +162,11 @@ export default function TestPage() {
 
     const isWordBased = testType.endsWith("w");
     const targetCount = parseInt(testType);
-    const testText = getTestText(lang, difficulty, isWordBased, targetCount);
+    const testText = getTestText(lang, difficulty, isWordBased, targetCount, topic);
 
     setConfig(testConfig);
     setText(testText);
-  }, [typeParam, lang]);
+  }, [typeParam, lang, topic]);
 
   const handleTestComplete = (stats: TypingStats & { timeElapsed: number; wpmHistory: WpmDataPoint[]; rawWpm: number; consistency: number }) => {
     if (!config) return;
@@ -293,7 +297,7 @@ export default function TestPage() {
     if (config) {
       const isWordBased = config.testType.endsWith("w");
       const targetCount = parseInt(config.testType);
-      const newText = getTestText(config.language, config.difficulty, isWordBased, targetCount);
+      const newText = getTestText(config.language, config.difficulty, isWordBased, targetCount, topic);
       setText(newText);
     }
     setResult(null);
@@ -341,7 +345,7 @@ export default function TestPage() {
                   {timeOptions.map((time) => (
                     <Link
                       key={time}
-                      href={`/${lang}/tests/${time}-${config.difficulty}`}
+                      href={`/${lang}/tests/${time}-${config.difficulty}${topicQuery}`}
                       className={`px-2 py-1.5 md:px-4 md:py-2 text-xs md:text-sm font-medium rounded-lg transition-all ${
                         config.testType === time
                           ? "bg-primary text-primary-foreground"
@@ -361,7 +365,7 @@ export default function TestPage() {
                   {difficultyOptions.map((diff) => (
                     <Link
                       key={diff}
-                      href={`/${lang}/tests/${config.testType}-${diff}`}
+                      href={`/${lang}/tests/${config.testType}-${diff}${topicQuery}`}
                       className={`px-1.5 py-1.5 md:px-3 md:py-2 text-[10px] md:text-xs font-medium rounded-lg transition-all ${
                         config.difficulty === diff
                           ? "bg-primary text-primary-foreground"

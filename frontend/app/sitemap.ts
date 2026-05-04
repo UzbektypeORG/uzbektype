@@ -8,6 +8,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const testTypes = ["10s", "30s", "60s", "10w", "30w", "60w"];
   const difficulties = ["easy", "medium", "hard"];
   const periods = ["weekly", "monthly", "alltime"];
+  // Programmatic-SEO topic landing pages — extended as the queue advances
+  const topicTests = ["programming"];
 
   const now = new Date();
 
@@ -50,6 +52,18 @@ export default function sitemap(): MetadataRoute.Sitemap {
           alternates: { languages: hreflangs(path) },
         });
       }
+    }
+
+    // Topic-specific test landing pages (programmatic SEO)
+    for (const topic of topicTests) {
+      const path = `/tests/${topic}`;
+      entries.push({
+        url: `${baseUrl}/${lang}${path}`,
+        lastModified: now,
+        changeFrequency: "weekly",
+        priority: 0.8,
+        alternates: { languages: hreflangs(path) },
+      });
     }
 
     // Leaderboard variants (period × difficulty) — content updates every test

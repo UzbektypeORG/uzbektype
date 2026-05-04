@@ -1,4 +1,5 @@
 import type { Language, Difficulty } from "@/types";
+import { topicTexts } from "@/data/wordpacks/programming";
 
 // Text data for typing tests - organized by language and difficulty
 // Each difficulty has 10 topics, randomly selected during tests
@@ -217,14 +218,19 @@ export function getTestText(
   language: Language,
   difficulty: Difficulty,
   isWordBased: boolean,
-  targetCount: number
+  targetCount: number,
+  topic?: string
 ): string {
-  const texts = sampleTexts[language][difficulty];
+  // When a topic is supplied (programmatic-SEO landing pages route here via ?topic=),
+  // pull from the topic-specific pack instead of the per-language default set.
+  const texts = topic && topicTexts[topic]
+    ? topicTexts[topic][difficulty]
+    : sampleTexts[language][difficulty];
   // Randomly select one topic from the array
   const randomIndex = Math.floor(Math.random() * texts.length);
   const baseText = texts[randomIndex];
 
-  console.log(`[getTestText] Language: ${language}, Difficulty: ${difficulty}, Topic index: ${randomIndex}/${texts.length}`);
+  console.log(`[getTestText] Language: ${language}, Difficulty: ${difficulty}, Topic: ${topic ?? "default"}, Index: ${randomIndex}/${texts.length}`);
 
   if (isWordBased) {
     // For word-based tests, repeat text until we have enough words
