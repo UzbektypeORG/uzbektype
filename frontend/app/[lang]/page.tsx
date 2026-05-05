@@ -122,6 +122,18 @@ const content = {
           description: "JavaScript, Python, TypeScript kodi bilan dasturchilar uchun",
           badge: "Yangi",
         },
+        {
+          slug: "numbers",
+          title: "Raqamlar typing test",
+          description: "Telefon raqamlari, sanalar, narxlar — numpad va raqam qatori mashqi",
+          badge: "Yangi",
+        },
+        {
+          slug: "punctuation",
+          title: "Tinish belgilari typing test",
+          description: "Vergul, qo'shtirnoq, qavslar — Shift kombinatsiyalarini tezlashtiring",
+          badge: "Yangi",
+        },
       ],
     },
     blog: {
@@ -194,6 +206,18 @@ const content = {
           description: "JavaScript, Python, and TypeScript code for developers",
           badge: "New",
         },
+        {
+          slug: "numbers",
+          title: "Number Typing Test",
+          description: "Phone numbers, dates, prices — numpad and number-row practice",
+          badge: "New",
+        },
+        {
+          slug: "punctuation",
+          title: "Punctuation Typing Test",
+          description: "Commas, quotes, brackets — train your Shift-key chords",
+          badge: "New",
+        },
       ],
     },
     blog: {
@@ -264,6 +288,18 @@ const content = {
           slug: "programming",
           title: "Тест печати кода",
           description: "JavaScript, Python и TypeScript для разработчиков",
+          badge: "Новое",
+        },
+        {
+          slug: "numbers",
+          title: "Тест печати цифр",
+          description: "Телефоны, даты, цены — тренировка numpad и цифрового ряда",
+          badge: "Новое",
+        },
+        {
+          slug: "punctuation",
+          title: "Тест печати пунктуации",
+          description: "Запятые, кавычки, скобки — отработайте аккорды с Shift",
           badge: "Новое",
         },
       ],

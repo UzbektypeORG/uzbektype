@@ -1,5 +1,5 @@
 import type { Language, Difficulty } from "@/types";
-import { topicTexts } from "@/data/wordpacks/programming";
+import { topicTexts } from "@/data/wordpacks";
 
 // Text data for typing tests - organized by language and difficulty
 // Each difficulty has 10 topics, randomly selected during tests

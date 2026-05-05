@@ -9,7 +9,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const difficulties = ["easy", "medium", "hard"];
   const periods = ["weekly", "monthly", "alltime"];
   // Programmatic-SEO topic landing pages — extended as the queue advances
-  const topicTests = ["programming"];
+  const topicTests = ["programming", "numbers", "punctuation"];
 
   const now = new Date();
 

@@ -43,7 +43,3 @@ export const programmingTexts: Record<Difficulty, string[]> = {
   ],
 };
 
-// Registry of topic word packs — extended as the programmatic SEO queue advances.
-export const topicTexts: Record<string, Record<Difficulty, string[]>> = {
-  programming: programmingTexts,
-};
