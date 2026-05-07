@@ -134,6 +134,12 @@ const content = {
           description: "Vergul, qo'shtirnoq, qavslar — Shift kombinatsiyalarini tezlashtiring",
           badge: "Yangi",
         },
+        {
+          slug: "quotes",
+          title: "Mashhur iqtiboslar typing test",
+          description: "Shakespeare, Einstein, Lincoln, Steve Jobs — tasdiqlangan iqtiboslar bilan",
+          badge: "Yangi",
+        },
       ],
     },
     blog: {
@@ -218,6 +224,12 @@ const content = {
           description: "Commas, quotes, brackets — train your Shift-key chords",
           badge: "New",
         },
+        {
+          slug: "quotes",
+          title: "Famous Quotes Typing Test",
+          description: "Shakespeare, Einstein, Lincoln, Steve Jobs — verified primary sources",
+          badge: "New",
+        },
       ],
     },
     blog: {
@@ -300,6 +312,12 @@ const content = {
           slug: "punctuation",
           title: "Тест печати пунктуации",
           description: "Запятые, кавычки, скобки — отработайте аккорды с Shift",
+          badge: "Новое",
+        },
+        {
+          slug: "quotes",
+          title: "Тест печати известных цитат",
+          description: "Шекспир, Эйнштейн, Линкольн, Стив Джобс — проверенные первоисточники",
           badge: "Новое",
         },
       ],

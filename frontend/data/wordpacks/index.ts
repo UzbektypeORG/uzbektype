@@ -2,6 +2,7 @@ import type { Difficulty } from "@/types";
 import { programmingTexts } from "./programming";
 import { numbersTexts } from "./numbers";
 import { punctuationTexts } from "./punctuation";
+import { quotesTexts } from "./quotes";
 
 // Central registry of topic word packs — extended as the programmatic SEO
 // queue advances. The slug used here MUST match the URL slug under
@@ -10,4 +11,5 @@ export const topicTexts: Record<string, Record<Difficulty, string[]>> = {
   programming: programmingTexts,
   numbers: numbersTexts,
   punctuation: punctuationTexts,
+  quotes: quotesTexts,
 };
