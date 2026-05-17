@@ -140,6 +140,12 @@ const content = {
           description: "Shakespeare, Einstein, Lincoln, Steve Jobs — tasdiqlangan iqtiboslar bilan",
           badge: "Yangi",
         },
+        {
+          slug: "uzbek-latin",
+          title: "Lotin yozuvda typing test",
+          description: "o', g', sh, ch, ng — o'zbek lotin alifbosi mashqi",
+          badge: "Yangi",
+        },
       ],
     },
     blog: {
@@ -230,6 +236,12 @@ const content = {
           description: "Shakespeare, Einstein, Lincoln, Steve Jobs — verified primary sources",
           badge: "New",
         },
+        {
+          slug: "uzbek-latin",
+          title: "Uzbek Latin Typing Test",
+          description: "o', g', sh, ch, ng — practice the modern Uzbek Latin alphabet",
+          badge: "New",
+        },
       ],
     },
     blog: {
@@ -318,6 +330,12 @@ const content = {
           slug: "quotes",
           title: "Тест печати известных цитат",
           description: "Шекспир, Эйнштейн, Линкольн, Стив Джобс — проверенные первоисточники",
+          badge: "Новое",
+        },
+        {
+          slug: "uzbek-latin",
+          title: "Тест печати на узбекской латинице",
+          description: "o', g', sh, ch, ng — современный узбекский алфавит",
           badge: "Новое",
         },
       ],
