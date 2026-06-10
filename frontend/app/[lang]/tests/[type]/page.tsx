@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { notFound, useParams, useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
@@ -92,7 +92,32 @@ export default function TestPage() {
   const [showTelegramModal, setShowTelegramModal] = useState(false);
   const [showMobileWarning, setShowMobileWarning] = useState(false);
   const [recordType, setRecordType] = useState<"personal" | "top" | null>(null);
+  // Server-issued anti-cheat token, minted at test start and required by
+  // /api/results to save the score. Held in a ref so the latest value is
+  // always available inside handleTestComplete without re-binding the callback.
+  const testTokenRef = useRef<string | null>(null);
   const { data: session } = useSession();
+
+  // Mint a fresh anti-cheat token for the given config (signed-in users only;
+  // anonymous users get 401 and simply have no token — their results aren't
+  // saved anyway). Called when a test is set up and on each retry.
+  const requestTestToken = useCallback((cfg: TestConfig) => {
+    testTokenRef.current = null;
+    fetch("/api/test/start", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        language: cfg.language,
+        testType: cfg.testType,
+        difficulty: cfg.difficulty,
+      }),
+    })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data: { token?: string } | null) => {
+        if (data?.token) testTokenRef.current = data.token;
+      })
+      .catch(() => {});
+  }, []);
 
   // Restore fullscreen if it was active before navigation
   useEffect(() => {
@@ -166,7 +191,8 @@ export default function TestPage() {
 
     setConfig(testConfig);
     setText(testText);
-  }, [typeParam, lang, topic]);
+    requestTestToken(testConfig);
+  }, [typeParam, lang, topic, requestTestToken]);
 
   const handleTestComplete = (stats: TypingStats & { timeElapsed: number; wpmHistory: WpmDataPoint[]; rawWpm: number; consistency: number }) => {
     if (!config) return;
@@ -209,6 +235,7 @@ export default function TestPage() {
         incorrectChars: stats.incorrectChars,
         totalChars: stats.totalChars,
         timeElapsed: stats.timeElapsed,
+        token: testTokenRef.current,
       }),
     })
       .then((r) => (r.ok ? r.json() : null))
@@ -299,6 +326,7 @@ export default function TestPage() {
       const targetCount = parseInt(config.testType);
       const newText = getTestText(config.language, config.difficulty, isWordBased, targetCount, topic);
       setText(newText);
+      requestTestToken(config);
     }
     setResult(null);
     setRecordType(null);

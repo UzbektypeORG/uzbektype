@@ -3,6 +3,20 @@ import { auth } from "@/auth";
 import { db, testResults, users } from "@/db";
 import { eq, sql } from "drizzle-orm";
 import { sendChannelMessage } from "@/lib/telegram";
+import { verifyTestToken } from "@/lib/test-token";
+
+// ─── Anti-cheat tuning ──────────────────────────────────────────────────────
+// MAX_WPM sits just above the human sustained-typing world record (~216 WPM),
+// so no genuine result is ever rejected but fabricated 400-500 WPM rows are.
+const MAX_WPM = 220;
+// Keystroke ceiling: 20 chars/s ≈ 240 net WPM — generous for the fastest real
+// typist, lethal to a payload claiming thousands of chars in a heartbeat.
+const MAX_CPS = 20;
+// A token is good for 15 min — long enough to read the text and run a test,
+// short enough to bound replay.
+const TOKEN_MAX_AGE_MS = 15 * 60_000;
+// Slack between the reported typing duration and real server wall-clock.
+const TIME_TOLERANCE_S = 3;
 
 const DIFFICULTY_LABELS: Record<"easy" | "medium" | "hard", string> = {
   easy: "Oson",
@@ -56,6 +70,7 @@ type Body = {
   incorrectChars?: unknown;
   totalChars?: unknown;
   timeElapsed?: unknown;
+  token?: unknown;
 };
 
 function isInt(v: unknown, min: number, max: number): v is number {
@@ -92,6 +107,59 @@ export async function POST(req: Request) {
   if (!isInt(body.totalChars, 0, 100000)) return NextResponse.json({ error: "invalid_total_chars" }, { status: 400 });
   if (!isNum(body.timeElapsed, 0, 600)) return NextResponse.json({ error: "invalid_time_elapsed" }, { status: 400 });
 
+  // ─── Anti-cheat ───────────────────────────────────────────────────────────
+  // From here on, nothing the client *claims* about its score is trusted.
+  // A valid server-issued token must be present, the timing/char arithmetic
+  // must be internally consistent, and WPM/accuracy are RECOMPUTED server-side
+  // (the client's `wpm`/`accuracy` are ignored — only the raw chars+time feed
+  // the stored values). This is what makes a fabricated 496 WPM impossible.
+  const now = Date.now();
+  const token = verifyTestToken(body.token, now, TOKEN_MAX_AGE_MS);
+  if (!token) {
+    return NextResponse.json({ error: "invalid_token" }, { status: 400 });
+  }
+  if (
+    token.uid !== session.user.id ||
+    token.tt !== body.testType ||
+    token.df !== body.difficulty ||
+    token.lg !== body.language
+  ) {
+    return NextResponse.json({ error: "token_mismatch" }, { status: 400 });
+  }
+
+  const t = body.timeElapsed; // seconds, validated 0..600 above
+  if (t <= 0 || body.totalChars <= 0) {
+    return NextResponse.json({ error: "empty_test" }, { status: 400 });
+  }
+
+  // The reported typing time cannot exceed real wall-clock since the token was
+  // issued — you can't claim 60 s of typing 4 s after the test started.
+  const wallElapsed = (now - token.iat) / 1000;
+  if (t > wallElapsed + TIME_TOLERANCE_S) {
+    return NextResponse.json({ error: "time_inconsistent" }, { status: 400 });
+  }
+
+  // Char counts must add up exactly (correct + corrected + incorrect = total).
+  if (body.correctChars + body.correctedChars + body.incorrectChars !== body.totalChars) {
+    return NextResponse.json({ error: "char_sum_mismatch" }, { status: 400 });
+  }
+
+  // Recompute the canonical metrics from raw fields, mirroring the client's
+  // own formulas (see TypingTest.tsx): WPM uses correct+corrected chars,
+  // accuracy uses pure-correct over total. These — not the client's claims —
+  // are what we store.
+  const serverWpm = Math.round(((body.correctChars + body.correctedChars) / 5 / t) * 60);
+  const serverAccuracy = (body.correctChars / body.totalChars) * 100;
+
+  // Physical plausibility ceilings — no human exceeds these.
+  if (serverWpm > MAX_WPM) {
+    return NextResponse.json({ error: "wpm_implausible" }, { status: 422 });
+  }
+  if (body.totalChars / t > MAX_CPS) {
+    return NextResponse.json({ error: "cps_implausible" }, { status: 422 });
+  }
+  // ──────────────────────────────────────────────────────────────────────────
+
   // Snapshot the previous all-time max for this difficulty BEFORE inserting,
   // so we can tell whether the incoming row breaks it. Cross-test-type
   // (10s/30s/.../60w) — one record per difficulty, not per category.
@@ -119,8 +187,8 @@ export async function POST(req: Request) {
       language: body.language,
       testType: body.testType,
       difficulty: body.difficulty,
-      wpm: body.wpm,
-      accuracy: body.accuracy.toFixed(2),
+      wpm: serverWpm,
+      accuracy: serverAccuracy.toFixed(2),
       stars: body.stars,
       correctChars: body.correctChars,
       correctedChars: body.correctedChars,
@@ -130,8 +198,8 @@ export async function POST(req: Request) {
     })
     .returning({ id: testResults.id });
 
-  const beatsGlobal = body.wpm > prevMax;
-  const beatsPersonal = body.wpm > prevUserMax;
+  const beatsGlobal = serverWpm > prevMax;
+  const beatsPersonal = serverWpm > prevUserMax;
   const recordType: "top" | "personal" | null = beatsGlobal
     ? "top"
     : beatsPersonal
@@ -153,7 +221,7 @@ export async function POST(req: Request) {
     await announceRecord({
       userId: session.user.id,
       difficulty: body.difficulty as "easy" | "medium" | "hard",
-      wpm: body.wpm,
+      wpm: serverWpm,
       debug: !beatsGlobal && debugAll,
     });
   }
