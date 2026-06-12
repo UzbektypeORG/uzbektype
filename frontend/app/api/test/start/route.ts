@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { issueTestToken } from "@/lib/test-token";
+import { isBannedEmail } from "@/lib/banned-emails";
 
 export const dynamic = "force-dynamic";
 export const fetchCache = "force-no-store";
@@ -16,6 +17,13 @@ export async function POST(req: Request) {
   const session = await auth();
   if (!session?.user?.id) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+  }
+
+  // Banned address: hand back a syntactically valid but meaningless token so
+  // the UI behaves normally, while /api/results silently drops the result.
+  // No error here, so the client shows no warning.
+  if (isBannedEmail(session.user.email)) {
+    return NextResponse.json({ token: "banned" });
   }
 
   const body = (await req.json().catch(() => null)) as {
