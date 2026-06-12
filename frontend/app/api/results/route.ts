@@ -7,9 +7,10 @@ import { verifyTestToken } from "@/lib/test-token";
 import { isBannedEmail } from "@/lib/banned-emails";
 
 // ─── Anti-cheat tuning ──────────────────────────────────────────────────────
-// The fastest genuine result on the site is ~131 WPM, so MAX_WPM = 150 leaves
-// a real fast typist comfortable headroom while rejecting fabricated scores.
-const MAX_WPM = 150;
+// Per-difficulty WPM ceilings. Harder text is typed slower, so each cap sits
+// ~25-30% above the fastest GENUINE result in that bucket (easy 131 / medium
+// 93 / hard 84) — headroom for a future fast typist, no room for fabrication.
+const MAX_WPM: Record<string, number> = { easy: 150, medium: 120, hard: 110 };
 // Keystroke ceiling: 14 chars/s ≈ 168 net WPM — above any real typist here
 // (legit top is ~10.5 cps), lethal to a payload claiming superhuman bursts.
 const MAX_CPS = 14;
@@ -162,7 +163,7 @@ export async function POST(req: Request) {
   const serverAccuracy = (body.correctChars / body.totalChars) * 100;
 
   // Physical plausibility ceilings — anything above is dropped silently.
-  if (serverWpm > MAX_WPM) return silentDrop();
+  if (serverWpm > (MAX_WPM[body.difficulty] ?? 150)) return silentDrop();
   if (body.totalChars / t > MAX_CPS) return silentDrop();
   // ──────────────────────────────────────────────────────────────────────────
 
