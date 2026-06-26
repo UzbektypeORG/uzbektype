@@ -79,7 +79,7 @@ export async function GET() {
       COUNT(DISTINCT anon_id) FILTER (WHERE signed_in)::int AS "allSignedIn"
     FROM daily_visit
   `);
-  const v = visitorRow.rows[0];
+  const v = visitorRow[0];
 
   function bucket(total: number | undefined, signedIn: number | undefined) {
     const t = Number(total ?? 0);
@@ -166,11 +166,11 @@ export async function GET() {
       last7d: totals?.last7d ?? 0,
       last30d: totals?.last30d ?? 0,
     },
-    daily: daily.rows.map((d) => ({
+    daily: daily.map((d) => ({
       day: d.day,
       count: Number(d.count),
     })),
-    visitorTimeline: dailyVisitorRows.rows.map((d) => ({
+    visitorTimeline: dailyVisitorRows.map((d) => ({
       day: d.day,
       total: Number(d.total),
       signedIn: Number(d.signedIn),

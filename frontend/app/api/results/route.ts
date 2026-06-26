@@ -175,7 +175,7 @@ export async function POST(req: Request) {
     FROM test_result
     WHERE difficulty = ${body.difficulty}
   `);
-  const prevMax = Number(prevRow.rows[0]?.maxWpm ?? 0);
+  const prevMax = Number(prevRow[0]?.maxWpm ?? 0);
 
   // Snapshot user's previous personal best for this difficulty, so we can
   // distinguish a personal record (beats own best but not global) from a
@@ -185,7 +185,7 @@ export async function POST(req: Request) {
     FROM test_result
     WHERE difficulty = ${body.difficulty} AND user_id = ${session.user.id}
   `);
-  const prevUserMax = Number(prevUserRow.rows[0]?.maxWpm ?? 0);
+  const prevUserMax = Number(prevUserRow[0]?.maxWpm ?? 0);
 
   const [row] = await db
     .insert(testResults)
