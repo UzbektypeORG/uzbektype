@@ -10,6 +10,8 @@ import TestResults from "@/components/typing/TestResults";
 import RecordCelebration from "@/components/RecordCelebration";
 import FeedbackModal from "@/components/FeedbackModal";
 import TelegramJoinModal from "@/components/TelegramJoinModal";
+import AuthorChannelModal from "@/components/AuthorChannelModal";
+import AuthorChannelCard from "@/components/AuthorChannelCard";
 import LeaderboardWidget from "@/components/LeaderboardWidget";
 import LoginCtaBanner from "@/components/LoginCtaBanner";
 import { getTestText } from "@/lib/getTestText";
@@ -90,6 +92,7 @@ export default function TestPage() {
   const [animationMode, setAnimationMode] = useState<'bounce' | 'fade'>('bounce');
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
   const [showTelegramModal, setShowTelegramModal] = useState(false);
+  const [showAuthorModal, setShowAuthorModal] = useState(false);
   const [showMobileWarning, setShowMobileWarning] = useState(false);
   const [recordType, setRecordType] = useState<"personal" | "top" | null>(null);
   // Server-issued anti-cheat token, minted at test start and required by
@@ -256,26 +259,28 @@ export default function TestPage() {
       }, 1500); // Show after results appear
     }
 
-    // Telegram join modal — shown once at the user's 3rd test, regardless of
-    // sign-in state. Signed-in users count post-login tests separately so a
-    // user who signs in after their first 3 anonymous tests still gets it
-    // (post-login test 3) instead of having missed the cutoff.
-    const telegramShown = localStorage.getItem("uzbektype_telegram_invited");
-    if (!telegramShown) {
-      let triggerTelegram = false;
-      if (session) {
-        const loggedInTests =
-          parseInt(localStorage.getItem("uzbektype_logged_in_tests") || "0") + 1;
-        localStorage.setItem("uzbektype_logged_in_tests", loggedInTests.toString());
-        if (loggedInTests === 3) triggerTelegram = true;
-      } else if (completedTests === 3) {
-        triggerTelegram = true;
-      }
-      if (triggerTelegram) {
-        setTimeout(() => {
-          setShowTelegramModal(true);
-        }, 1700);
-      }
+    // Channel promo modals, keyed off a test-count milestone. Signed-in users
+    // count post-login tests separately so someone who signs in after a few
+    // anonymous tests still hits the milestone instead of missing the cutoff.
+    // Milestones are spaced so the prompts never stack (3 / 7-feedback / 10).
+    let loggedInTests = 0;
+    if (session) {
+      loggedInTests =
+        parseInt(localStorage.getItem("uzbektype_logged_in_tests") || "0") + 1;
+      localStorage.setItem("uzbektype_logged_in_tests", loggedInTests.toString());
+    }
+    const milestoneHit = (n: number) =>
+      session ? loggedInTests === n : completedTests === n;
+
+    // Author channel (@shavkatovio) — once, at the 3rd test.
+    if (!localStorage.getItem("uzbektype_author_invited") && milestoneHit(3)) {
+      setTimeout(() => setShowAuthorModal(true), 1700);
+    }
+
+    // Site channel (@uzbektype, leaderboard announcements) — once, at the 10th
+    // test, kept clear of the author modal at test 3.
+    if (!localStorage.getItem("uzbektype_telegram_invited") && milestoneHit(10)) {
+      setTimeout(() => setShowTelegramModal(true), 1700);
     }
 
     setResult(stats);
@@ -284,6 +289,11 @@ export default function TestPage() {
   const handleTelegramClose = () => {
     setShowTelegramModal(false);
     localStorage.setItem("uzbektype_telegram_invited", "true");
+  };
+
+  const handleAuthorClose = () => {
+    setShowAuthorModal(false);
+    localStorage.setItem("uzbektype_author_invited", "true");
   };
 
   const handleFeedbackSubmit = async (feedback: string) => {
@@ -547,8 +557,10 @@ export default function TestPage() {
                 />
               </div>
               {/* Right (xl) / Bottom (mobile): Leaderboard widget — top 5 in result view */}
-              <div className="w-full">
+              <div className="w-full space-y-4">
                 <LeaderboardWidget lang={lang} limit={5} />
+                {/* Author channel promo — subtle, dismissible per session */}
+                <AuthorChannelCard lang={lang} />
               </div>
             </div>
           </div>
@@ -572,10 +584,17 @@ export default function TestPage() {
         lang={lang}
       />
 
-      {/* Telegram Join Modal — only for Google-signed-in users at 3 post-login tests */}
+      {/* Site channel modal (@uzbektype) — at the 10th test */}
       <TelegramJoinModal
         isOpen={showTelegramModal}
         onClose={handleTelegramClose}
+        lang={lang}
+      />
+
+      {/* Author channel modal (@shavkatovio) — at the 3rd test */}
+      <AuthorChannelModal
+        isOpen={showAuthorModal}
+        onClose={handleAuthorClose}
         lang={lang}
       />
 
