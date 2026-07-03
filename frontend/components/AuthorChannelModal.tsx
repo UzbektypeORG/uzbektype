@@ -65,7 +65,15 @@ export default function AuthorChannelModal({ isOpen, onClose, lang }: AuthorChan
               href={CHANNEL_URL}
               target="_blank"
               rel="noopener noreferrer"
-              onClick={() => setTimeout(onClose, 200)}
+              onClick={() => {
+                // They're opening the channel — stop re-prompting on future tests.
+                try {
+                  localStorage.setItem("uzbektype_author_joined", "true");
+                } catch {
+                  // localStorage unavailable — ignore.
+                }
+                setTimeout(onClose, 200);
+              }}
               className="flex-1 px-4 py-2.5 text-sm rounded-lg bg-[#229ED9] text-white hover:opacity-90 transition-all font-medium text-center"
             >
               {t.cta}

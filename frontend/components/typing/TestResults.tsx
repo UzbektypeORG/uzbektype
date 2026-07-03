@@ -63,8 +63,8 @@ const labels = {
     easy: "Oson",
     medium: "O'rta",
     hard: "Qiyin",
-    tgTitle: "Uzbektype rasmiy kanaliga qo'shiling",
-    tgSubtitle: "Yangiliklar, yangi imkoniyatlar va yozuv maslahatlari",
+    tgTitle: "@shavkatovio kanaliga qo'shiling",
+    tgSubtitle: "AI yangiliklari va raqamli ko'nikmalar bo'yicha foydali kontent",
     tgCta: "Qo'shilish",
   },
   en: {
@@ -80,8 +80,8 @@ const labels = {
     easy: "Easy",
     medium: "Medium",
     hard: "Hard",
-    tgTitle: "Join the official Uzbektype channel",
-    tgSubtitle: "News, new features and typing tips",
+    tgTitle: "Join the @shavkatovio channel",
+    tgSubtitle: "Practical content on AI news and digital skills",
     tgCta: "Join",
   },
   ru: {
@@ -97,8 +97,8 @@ const labels = {
     easy: "Лёгкий",
     medium: "Средний",
     hard: "Сложный",
-    tgTitle: "Официальный канал Uzbektype",
-    tgSubtitle: "Новости, новые возможности и советы по печати",
+    tgTitle: "Канал @shavkatovio",
+    tgSubtitle: "Полезный контент об AI и цифровых навыках",
     tgCta: "Вступить",
   },
 };
@@ -303,7 +303,7 @@ export default function TestResults({
 
       {/* Telegram CTA Banner */}
       <a
-        href="https://t.me/uzbektype"
+        href="https://t.me/shavkatovio"
         target="_blank"
         rel="noopener noreferrer"
         className="group relative block w-full overflow-hidden rounded-xl min-h-[90px] md:min-h-[110px] bg-gradient-to-r from-[#229ED9]/10 via-[#229ED9]/5 to-transparent border border-[#229ED9]/30 hover:border-[#229ED9]/60 hover:shadow-lg hover:shadow-[#229ED9]/10 transition-all duration-300"

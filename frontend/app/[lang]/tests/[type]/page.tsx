@@ -11,7 +11,6 @@ import RecordCelebration from "@/components/RecordCelebration";
 import FeedbackModal from "@/components/FeedbackModal";
 import TelegramJoinModal from "@/components/TelegramJoinModal";
 import AuthorChannelModal from "@/components/AuthorChannelModal";
-import AuthorChannelCard from "@/components/AuthorChannelCard";
 import LeaderboardWidget from "@/components/LeaderboardWidget";
 import LoginCtaBanner from "@/components/LoginCtaBanner";
 import { getTestText } from "@/lib/getTestText";
@@ -269,17 +268,22 @@ export default function TestPage() {
         parseInt(localStorage.getItem("uzbektype_logged_in_tests") || "0") + 1;
       localStorage.setItem("uzbektype_logged_in_tests", loggedInTests.toString());
     }
-    const milestoneHit = (n: number) =>
-      session ? loggedInTests === n : completedTests === n;
+    const testCount = session ? loggedInTests : completedTests;
 
-    // Author channel (@shavkatovio) — once, at the 3rd test.
-    if (!localStorage.getItem("uzbektype_author_invited") && milestoneHit(3)) {
+    // Author channel (@shavkatovio) — recurring prompt on every 3rd test
+    // (3, 6, 9, …). Stops once the user actually opens the channel, so it
+    // keeps nudging non-subscribers without nagging people who already joined.
+    if (
+      !localStorage.getItem("uzbektype_author_joined") &&
+      testCount > 0 &&
+      testCount % 3 === 0
+    ) {
       setTimeout(() => setShowAuthorModal(true), 1700);
     }
 
-    // Site channel (@uzbektype, leaderboard announcements) — once, at the 10th
-    // test, kept clear of the author modal at test 3.
-    if (!localStorage.getItem("uzbektype_telegram_invited") && milestoneHit(10)) {
+    // Site channel (@uzbektype) — once, at the 10th test. 10 isn't a multiple
+    // of 3, so it never lands on the same test as the author prompt.
+    if (!localStorage.getItem("uzbektype_telegram_invited") && testCount === 10) {
       setTimeout(() => setShowTelegramModal(true), 1700);
     }
 
@@ -292,8 +296,9 @@ export default function TestPage() {
   };
 
   const handleAuthorClose = () => {
+    // Just dismiss — the every-3rd-test spacing handles re-prompting. The prompt
+    // only stops for good once the user opens the channel (flag set in the modal).
     setShowAuthorModal(false);
-    localStorage.setItem("uzbektype_author_invited", "true");
   };
 
   const handleFeedbackSubmit = async (feedback: string) => {
@@ -557,10 +562,8 @@ export default function TestPage() {
                 />
               </div>
               {/* Right (xl) / Bottom (mobile): Leaderboard widget — top 5 in result view */}
-              <div className="w-full space-y-4">
+              <div className="w-full">
                 <LeaderboardWidget lang={lang} limit={5} />
-                {/* Author channel promo — subtle, dismissible per session */}
-                <AuthorChannelCard lang={lang} />
               </div>
             </div>
           </div>
