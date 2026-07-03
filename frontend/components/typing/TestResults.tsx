@@ -63,8 +63,8 @@ const labels = {
     easy: "Oson",
     medium: "O'rta",
     hard: "Qiyin",
-    tgTitle: "Oylik top-10 chempionlar",
-    tgSubtitle: "Har oy g'oliblar Telegramda e'lon qilinadi",
+    tgTitle: "Uzbektype rasmiy kanaliga qo'shiling",
+    tgSubtitle: "Yangiliklar, yangi imkoniyatlar va yozuv maslahatlari",
     tgCta: "Qo'shilish",
   },
   en: {
@@ -80,8 +80,8 @@ const labels = {
     easy: "Easy",
     medium: "Medium",
     hard: "Hard",
-    tgTitle: "Monthly top-10 champions",
-    tgSubtitle: "Winners announced on Telegram each month",
+    tgTitle: "Join the official Uzbektype channel",
+    tgSubtitle: "News, new features and typing tips",
     tgCta: "Join",
   },
   ru: {
@@ -97,8 +97,8 @@ const labels = {
     easy: "Лёгкий",
     medium: "Средний",
     hard: "Сложный",
-    tgTitle: "Топ-10 чемпионов месяца",
-    tgSubtitle: "Победителей объявляем в Telegram каждый месяц",
+    tgTitle: "Официальный канал Uzbektype",
+    tgSubtitle: "Новости, новые возможности и советы по печати",
     tgCta: "Вступить",
   },
 };

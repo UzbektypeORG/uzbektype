@@ -10,20 +10,20 @@ const TELEGRAM_URL = "https://t.me/uzbektype";
 
 const content = {
   uz: {
-    title: "Oylik top-10 chempion bo'ling",
-    subtitle: "Har oy eng tezkor 10 yozuvchi Telegram kanalimizda e'lon qilinadi",
+    title: "Uzbektype rasmiy kanaliga qo'shiling",
+    subtitle: "Yangiliklar, yangi imkoniyatlar va yozuv tezligi bo'yicha maslahatlar — rasmiy Telegram kanalimizda",
     cta: "Kanalga o'tish",
     later: "Keyinroq",
   },
   en: {
-    title: "Become a monthly top-10 champion",
-    subtitle: "The 10 fastest typists each month are announced on our Telegram channel",
+    title: "Join the official Uzbektype channel",
+    subtitle: "News, new features and typing-speed tips — on our official Telegram channel",
     cta: "Open channel",
     later: "Later",
   },
   ru: {
-    title: "Войдите в топ-10 чемпионов месяца",
-    subtitle: "10 самых быстрых машинистов каждого месяца объявляем в нашем Telegram-канале",
+    title: "Присоединяйтесь к официальному каналу Uzbektype",
+    subtitle: "Новости, новые возможности и советы по скорости печати — в нашем официальном Telegram-канале",
     cta: "Открыть канал",
     later: "Позже",
   },
