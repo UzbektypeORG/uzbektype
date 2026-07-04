@@ -35,9 +35,14 @@ export async function GET() {
     ORDER BY day ASC
   `);
 
-  // Daily unique visitors for the last 365 days, broken down by signed-in vs
-  // guest. Overview slices the tail to render the 14-day chart; the dedicated
+  // Daily unique visitors for the last year, broken down by signed-in vs guest.
+  // Overview slices the tail to render the 14-day chart; the dedicated
   // Tashriflar tab consumes the full range and aggregates to weekly/monthly.
+  //
+  // Today (CURRENT_DATE) is intentionally EXCLUDED: it's still in progress, so
+  // its partial count would render as a misleading dip on the timeline (worst
+  // in the morning). The chart therefore ends at yesterday. Note this only
+  // affects the time-series — the "Bugun" breakdown tile still counts today.
   const dailyVisitorRows = await db.execute<{
     day: string;
     total: number;
@@ -50,7 +55,8 @@ export async function GET() {
       COUNT(*) FILTER (WHERE signed_in)::int AS "signedIn",
       COUNT(*) FILTER (WHERE NOT signed_in)::int AS guests
     FROM daily_visit
-    WHERE visit_date >= CURRENT_DATE - INTERVAL '364 days'
+    WHERE visit_date >= CURRENT_DATE - INTERVAL '365 days'
+      AND visit_date < CURRENT_DATE
     GROUP BY day
     ORDER BY day ASC
   `);
