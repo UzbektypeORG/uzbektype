@@ -68,7 +68,7 @@ export async function generateMetadata({
     description: m.description,
     keywords: m.keywords,
     alternates: {
-      canonical: `https://uzbektype.uz/${lang}/tests/numbers`,
+      canonical: `https://www.uzbektype.uz/${lang}/tests/numbers`,
       languages: {
         uz: "/uz/tests/numbers",
         en: "/en/tests/numbers",
@@ -78,7 +78,7 @@ export async function generateMetadata({
     openGraph: {
       title: m.ogTitle,
       description: m.description,
-      url: `https://uzbektype.uz/${lang}/tests/numbers`,
+      url: `https://www.uzbektype.uz/${lang}/tests/numbers`,
       type: "website",
       locale: lang === "uz" ? "uz_UZ" : lang === "en" ? "en_US" : "ru_RU",
     },

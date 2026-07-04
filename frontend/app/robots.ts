@@ -21,7 +21,7 @@ export default function robots(): MetadataRoute.Robots {
         ],
       },
     ],
-    sitemap: "https://uzbektype.uz/sitemap.xml",
-    host: "https://uzbektype.uz",
+    sitemap: "https://www.uzbektype.uz/sitemap.xml",
+    host: "https://www.uzbektype.uz",
   };
 }

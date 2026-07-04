@@ -26,7 +26,7 @@ const pageContent = {
   },
 } as const;
 
-const baseUrl = "https://uzbektype.uz";
+const baseUrl = "https://www.uzbektype.uz";
 
 export async function generateMetadata({ params }: { params: Promise<{ lang: Language }> }): Promise<Metadata> {
   const { lang } = await params;

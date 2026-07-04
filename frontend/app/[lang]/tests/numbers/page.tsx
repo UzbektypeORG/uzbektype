@@ -126,7 +126,7 @@ export default async function NumbersTestPage({
 }) {
   const { lang } = await params;
   const t = content[lang];
-  const baseUrl = "https://uzbektype.uz";
+  const baseUrl = "https://www.uzbektype.uz";
   const pageUrl = `${baseUrl}/${lang}/tests/numbers`;
 
   const jsonLd = {

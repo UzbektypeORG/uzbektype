@@ -23,7 +23,7 @@ const courseDescriptions = {
 } as const;
 
 export default function StructuredData({ lang }: StructuredDataProps) {
-  const baseUrl = "https://uzbektype.uz";
+  const baseUrl = "https://www.uzbektype.uz";
 
   const webApp = {
     "@context": "https://schema.org",
@@ -55,6 +55,22 @@ export default function StructuredData({ lang }: StructuredDataProps) {
         ],
       },
     },
+    publisher: {
+      "@id": `${baseUrl}/#organization`,
+    },
+  };
+
+  // WebSite entity — anchors the site name for Google (branding / sitelinks).
+  // No SearchAction: the site has no on-site search results page, so a
+  // sitelinks searchbox would be invalid.
+  const website = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "@id": `${baseUrl}/#website`,
+    name: "Uzbektype",
+    url: baseUrl,
+    description: descriptions[lang],
+    inLanguage: lang,
     publisher: {
       "@id": `${baseUrl}/#organization`,
     },
@@ -102,7 +118,7 @@ export default function StructuredData({ lang }: StructuredDataProps) {
     },
   };
 
-  const blob = JSON.stringify([webApp, organization, course]);
+  const blob = JSON.stringify([webApp, website, organization, course]);
 
   return (
     <script

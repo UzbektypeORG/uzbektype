@@ -129,7 +129,7 @@ export default async function PunctuationTestPage({
 }) {
   const { lang } = await params;
   const t = content[lang];
-  const baseUrl = "https://uzbektype.uz";
+  const baseUrl = "https://www.uzbektype.uz";
   const pageUrl = `${baseUrl}/${lang}/tests/punctuation`;
 
   const jsonLd = {

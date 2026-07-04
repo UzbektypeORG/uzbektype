@@ -2,7 +2,7 @@ import { MetadataRoute } from "next";
 import { blogPosts } from "@/data/blogPosts";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = "https://uzbektype.uz";
+  const baseUrl = "https://www.uzbektype.uz";
   const languages = ["uz", "en", "ru"] as const;
 
   const testTypes = ["10s", "30s", "60s", "10w", "30w", "60w"];

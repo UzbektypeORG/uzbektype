@@ -65,7 +65,7 @@ export async function generateMetadata({
     description: m.description,
     keywords: m.keywords,
     alternates: {
-      canonical: `https://uzbektype.uz/${lang}/tests/punctuation`,
+      canonical: `https://www.uzbektype.uz/${lang}/tests/punctuation`,
       languages: {
         uz: "/uz/tests/punctuation",
         en: "/en/tests/punctuation",
@@ -75,7 +75,7 @@ export async function generateMetadata({
     openGraph: {
       title: m.ogTitle,
       description: m.description,
-      url: `https://uzbektype.uz/${lang}/tests/punctuation`,
+      url: `https://www.uzbektype.uz/${lang}/tests/punctuation`,
       type: "website",
       locale: lang === "uz" ? "uz_UZ" : lang === "en" ? "en_US" : "ru_RU",
     },

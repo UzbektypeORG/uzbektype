@@ -67,7 +67,7 @@ export async function generateMetadata({ params }: { params: Promise<{ lang: Lan
     description: seo.description,
     keywords: seo.keywords,
     alternates: {
-      canonical: `https://uzbektype.uz/${currentLang}`,
+      canonical: `https://www.uzbektype.uz/${currentLang}`,
       languages: {
         "uz": "/uz",
         "en": "/en",
@@ -77,8 +77,16 @@ export async function generateMetadata({ params }: { params: Promise<{ lang: Lan
     openGraph: {
       title: seo.title,
       description: seo.description,
-      url: `https://uzbektype.uz/${currentLang}`,
+      url: `https://www.uzbektype.uz/${currentLang}`,
       locale: currentLang === "uz" ? "uz_UZ" : currentLang === "en" ? "en_US" : "ru_RU",
+      siteName: "Uzbektype",
+      images: [{ url: "/og-image.png", width: 1200, height: 630, alt: seo.title }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: seo.title,
+      description: seo.description,
+      images: ["/og-image.png"],
     },
   };
 }

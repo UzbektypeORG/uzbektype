@@ -113,7 +113,7 @@ export default function TestResults({
   const [showCopied, setShowCopied] = useState(false);
 
   const handleShare = async () => {
-    const shareText = `Uzbektype - ${stats.wpm} WPM | ${stats.accuracy}% ${t.accuracy} | ${config.testType.toUpperCase()} ${t[config.difficulty]}\n\nhttps://uzbektype.uz`;
+    const shareText = `Uzbektype - ${stats.wpm} WPM | ${stats.accuracy}% ${t.accuracy} | ${config.testType.toUpperCase()} ${t[config.difficulty]}\n\nhttps://www.uzbektype.uz`;
 
     if (navigator.share) {
       try {

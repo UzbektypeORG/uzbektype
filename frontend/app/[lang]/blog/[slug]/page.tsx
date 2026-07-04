@@ -15,7 +15,7 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
   if (!post) return { title: "Not found" };
 
   const localeMap: Record<Language, string> = { uz: "uz_UZ", en: "en_US", ru: "ru_RU" };
-  const baseUrl = "https://uzbektype.uz";
+  const baseUrl = "https://www.uzbektype.uz";
   const canonical = `${baseUrl}/${lang}/blog/${slug}`;
   const alternateLanguages = Object.fromEntries(
     (Object.keys(post.slugs) as Language[]).map((l) => [l, `${baseUrl}/${l}/blog/${post.slugs[l]}`])

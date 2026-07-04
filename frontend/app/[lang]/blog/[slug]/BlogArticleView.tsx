@@ -219,7 +219,7 @@ function MarkdownRenderer({ content }: { content: string }) {
 
 export default function BlogArticleView({ post, lang }: { post: BlogPost; lang: Language }) {
   const t = navContent[lang];
-  const baseUrl = "https://uzbektype.uz";
+  const baseUrl = "https://www.uzbektype.uz";
 
   // JSON-LD: Article + (optional) HowTo
   const articleSchema = {

@@ -132,7 +132,7 @@ export default async function UzbekLatinTestPage({
 }) {
   const { lang } = await params;
   const t = content[lang];
-  const baseUrl = "https://uzbektype.uz";
+  const baseUrl = "https://www.uzbektype.uz";
   const pageUrl = `${baseUrl}/${lang}/tests/uzbek-latin`;
 
   const jsonLd = {
