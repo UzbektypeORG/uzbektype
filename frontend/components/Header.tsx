@@ -8,6 +8,7 @@ import { useGoogleLogin } from "@/lib/useGoogleLogin";
 import { displayName, avatarSrc } from "@/lib/userDisplay";
 import DonateModal from "@/components/DonateModal";
 import AnimatedSupportLabel from "@/components/AnimatedSupportLabel";
+import { trackPromo } from "@/lib/track-promo";
 
 type Language = "uz" | "en" | "ru";
 
@@ -239,7 +240,7 @@ export default function Header({ lang }: HeaderProps) {
               </span>
             </span>
             <button
-              onClick={() => setShowDonate(true)}
+              onClick={() => { trackPromo("donate_button", "click", lang); setShowDonate(true); }}
               className="absolute inset-y-0 left-1/2 -translate-x-1/2 text-sm font-bold flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-primary/60 text-primary hover:bg-primary hover:text-primary-foreground transition-colors duration-300 cursor-pointer whitespace-nowrap"
             >
               <svg className="heart-beat" width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
@@ -425,7 +426,7 @@ export default function Header({ lang }: HeaderProps) {
         <div className="md:hidden flex items-center gap-2">
           {/* Donate — always visible in the mobile top bar */}
           <button
-            onClick={() => setShowDonate(true)}
+            onClick={() => { trackPromo("donate_button", "click", lang); setShowDonate(true); }}
             aria-label={navContent[lang].support}
             className="flex items-center gap-1 px-2.5 py-1 rounded-full border border-primary/60 text-primary text-xs font-bold hover:bg-primary hover:text-primary-foreground transition-colors duration-300"
           >

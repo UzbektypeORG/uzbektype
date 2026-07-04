@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { createPortal } from "react-dom";
 import { X, Copy, Check } from "lucide-react";
+import { trackPromo } from "@/lib/track-promo";
 
 interface DonateModalProps {
   isOpen: boolean;
@@ -60,6 +61,7 @@ export default function DonateModal({ isOpen, onClose, lang }: DonateModalProps)
       document.execCommand("copy");
       document.body.removeChild(ta);
     }
+    trackPromo("donate_copy", "click", lang);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };

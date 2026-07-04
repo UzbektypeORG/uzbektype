@@ -255,8 +255,18 @@ function pct(part: number, whole: number): string {
   return `${((part / whole) * 100).toFixed(1)}%`;
 }
 
+const AD_PROMOS = ["author_modal", "author_banner", "uzbektype_modal"];
+
 function PromoSection({ promo }: { promo: Stats["promo"] }) {
-  const totals = promo.reduce(
+  const ads = promo.filter((p) => AD_PROMOS.includes(p.promo));
+
+  const byId: Record<string, Stats["promo"][number]> = {};
+  for (const p of promo) byId[p.promo] = p;
+  const donateClicks = byId["donate_button"]?.clicks ?? 0;
+  const donateCopies = byId["donate_copy"]?.clicks ?? 0;
+  const donateAuto = byId["donate_auto"]?.impressions ?? 0;
+
+  const totals = ads.reduce(
     (a, p) => ({
       impressions: a.impressions + p.impressions,
       uniqueUsers: a.uniqueUsers + p.uniqueUsers,
@@ -277,7 +287,7 @@ function PromoSection({ promo }: { promo: Stats["promo"] }) {
 
       <section className="border border-border rounded-xl p-5 md:p-6">
         <h3 className="text-base font-semibold mb-4">Reklama bo'yicha tahlil</h3>
-        {promo.length === 0 ? (
+        {ads.length === 0 ? (
           <p className="text-sm text-muted-foreground">
             Hozircha ma'lumot yo'q. Foydalanuvchilar reklamani ko'rgach shu yerda paydo bo'ladi.
           </p>
@@ -296,7 +306,7 @@ function PromoSection({ promo }: { promo: Stats["promo"] }) {
                 </tr>
               </thead>
               <tbody>
-                {promo.map((p) => (
+                {ads.map((p) => (
                   <tr key={p.promo} className="border-b border-border/50">
                     <td className="py-2.5 pr-3 font-medium">{PROMO_LABELS[p.promo] ?? p.promo}</td>
                     <td className="py-2.5 px-3 text-right font-mono">{p.impressions}</td>
@@ -313,6 +323,20 @@ function PromoSection({ promo }: { promo: Stats["promo"] }) {
         )}
         <p className="text-xs text-muted-foreground mt-4">
           CTR = bosilgan ÷ ko'rsatilgan. &quot;Foydalanuvchi&quot; — reklamani ko'rgan noyob brauzerlar soni.
+        </p>
+      </section>
+
+      <section className="border border-border rounded-xl p-5 md:p-6">
+        <h3 className="text-base font-semibold mb-4">💛 Donat</h3>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <StatCard label="Donat tugma bosilgan" value={donateClicks} />
+          <StatCard label="Karta nusxa olingan" value={donateCopies} />
+          <StatCard label="Avto ochilgan (15-test)" value={donateAuto} />
+        </div>
+        <p className="text-xs text-muted-foreground mt-4">
+          «Donat tugma bosilgan» — donat oynasi tugma orqali ochilgan; «nusxa
+          olingan» — karta raqami nusxalab olingan; «avto ochilgan» — foydalanuvchi
+          15-testni tugatgach oyna avtomatik ochilgan.
         </p>
       </section>
     </div>

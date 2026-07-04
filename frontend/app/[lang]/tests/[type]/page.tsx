@@ -11,7 +11,9 @@ import RecordCelebration from "@/components/RecordCelebration";
 import FeedbackModal from "@/components/FeedbackModal";
 import TelegramJoinModal from "@/components/TelegramJoinModal";
 import AuthorChannelModal from "@/components/AuthorChannelModal";
+import DonateModal from "@/components/DonateModal";
 import LeaderboardWidget from "@/components/LeaderboardWidget";
+import { trackPromo } from "@/lib/track-promo";
 import LoginCtaBanner from "@/components/LoginCtaBanner";
 import { getTestText } from "@/lib/getTestText";
 import { calculateStars } from "@/lib/calculateStars";
@@ -27,6 +29,8 @@ const labels = {
     changeFormat: "Formatni o'zgartirish",
     restart: "Qaytadan boshlash",
     time: "Vaqt",
+    modeTime: "Vaqt",
+    modeWords: "So'z",
     easy: "OSON",
     medium: "O'RTA",
     hard: "QIYIN"
@@ -36,6 +40,8 @@ const labels = {
     changeFormat: "Change Format",
     restart: "Restart",
     time: "Time",
+    modeTime: "Time",
+    modeWords: "Words",
     easy: "EASY",
     medium: "MEDIUM",
     hard: "HARD"
@@ -45,6 +51,8 @@ const labels = {
     changeFormat: "Изменить формат",
     restart: "Перезапустить",
     time: "Время",
+    modeTime: "Время",
+    modeWords: "Слова",
     easy: "ЛЁГКИЙ",
     medium: "СРЕДНИЙ",
     hard: "СЛОЖНЫЙ"
@@ -72,6 +80,7 @@ const mobileWarning = {
 const difficultyOptions: Difficulty[] = ["easy", "medium", "hard"];
 
 const timeOptions = ["10s", "30s", "60s"] as const;
+const wordOptions = ["10w", "30w", "60w"] as const;
 
 export default function TestPage() {
   const params = useParams();
@@ -92,6 +101,7 @@ export default function TestPage() {
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
   const [showTelegramModal, setShowTelegramModal] = useState(false);
   const [showAuthorModal, setShowAuthorModal] = useState(false);
+  const [showDonateModal, setShowDonateModal] = useState(false);
   const [showMobileWarning, setShowMobileWarning] = useState(false);
   const [recordType, setRecordType] = useState<"personal" | "top" | null>(null);
   // Server-issued anti-cheat token, minted at test start and required by
@@ -270,10 +280,17 @@ export default function TestPage() {
     }
     const testCount = session ? loggedInTests : completedTests;
 
+    // Donate modal — auto-opens once, right after the 15th test.
+    if (!localStorage.getItem("uzbektype_donate_auto_shown") && testCount === 15) {
+      localStorage.setItem("uzbektype_donate_auto_shown", "true");
+      trackPromo("donate_auto", "impression", config.language);
+      setTimeout(() => setShowDonateModal(true), 1700);
+    }
     // Author channel (@shavkatovio) — recurring prompt on every 3rd test
     // (3, 6, 9, …). Stops once the user actually opens the channel, so it
     // keeps nudging non-subscribers without nagging people who already joined.
-    if (
+    // The 15th test is skipped here — it belongs to the donate prompt above.
+    else if (
       !localStorage.getItem("uzbektype_author_joined") &&
       testCount > 0 &&
       testCount % 3 === 0
@@ -372,6 +389,9 @@ export default function TestPage() {
   }
 
   const t = labels[config.language];
+  const isWordMode = config.testType.endsWith("w");
+  const currentCount = parseInt(config.testType, 10);
+  const countOptions = isWordMode ? wordOptions : timeOptions;
 
   return (
     <main className="h-[calc(100vh-73px)] md:h-[calc(100dvh-73px)] flex flex-col">
@@ -383,19 +403,43 @@ export default function TestPage() {
               {/* Mobile Row 1: Time + Difficulty (side by side) */}
               {/* Desktop: Left section */}
               <div className="flex items-center gap-2 md:gap-4 w-full md:w-auto justify-center md:justify-start">
-                {/* Time Options */}
+                {/* Time / Words mode toggle */}
+                <div className="flex items-center gap-0.5 md:gap-1 border border-border rounded-lg p-0.5 md:p-1">
+                  <Link
+                    href={`/${lang}/tests/${currentCount}s-${config.difficulty}${topicQuery}`}
+                    className={`px-1.5 py-1 md:px-2.5 md:py-1.5 text-[10px] md:text-xs font-medium rounded-md transition-all ${
+                      !isWordMode
+                        ? "bg-foreground text-background"
+                        : "text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    {t.modeTime}
+                  </Link>
+                  <Link
+                    href={`/${lang}/tests/${currentCount}w-${config.difficulty}${topicQuery}`}
+                    className={`px-1.5 py-1 md:px-2.5 md:py-1.5 text-[10px] md:text-xs font-medium rounded-md transition-all ${
+                      isWordMode
+                        ? "bg-foreground text-background"
+                        : "text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    {t.modeWords}
+                  </Link>
+                </div>
+
+                {/* Time/Word count Options */}
                 <div className="flex items-center gap-1 md:gap-2">
-                  {timeOptions.map((time) => (
+                  {countOptions.map((option) => (
                     <Link
-                      key={time}
-                      href={`/${lang}/tests/${time}-${config.difficulty}${topicQuery}`}
+                      key={option}
+                      href={`/${lang}/tests/${option}-${config.difficulty}${topicQuery}`}
                       className={`px-2 py-1.5 md:px-4 md:py-2 text-xs md:text-sm font-medium rounded-lg transition-all ${
-                        config.testType === time
+                        config.testType === option
                           ? "bg-primary text-primary-foreground"
                           : "border border-border hover:border-foreground"
                       }`}
                     >
-                      {time.toUpperCase()}
+                      {option.toUpperCase()}
                     </Link>
                   ))}
                 </div>
@@ -521,7 +565,7 @@ export default function TestPage() {
                   <RotateCcw size={16} className="hidden md:block" />
                 </button>
                 <Link
-                  href={`/${lang}/tests`}
+                  href={`/${lang}`}
                   className="px-2 py-1 md:px-3 md:py-1.5 text-[10px] md:text-xs text-muted-foreground hover:text-foreground transition-colors"
                 >
                   ← {t.back}
@@ -598,6 +642,13 @@ export default function TestPage() {
       <AuthorChannelModal
         isOpen={showAuthorModal}
         onClose={handleAuthorClose}
+        lang={lang}
+      />
+
+      {/* Donate modal — auto-opens after the 15th test */}
+      <DonateModal
+        isOpen={showDonateModal}
+        onClose={() => setShowDonateModal(false)}
         lang={lang}
       />
 
