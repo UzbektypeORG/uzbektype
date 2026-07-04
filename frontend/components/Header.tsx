@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState, useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import { useRouter, usePathname } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
 import { useGoogleLogin } from "@/lib/useGoogleLogin";
@@ -629,6 +630,22 @@ export default function Header({ lang }: HeaderProps) {
 
         </div>
       </div>
+
+      {/* Mobile menu backdrop — blurs the rest of the screen while the menu is
+          open. Portaled to <body> so the header's own backdrop-filter doesn't
+          trap this fixed overlay. Sits below the header (z-40 < z-50), so the
+          top bar + dropdown stay sharp. */}
+      {typeof document !== "undefined" &&
+        createPortal(
+          <div
+            aria-hidden
+            onClick={() => setIsMobileMenuOpen(false)}
+            className={`md:hidden fixed inset-x-0 bottom-0 top-[73px] z-40 bg-black/20 backdrop-blur-md transition-opacity duration-300 ${
+              isMobileMenuOpen ? "opacity-100" : "opacity-0 pointer-events-none"
+            }`}
+          />,
+          document.body
+        )}
 
       <DonateModal isOpen={showDonate} onClose={() => setShowDonate(false)} lang={lang} />
     </header>
