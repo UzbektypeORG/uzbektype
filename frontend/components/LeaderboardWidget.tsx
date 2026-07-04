@@ -118,7 +118,7 @@ export default function LeaderboardWidget({
   limit?: number;
   variant?: "card" | "inline";
 }) {
-  const [period, setPeriod] = useState<Period>("monthly");
+  const [period, setPeriod] = useState<Period>("weekly");
   const [difficulty, setDifficulty] = useState<Difficulty>("easy");
   const { data: session, status } = useSession();
   const user = session?.user ?? null;
@@ -181,7 +181,7 @@ export default function LeaderboardWidget({
           ))}
         </div>
         <div className="flex flex-1 gap-0.5 border border-border rounded-lg p-0.5">
-          {(Object.keys(t.periods) as Period[]).map((p) => (
+          {(Object.keys(t.periods) as Period[]).filter((p) => p !== "alltime").map((p) => (
             <button
               key={p}
               onClick={() => setPeriod(p)}

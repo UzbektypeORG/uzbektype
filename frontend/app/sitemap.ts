@@ -7,7 +7,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
   const testTypes = ["10s", "30s", "60s", "10w", "30w", "60w"];
   const difficulties = ["easy", "medium", "hard"];
-  const periods = ["weekly", "monthly", "alltime"];
+  // all-time is admin-only, so it's intentionally excluded from the sitemap.
+  const periods = ["weekly", "monthly"];
   // Programmatic-SEO topic landing pages — extended as the queue advances
   const topicTests = ["programming", "numbers", "punctuation", "quotes", "uzbek-latin"];
 

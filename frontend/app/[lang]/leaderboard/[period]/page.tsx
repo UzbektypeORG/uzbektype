@@ -6,5 +6,5 @@ type Period = "weekly" | "monthly" | "alltime";
 // Old route — redirect to default difficulty (easy, matches the test page default).
 export default async function PeriodOnlyRedirect({ params }: { params: Promise<{ lang: Language; period: Period }> }) {
   const { lang, period } = await params;
-  redirect(`/${lang || "uz"}/leaderboard/${period || "monthly"}/easy`);
+  redirect(`/${lang || "uz"}/leaderboard/${period || "weekly"}/easy`);
 }

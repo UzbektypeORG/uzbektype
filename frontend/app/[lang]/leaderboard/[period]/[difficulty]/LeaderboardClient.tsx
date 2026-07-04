@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { useGoogleLogin } from "@/lib/useGoogleLogin";
 import { displayName, avatarSrc } from "@/lib/userDisplay";
@@ -88,6 +89,7 @@ function entryAvatar(e: Entry): string {
 }
 
 export default function LeaderboardClient({ lang, period, difficulty }: { lang: Language; period: Period; difficulty: Difficulty }) {
+  const router = useRouter();
   const { data: session, status } = useSession();
   const user = session?.user ?? null;
   const mounted = status !== "loading";
@@ -95,7 +97,30 @@ export default function LeaderboardClient({ lang, period, difficulty }: { lang: 
   const [entries, setEntries] = useState<Entry[]>([]);
   const [me, setMe] = useState<MeRank | null>(null);
   const [loading, setLoading] = useState(true);
+  // null = unknown yet. The all-time filter is admin-only, so it stays hidden
+  // until the probe confirms admin status.
+  const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
   const t = content[lang];
+
+  useEffect(() => {
+    fetch("/api/admin/check", { cache: "no-store" })
+      .then((r) => (r.ok ? r.json() : { isAdmin: false }))
+      .then((d: { isAdmin?: boolean }) => setIsAdmin(!!d.isAdmin))
+      .catch(() => setIsAdmin(false));
+  }, []);
+
+  // A non-admin can't sit on the all-time view (e.g. via a direct link) —
+  // bounce them to the weekly board for the same difficulty.
+  useEffect(() => {
+    if (isAdmin === false && period === "alltime") {
+      router.replace(`/${lang}/leaderboard/weekly/${difficulty}`);
+    }
+  }, [isAdmin, period, lang, difficulty, router]);
+
+  // Users see weekly + monthly; all-time is revealed only once admin confirms.
+  const visiblePeriods = (Object.keys(t.periods) as Period[]).filter(
+    (p) => p !== "alltime" || isAdmin === true
+  );
   const top3 = entries.slice(0, 3);
   const rest = entries.slice(3);
   const tableSize = entries.length;
@@ -142,7 +167,7 @@ export default function LeaderboardClient({ lang, period, difficulty }: { lang: 
             ))}
           </div>
           <div className="inline-flex border border-border rounded-lg p-1 gap-0.5">
-            {(Object.keys(t.periods) as Period[]).map((p) => (
+            {visiblePeriods.map((p) => (
               <Link
                 key={p}
                 href={`/${lang}/leaderboard/${p}/${difficulty}`}

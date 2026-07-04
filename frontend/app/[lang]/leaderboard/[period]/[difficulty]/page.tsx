@@ -24,7 +24,7 @@ export default async function LeaderboardPage({ params }: { params: Promise<{ la
   const { lang, period, difficulty } = await params;
   const validPeriods: Period[] = ["weekly", "monthly", "alltime"];
   const validDifficulties: Difficulty[] = ["easy", "medium", "hard"];
-  const safePeriod = validPeriods.includes(period) ? period : "monthly";
+  const safePeriod = validPeriods.includes(period) ? period : "weekly";
   const safeDifficulty = validDifficulties.includes(difficulty) ? difficulty : "easy";
   return <LeaderboardClient lang={lang || "uz"} period={safePeriod} difficulty={safeDifficulty} />;
 }
