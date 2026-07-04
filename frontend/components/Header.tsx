@@ -6,6 +6,8 @@ import { useRouter, usePathname } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
 import { useGoogleLogin } from "@/lib/useGoogleLogin";
 import { displayName, avatarSrc } from "@/lib/userDisplay";
+import DonateModal from "@/components/DonateModal";
+import AnimatedSupportLabel from "@/components/AnimatedSupportLabel";
 
 type Language = "uz" | "en" | "ru";
 
@@ -29,7 +31,9 @@ const navContent = {
     login: "Kirish",
     logout: "Chiqish",
     profile: "Profil",
-    start: "Boshlash"
+    start: "Boshlash",
+    support: "Qo'llab-quvvatlash",
+    donate: "Donat qilish"
   },
   en: {
     home: "Home",
@@ -40,7 +44,9 @@ const navContent = {
     login: "Login",
     logout: "Logout",
     profile: "Profile",
-    start: "Start"
+    start: "Start",
+    support: "Support",
+    donate: "Donate"
   },
   ru: {
     home: "Главная",
@@ -51,7 +57,9 @@ const navContent = {
     login: "Войти",
     logout: "Выйти",
     profile: "Профиль",
-    start: "Начать"
+    start: "Начать",
+    support: "Поддержать",
+    donate: "Донат"
   }
 };
 
@@ -61,6 +69,7 @@ export default function Header({ lang }: HeaderProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isDark, setIsDark] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [showDonate, setShowDonate] = useState(false);
   const { data: session } = useSession();
   const user = session?.user ?? null;
   const { handleLogin: handleGoogleLogin, isLoggingIn } = useGoogleLogin(lang);
@@ -205,6 +214,34 @@ export default function Header({ lang }: HeaderProps) {
           >
             {navContent[lang].blog}
           </Link>
+
+          {/* Donate / Support — a fixed-width slot (sized to the widest label)
+              reserves layout space, so the button can grow/shrink freely
+              without nudging the rest of the nav. The real button is centered
+              over the invisible sizer. */}
+          <span className="relative inline-flex items-center">
+            <span
+              aria-hidden
+              className="invisible flex items-center gap-1.5 px-3 py-1.5 text-sm font-bold border rounded-full"
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+              </svg>
+              <span className="grid">
+                <span className="col-start-1 row-start-1 whitespace-nowrap">{navContent[lang].support}</span>
+                <span className="col-start-1 row-start-1 whitespace-nowrap">{navContent[lang].donate}</span>
+              </span>
+            </span>
+            <button
+              onClick={() => setShowDonate(true)}
+              className="absolute inset-y-0 left-1/2 -translate-x-1/2 text-sm font-bold flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-primary/60 text-primary hover:bg-primary hover:text-primary-foreground transition-colors duration-300 cursor-pointer whitespace-nowrap"
+            >
+              <svg className="heart-beat" width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+              </svg>
+              <AnimatedSupportLabel support={navContent[lang].support} donate={navContent[lang].donate} />
+            </button>
+          </span>
 
           {/* Dark Mode Toggle */}
           <button
@@ -501,6 +538,17 @@ export default function Header({ lang }: HeaderProps) {
             {navContent[lang].blog}
           </Link>
 
+          {/* Donate / Support */}
+          <button
+            onClick={() => { setShowDonate(true); setIsMobileMenuOpen(false); }}
+            className="px-3 py-2.5 text-sm font-bold rounded-lg hover:bg-primary/10 transition-colors flex items-center gap-3 text-primary text-left"
+          >
+            <svg className="heart-beat" width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+            </svg>
+            <AnimatedSupportLabel support={navContent[lang].support} donate={navContent[lang].donate} />
+          </button>
+
           {user && (
             <Link
               href={`/${lang}/dashboard`}
@@ -580,6 +628,8 @@ export default function Header({ lang }: HeaderProps) {
           </div>
         </div>
       </div>
+
+      <DonateModal isOpen={showDonate} onClose={() => setShowDonate(false)} lang={lang} />
     </header>
   );
 }
