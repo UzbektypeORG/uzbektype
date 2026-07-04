@@ -32,6 +32,9 @@ import { ruContent as cpmWpmFarqiRu } from "./blog/cpm-va-wpm-farqi/ru";
 import { uzContent as yozishTestiOnlaynUz } from "./blog/yozish-testi-onlayn/uz";
 import { enContent as yozishTestiOnlaynEn } from "./blog/yozish-testi-onlayn/en";
 import { ruContent as yozishTestiOnlaynRu } from "./blog/yozish-testi-onlayn/ru";
+import { uzContent as klaviaturaLayoutUz } from "./blog/klaviatura-layout-taqqoslash/uz";
+import { enContent as klaviaturaLayoutEn } from "./blog/klaviatura-layout-taqqoslash/en";
+import { ruContent as klaviaturaLayoutRu } from "./blog/klaviatura-layout-taqqoslash/ru";
 
 export type Language = "uz" | "en" | "ru";
 
@@ -412,6 +415,42 @@ export const blogPosts: BlogPost[] = [
       ru: "тест скорости печати онлайн",
     },
     articleType: "HowTo",
+  },
+  {
+    id: "klaviatura-layout-taqqoslash",
+    publishedAt: "2026-07-04",
+    updatedAt: "2026-07-04",
+    slugs: {
+      uz: "klaviatura-layout-taqqoslash",
+      en: "keyboard-layout-comparison",
+      ru: "sravnenie-raskladok-klaviatury",
+    },
+    titles: {
+      uz: "QWERTY, Dvorak yoki Colemak — klaviatura layouti tezlikni oshiradimi?",
+      en: "QWERTY vs Dvorak vs Colemak — Does Keyboard Layout Actually Make You Type Faster?",
+      ru: "QWERTY, Dvorak или Colemak — влияет ли раскладка клавиатуры на скорость печати?",
+    },
+    excerpts: {
+      uz: "Dvorak va Colemak nazariy jihatdan barmoq harakatini kamaytiradi, lekin real tadqiqotlar boshqasini ko'rsatadi — ayniqsa o'zbek tili uchun. QWERTY'da qolib tezlikni qanday oshirish mumkinligi.",
+      en: "Dvorak and Colemak reduce finger travel on paper, but real research tells a different story — especially outside English. What actually raises your speed while staying on QWERTY.",
+      ru: "Dvorak и Colemak теоретически снижают путь пальцев, но реальные исследования говорят другое — особенно не для английского. Что на самом деле повышает скорость, если остаться на QWERTY.",
+    },
+    content: {
+      uz: klaviaturaLayoutUz,
+      en: klaviaturaLayoutEn,
+      ru: klaviaturaLayoutRu,
+    },
+    readTime: {
+      uz: "8 daqiqa",
+      en: "7 min read",
+      ru: "8 мин чтения",
+    },
+    primaryKeyword: {
+      uz: "klaviatura layout taqqoslash",
+      en: "keyboard layout comparison",
+      ru: "сравнение раскладок клавиатуры",
+    },
+    articleType: "Article",
   },
 ];
 
