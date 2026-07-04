@@ -10,9 +10,12 @@ interface TypingTestProps {
   animationSpeed: number;
   correctCharColor: 'default' | 'blue' | 'yellow' | 'green';
   animationMode: 'bounce' | 'fade';
+  // Fires true when the user starts typing, false when the test finishes —
+  // lets the parent fade the settings bar out while a test is in progress.
+  onActiveChange?: (active: boolean) => void;
 }
 
-export default function TypingTest({ config, text: initialText, onComplete, animationSpeed, correctCharColor, animationMode }: TypingTestProps) {
+export default function TypingTest({ config, text: initialText, onComplete, animationSpeed, correctCharColor, animationMode, onActiveChange }: TypingTestProps) {
   const [userInput, setUserInput] = useState("");
   const [startTime, setStartTime] = useState<number | null>(null);
   const [currentTime, setCurrentTime] = useState(0);
@@ -29,6 +32,20 @@ export default function TypingTest({ config, text: initialText, onComplete, anim
   // For time-based tests: extend text when user reaches the end
   const [text, setText] = useState(initialText);
   const baseTextRef = useRef(initialText);
+
+  // Latest userInput/text mirrored into refs so the timer interval below can
+  // read current values without needing them in its effect dependencies —
+  // putting them there tears the interval down and recreates it on every
+  // keystroke, starving it during continuous fast typing (it never survives
+  // a full 100ms tick, so wpmHistory stays sparse and finishTest() fires late).
+  const userInputRef = useRef(userInput);
+  const textRef = useRef(text);
+  useEffect(() => {
+    userInputRef.current = userInput;
+  }, [userInput]);
+  useEffect(() => {
+    textRef.current = text;
+  }, [text]);
 
   // Reset text and error tracking when initialText changes (e.g., on retry)
   useEffect(() => {
@@ -103,10 +120,12 @@ export default function TypingTest({ config, text: initialText, onComplete, anim
         lastRecordedSecond.current = elapsedSeconds;
 
         // Count all currently correct chars (pure + corrected)
-        const currentlyCorrectChars = userInput
+        const currentInput = userInputRef.current;
+        const currentText = textRef.current;
+        const currentlyCorrectChars = currentInput
           .split("")
-          .filter((char, i) => char === text[i]).length;
-        const totalChars = userInput.length;
+          .filter((char, i) => char === currentText[i]).length;
+        const totalChars = currentInput.length;
         const timeInMinutes = elapsedSeconds / 60;
 
         const wpm = Math.round((currentlyCorrectChars / 5) / timeInMinutes);
@@ -116,7 +135,7 @@ export default function TypingTest({ config, text: initialText, onComplete, anim
       }
     }, 100);
     return () => clearInterval(interval);
-  }, [startTime, isFinished, userInput, text]);
+  }, [startTime, isFinished]);
 
   useEffect(() => {
     if (!startTime || isFinished) return;
@@ -139,6 +158,7 @@ export default function TypingTest({ config, text: initialText, onComplete, anim
   const finishTest = () => {
     if (isFinished) return;
     setIsFinished(true);
+    onActiveChange?.(false);
     const stats = calculateStats();
     const timeElapsed = startTime ? (Date.now() - startTime) / 1000 : 0;
 
@@ -166,6 +186,7 @@ export default function TypingTest({ config, text: initialText, onComplete, anim
     if (!startTime && e.key.length === 1) {
       setStartTime(Date.now());
       setCurrentTime(Date.now());
+      onActiveChange?.(true);
     }
 
     // Handle backspace
@@ -200,6 +221,7 @@ export default function TypingTest({ config, text: initialText, onComplete, anim
     if (!startTime && newValue.length > 0) {
       setStartTime(Date.now());
       setCurrentTime(Date.now());
+      onActiveChange?.(true);
     }
 
     // Track error positions for newly typed characters
@@ -460,9 +482,9 @@ export default function TypingTest({ config, text: initialText, onComplete, anim
             {renderText()}
           </div>
 
-          {/* Vertical Cursor */}
+          {/* Vertical Cursor — dim (10%) before the user starts, full once typing begins */}
           <div
-            className="absolute w-[2.5px] transition-all duration-150 ease-out pointer-events-none"
+            className="absolute w-[2.5px] transition-all duration-300 ease-out pointer-events-none"
             style={{
               left: `${cursorPosition.left}px`,
               top: `${cursorPosition.top}px`,
@@ -470,6 +492,7 @@ export default function TypingTest({ config, text: initialText, onComplete, anim
               transform: 'scaleY(0.65)',
               transformOrigin: 'center',
               backgroundColor: getTargetColor(),
+              opacity: startTime ? 1 : 0.1,
             }}
           />
         </div>

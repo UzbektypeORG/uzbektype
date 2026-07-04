@@ -28,9 +28,11 @@ const labels = {
     back: "Orqaga",
     changeFormat: "Formatni o'zgartirish",
     restart: "Qaytadan boshlash",
-    time: "Vaqt",
-    modeTime: "Vaqt",
-    modeWords: "So'z",
+    time: "Yozish vaqti",
+    difficulty: "Qiyinlik darajasi",
+    color: "Harflar rangi",
+    speed: "Animatsiya tezligi",
+    animation: "Animatsiya",
     easy: "OSON",
     medium: "O'RTA",
     hard: "QIYIN"
@@ -39,9 +41,11 @@ const labels = {
     back: "Back",
     changeFormat: "Change Format",
     restart: "Restart",
-    time: "Time",
-    modeTime: "Time",
-    modeWords: "Words",
+    time: "Typing time",
+    difficulty: "Difficulty level",
+    color: "Letters color",
+    speed: "Animation speed",
+    animation: "Animation",
     easy: "EASY",
     medium: "MEDIUM",
     hard: "HARD"
@@ -50,9 +54,11 @@ const labels = {
     back: "Назад",
     changeFormat: "Изменить формат",
     restart: "Перезапустить",
-    time: "Время",
-    modeTime: "Время",
-    modeWords: "Слова",
+    time: "Время печати",
+    difficulty: "Уровень сложности",
+    color: "Цвет букв",
+    speed: "Скорость анимации",
+    animation: "Анимация",
     easy: "ЛЁГКИЙ",
     medium: "СРЕДНИЙ",
     hard: "СЛОЖНЫЙ"
@@ -80,7 +86,6 @@ const mobileWarning = {
 const difficultyOptions: Difficulty[] = ["easy", "medium", "hard"];
 
 const timeOptions = ["10s", "30s", "60s"] as const;
-const wordOptions = ["10w", "30w", "60w"] as const;
 
 export default function TestPage() {
   const params = useParams();
@@ -95,6 +100,8 @@ export default function TestPage() {
   const [text, setText] = useState("");
   const [result, setResult] = useState<(TypingStats & { timeElapsed: number; wpmHistory: WpmDataPoint[]; rawWpm: number; consistency: number }) | null>(null);
   const [key, setKey] = useState(0);
+  // True while a test is actively being typed — fades the settings bar out.
+  const [isTyping, setIsTyping] = useState(false);
   const [animationSpeed, setAnimationSpeed] = useState(1);
   const [correctCharColor, setCorrectCharColor] = useState<'default' | 'blue' | 'yellow' | 'green'>('default');
   const [animationMode, setAnimationMode] = useState<'bounce' | 'fade'>('bounce');
@@ -362,8 +369,57 @@ export default function TestPage() {
     }
     setResult(null);
     setRecordType(null);
+    setIsTyping(false);
     setKey((prev) => prev + 1);
   };
+
+  // Live ref to the latest handleRetry for the keyboard shortcut below.
+  const handleRetryRef = useRef(handleRetry);
+  useEffect(() => {
+    handleRetryRef.current = handleRetry;
+  });
+
+  // Tab-then-Enter restarts the test (MonkeyType-style). Tab arms the shortcut,
+  // Enter fires it; any other key cancels the pending Tab.
+  useEffect(() => {
+    let armed = false;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const disarm = () => {
+      armed = false;
+      if (timer) clearTimeout(timer);
+    };
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Tab") {
+        e.preventDefault();
+        armed = true;
+        if (timer) clearTimeout(timer);
+        timer = setTimeout(() => {
+          armed = false;
+        }, 1500);
+        return;
+      }
+      if (armed && e.key === "Enter") {
+        e.preventDefault();
+        disarm();
+        handleRetryRef.current();
+        return;
+      }
+      if (armed) disarm();
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => {
+      window.removeEventListener("keydown", onKeyDown);
+      if (timer) clearTimeout(timer);
+    };
+  }, []);
+
+  // Broadcast typing state so global chrome (the header donate button) can
+  // freeze its heart-beat + label crossfade while a test is being typed.
+  useEffect(() => {
+    document.documentElement.setAttribute("data-typing", isTyping ? "true" : "false");
+    window.dispatchEvent(new CustomEvent("uz:typing", { detail: isTyping }));
+  }, [isTyping]);
+  useEffect(() => () => document.documentElement.removeAttribute("data-typing"), []);
 
   const handleAnimationSpeedChange = (speed: number) => {
     setAnimationSpeed(speed);
@@ -389,9 +445,8 @@ export default function TestPage() {
   }
 
   const t = labels[config.language];
-  const isWordMode = config.testType.endsWith("w");
-  const currentCount = parseInt(config.testType, 10);
-  const countOptions = isWordMode ? wordOptions : timeOptions;
+  // Faint caption shown above each settings control.
+  const captionCls = "text-[9px] uppercase tracking-wider text-muted-foreground opacity-70 leading-none whitespace-nowrap";
 
   return (
     <main className="h-[calc(100vh-73px)] md:h-[calc(100dvh-73px)] flex flex-col">
@@ -402,174 +457,162 @@ export default function TestPage() {
             <div className="w-full md:w-[80%] max-w-6xl flex flex-col md:flex-row items-center justify-between gap-3 md:gap-0">
               {/* Mobile Row 1: Time + Difficulty (side by side) */}
               {/* Desktop: Left section */}
-              <div className="flex items-center gap-2 md:gap-4 w-full md:w-auto justify-center md:justify-start">
-                {/* Time / Words mode toggle */}
-                <div className="flex items-center gap-0.5 md:gap-1 border border-border rounded-lg p-0.5 md:p-1">
-                  <Link
-                    href={`/${lang}/tests/${currentCount}s-${config.difficulty}${topicQuery}`}
-                    className={`px-1.5 py-1 md:px-2.5 md:py-1.5 text-[10px] md:text-xs font-medium rounded-md transition-all ${
-                      !isWordMode
-                        ? "bg-foreground text-background"
-                        : "text-muted-foreground hover:text-foreground"
-                    }`}
-                  >
-                    {t.modeTime}
-                  </Link>
-                  <Link
-                    href={`/${lang}/tests/${currentCount}w-${config.difficulty}${topicQuery}`}
-                    className={`px-1.5 py-1 md:px-2.5 md:py-1.5 text-[10px] md:text-xs font-medium rounded-md transition-all ${
-                      isWordMode
-                        ? "bg-foreground text-background"
-                        : "text-muted-foreground hover:text-foreground"
-                    }`}
-                  >
-                    {t.modeWords}
-                  </Link>
+              <div className={`flex items-end gap-3 md:gap-5 w-full md:w-auto justify-center md:justify-start transition-opacity duration-300 ${isTyping ? "opacity-0 pointer-events-none" : "opacity-100"}`}>
+                {/* Time */}
+                <div className="flex flex-col items-center gap-1">
+                  <span className={captionCls}>{t.time}</span>
+                  <div className="flex items-center gap-1 md:gap-2">
+                    {timeOptions.map((time) => (
+                      <Link
+                        key={time}
+                        href={`/${lang}/tests/${time}-${config.difficulty}${topicQuery}`}
+                        className={`px-2 py-1.5 md:px-4 md:py-2 text-xs md:text-sm font-medium rounded-lg transition-all ${
+                          config.testType === time
+                            ? "bg-primary text-primary-foreground"
+                            : "border border-border hover:border-foreground"
+                        }`}
+                      >
+                        {time.toUpperCase()}
+                      </Link>
+                    ))}
+                  </div>
                 </div>
 
-                {/* Time/Word count Options */}
-                <div className="flex items-center gap-1 md:gap-2">
-                  {countOptions.map((option) => (
-                    <Link
-                      key={option}
-                      href={`/${lang}/tests/${option}-${config.difficulty}${topicQuery}`}
-                      className={`px-2 py-1.5 md:px-4 md:py-2 text-xs md:text-sm font-medium rounded-lg transition-all ${
-                        config.testType === option
-                          ? "bg-primary text-primary-foreground"
-                          : "border border-border hover:border-foreground"
-                      }`}
-                    >
-                      {option.toUpperCase()}
-                    </Link>
-                  ))}
-                </div>
-
-                {/* Divider */}
-                <div className="h-5 md:h-6 w-px bg-border" />
-
-                {/* Difficulty Options */}
-                <div className="flex items-center gap-1 md:gap-2">
-                  {difficultyOptions.map((diff) => (
-                    <Link
-                      key={diff}
-                      href={`/${lang}/tests/${config.testType}-${diff}${topicQuery}`}
-                      className={`px-1.5 py-1.5 md:px-3 md:py-2 text-[10px] md:text-xs font-medium rounded-lg transition-all ${
-                        config.difficulty === diff
-                          ? "bg-primary text-primary-foreground"
-                          : "border border-border hover:border-foreground"
-                      }`}
-                    >
-                      {t[diff]}
-                    </Link>
-                  ))}
+                {/* Difficulty */}
+                <div className="flex flex-col items-center gap-1">
+                  <span className={captionCls}>{t.difficulty}</span>
+                  <div className="flex items-center gap-1 md:gap-2">
+                    {difficultyOptions.map((diff) => (
+                      <Link
+                        key={diff}
+                        href={`/${lang}/tests/${config.testType}-${diff}${topicQuery}`}
+                        className={`px-1.5 py-1.5 md:px-3 md:py-2 text-[10px] md:text-xs font-medium rounded-lg transition-all ${
+                          config.difficulty === diff
+                            ? "bg-primary text-primary-foreground"
+                            : "border border-border hover:border-foreground"
+                        }`}
+                      >
+                        {t[diff]}
+                      </Link>
+                    ))}
+                  </div>
                 </div>
               </div>
 
               {/* Mobile Row 2: Color picker + Slider + Animation mode */}
               {/* Desktop: Center section */}
-              <div className="flex items-center gap-2 md:gap-3 w-full md:w-auto justify-center">
-                {/* Color Picker */}
-                <div className="flex items-center gap-0.5 md:gap-1 border border-border rounded-lg p-0.5 md:p-1">
-                  <button
-                    onClick={() => handleCorrectCharColorChange('default')}
-                    className={`w-5 h-5 md:w-6 md:h-6 rounded-full bg-foreground border-2 transition-all ${
-                      correctCharColor === 'default'
-                        ? 'border-foreground scale-110 ring-2 ring-muted'
-                        : 'border-transparent opacity-60 hover:opacity-100'
-                    }`}
-                    title="Default"
-                  />
-                  <button
-                    onClick={() => handleCorrectCharColorChange('blue')}
-                    className={`w-5 h-5 md:w-6 md:h-6 rounded-full bg-blue-500 border-2 transition-all ${
-                      correctCharColor === 'blue'
-                        ? 'border-foreground scale-110'
-                        : 'border-transparent opacity-60 hover:opacity-100'
-                    }`}
-                    title="Ko'k"
-                  />
-                  <button
-                    onClick={() => handleCorrectCharColorChange('yellow')}
-                    className={`w-5 h-5 md:w-6 md:h-6 rounded-full bg-yellow-500 border-2 transition-all ${
-                      correctCharColor === 'yellow'
-                        ? 'border-foreground scale-110'
-                        : 'border-transparent opacity-60 hover:opacity-100'
-                    }`}
-                    title="Sariq"
-                  />
-                  <button
-                    onClick={() => handleCorrectCharColorChange('green')}
-                    className={`w-5 h-5 md:w-6 md:h-6 rounded-full bg-green-500 border-2 transition-all ${
-                      correctCharColor === 'green'
-                        ? 'border-foreground scale-110'
-                        : 'border-transparent opacity-60 hover:opacity-100'
-                    }`}
-                    title="Yashil"
-                  />
+              <div className={`flex items-end gap-2 md:gap-3 w-full md:w-auto justify-center transition-opacity duration-300 ${isTyping ? "opacity-0 pointer-events-none" : "opacity-100"}`}>
+                {/* Color */}
+                <div className="flex flex-col items-center gap-1">
+                  <span className={captionCls}>{t.color}</span>
+                  <div className="flex items-center gap-0.5 md:gap-1 border border-border rounded-lg p-0.5 md:p-1">
+                    <button
+                      onClick={() => handleCorrectCharColorChange('default')}
+                      className={`w-5 h-5 md:w-6 md:h-6 rounded-full bg-foreground border-2 transition-all ${
+                        correctCharColor === 'default'
+                          ? 'border-foreground scale-110 ring-2 ring-muted'
+                          : 'border-transparent opacity-60 hover:opacity-100'
+                      }`}
+                      title="Default"
+                    />
+                    <button
+                      onClick={() => handleCorrectCharColorChange('blue')}
+                      className={`w-5 h-5 md:w-6 md:h-6 rounded-full bg-blue-500 border-2 transition-all ${
+                        correctCharColor === 'blue'
+                          ? 'border-foreground scale-110'
+                          : 'border-transparent opacity-60 hover:opacity-100'
+                      }`}
+                      title="Ko'k"
+                    />
+                    <button
+                      onClick={() => handleCorrectCharColorChange('yellow')}
+                      className={`w-5 h-5 md:w-6 md:h-6 rounded-full bg-yellow-500 border-2 transition-all ${
+                        correctCharColor === 'yellow'
+                          ? 'border-foreground scale-110'
+                          : 'border-transparent opacity-60 hover:opacity-100'
+                      }`}
+                      title="Sariq"
+                    />
+                    <button
+                      onClick={() => handleCorrectCharColorChange('green')}
+                      className={`w-5 h-5 md:w-6 md:h-6 rounded-full bg-green-500 border-2 transition-all ${
+                        correctCharColor === 'green'
+                          ? 'border-foreground scale-110'
+                          : 'border-transparent opacity-60 hover:opacity-100'
+                      }`}
+                      title="Yashil"
+                    />
+                  </div>
                 </div>
 
-                {/* Animation Speed Slider */}
-                <div className="flex items-center gap-1 md:gap-2 border border-border rounded-lg px-2 py-1 md:px-3 md:py-1.5">
-                  <Timer size={14} className="text-muted-foreground flex-shrink-0 md:hidden" />
-                  <Timer size={16} className="text-muted-foreground flex-shrink-0 hidden md:block" />
-                  <input
-                    type="range"
-                    min="0"
-                    max="2"
-                    step="0.05"
-                    value={animationSpeed}
-                    onChange={(e) => handleAnimationSpeedChange(parseFloat(e.target.value))}
-                    className="animation-speed-slider w-12 md:w-20"
-                  />
-                  <span className="text-[10px] md:text-xs text-muted-foreground w-8 md:w-10 text-right flex-shrink-0">{animationSpeed.toFixed(2)}s</span>
+                {/* Speed */}
+                <div className="flex flex-col items-center gap-1">
+                  <span className={captionCls}>{t.speed}</span>
+                  <div className="flex items-center gap-1 md:gap-2 border border-border rounded-lg px-2 py-1 md:px-3 md:py-1.5">
+                    <Timer size={14} className="text-muted-foreground flex-shrink-0 md:hidden" />
+                    <Timer size={16} className="text-muted-foreground flex-shrink-0 hidden md:block" />
+                    <input
+                      type="range"
+                      min="0"
+                      max="2"
+                      step="0.05"
+                      value={animationSpeed}
+                      onChange={(e) => handleAnimationSpeedChange(parseFloat(e.target.value))}
+                      className="animation-speed-slider w-12 md:w-20"
+                    />
+                    <span className="text-[10px] md:text-xs text-muted-foreground w-8 md:w-10 text-right flex-shrink-0">{animationSpeed.toFixed(2)}s</span>
+                  </div>
                 </div>
 
-                {/* Animation Mode Buttons */}
-                <div className="flex items-center gap-0.5 md:gap-1 border border-border rounded-lg p-0.5 md:p-1">
-                  <button
-                    onClick={() => handleAnimationModeChange('bounce')}
-                    className={`p-1 md:p-1.5 rounded transition-all ${
-                      animationMode === 'bounce'
-                        ? 'bg-foreground text-background'
-                        : 'text-muted-foreground hover:text-foreground'
-                    }`}
-                    title="Bounce"
-                  >
-                    <MoveVertical size={14} className="md:hidden" />
-                    <MoveVertical size={16} className="hidden md:block" />
-                  </button>
-                  <button
-                    onClick={() => handleAnimationModeChange('fade')}
-                    className={`p-1 md:p-1.5 rounded transition-all ${
-                      animationMode === 'fade'
-                        ? 'bg-foreground text-background'
-                        : 'text-muted-foreground hover:text-foreground'
-                    }`}
-                    title="Fade"
-                  >
-                    <Blend size={14} className="md:hidden" />
-                    <Blend size={16} className="hidden md:block" />
-                  </button>
+                {/* Animation */}
+                <div className="flex flex-col items-center gap-1">
+                  <span className={captionCls}>{t.animation}</span>
+                  <div className="flex items-center gap-0.5 md:gap-1 border border-border rounded-lg p-0.5 md:p-1">
+                    <button
+                      onClick={() => handleAnimationModeChange('bounce')}
+                      className={`p-1 md:p-1.5 rounded transition-all ${
+                        animationMode === 'bounce'
+                          ? 'bg-foreground text-background'
+                          : 'text-muted-foreground hover:text-foreground'
+                      }`}
+                      title="Bounce"
+                    >
+                      <MoveVertical size={14} className="md:hidden" />
+                      <MoveVertical size={16} className="hidden md:block" />
+                    </button>
+                    <button
+                      onClick={() => handleAnimationModeChange('fade')}
+                      className={`p-1 md:p-1.5 rounded transition-all ${
+                        animationMode === 'fade'
+                          ? 'bg-foreground text-background'
+                          : 'text-muted-foreground hover:text-foreground'
+                      }`}
+                      title="Fade"
+                    >
+                      <Blend size={14} className="md:hidden" />
+                      <Blend size={16} className="hidden md:block" />
+                    </button>
+                  </div>
                 </div>
               </div>
 
-              {/* Mobile Row 3: Restart + Back */}
-              {/* Desktop: Right section */}
-              <div className="flex items-center gap-2 w-full md:w-auto justify-center md:justify-end">
-                <button
-                  onClick={handleRetry}
-                  className="p-1.5 md:p-2 border border-border rounded hover:border-foreground dark:hover:border-white transition-colors"
-                  title={t.restart}
-                >
-                  <RotateCcw size={14} className="md:hidden" />
-                  <RotateCcw size={16} className="hidden md:block" />
-                </button>
+              {/* Mobile Row 3: Back + Restart, centered like the other rows.
+                  Desktop: Back only, right-aligned. */}
+              <div className="flex items-center gap-3 w-full md:w-auto justify-center md:justify-end">
                 <Link
                   href={`/${lang}`}
-                  className="px-2 py-1 md:px-3 md:py-1.5 text-[10px] md:text-xs text-muted-foreground hover:text-foreground transition-colors"
+                  className={`px-2 py-1 md:px-3 md:py-1.5 text-[10px] md:text-xs text-muted-foreground hover:text-foreground transition-all duration-300 ${isTyping ? "opacity-0 pointer-events-none" : "opacity-100"}`}
                 >
                   ← {t.back}
                 </Link>
+                {/* Restart — mobile only, on the right; dims to 20% while typing */}
+                <button
+                  onClick={handleRetry}
+                  className={`md:hidden p-1.5 border border-border rounded hover:border-foreground transition-all duration-300 ${isTyping ? "opacity-20" : "opacity-100"}`}
+                  title={t.restart}
+                >
+                  <RotateCcw size={14} />
+                </button>
               </div>
             </div>
           </div>
@@ -585,8 +628,28 @@ export default function TestPage() {
                 animationSpeed={animationSpeed}
                 correctCharColor={correctCharColor}
                 animationMode={animationMode}
+                onActiveChange={setIsTyping}
               />
             </div>
+          </div>
+
+          {/* Restart — desktop: centered below the text (with Tab+Enter hint).
+              While typing the whole control just dims to 50% (stays clickable). */}
+          <div
+            className={`hidden md:flex items-center justify-center gap-2 mt-6 md:mt-8 transition-opacity duration-300 ${isTyping ? "opacity-20" : "opacity-100"}`}
+          >
+            <span className="inline-flex items-center gap-1 text-[10px] text-muted-foreground">
+              <kbd className="px-1.5 py-0.5 rounded bg-muted/50 font-mono">Tab</kbd>
+              <span>+</span>
+              <kbd className="px-1.5 py-0.5 rounded bg-muted/50 font-mono">Enter</kbd>
+            </span>
+            <button
+              onClick={handleRetry}
+              className="p-2 border border-border rounded hover:border-foreground dark:hover:border-white transition-colors"
+              title={t.restart}
+            >
+              <RotateCcw size={16} />
+            </button>
           </div>
 
           {/* Lower flex-1 space - empty (takes remaining space on mobile for keyboard) */}

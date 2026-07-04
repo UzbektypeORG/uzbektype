@@ -432,6 +432,10 @@ a {
     animation: none;
   }
 }
+/* Freeze the donate heart while a test is actively being typed */
+html[data-typing="true"] .heart-beat {
+  animation: none;
+}
 
 /* Skeleton shimmer — used by the leaderboard loading placeholders */
 @keyframes shimmer {
@@ -455,5 +459,16 @@ a {
 @media (prefers-reduced-motion: reduce) {
   .shimmer {
     animation: none;
+  }
+}
+
+/* Stop iOS Safari from auto-zooming when a form field gains focus. It zooms
+   whenever the field's font-size is under 16px, so pin text fields to 16px on
+   phones. Pinch-zoom stays available; only the jarring focus-zoom is gone. */
+@media (max-width: 767px) {
+  input:not([type="range"]):not([type="checkbox"]):not([type="radio"]),
+  textarea,
+  select {
+    font-size: 16px;
   }
 }

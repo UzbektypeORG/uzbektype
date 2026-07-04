@@ -257,11 +257,36 @@ function pct(part: number, whole: number): string {
 
 const AD_PROMOS = ["author_modal", "author_banner", "uzbektype_modal"];
 
+type PromoPeriod = "all" | "today" | "yesterday" | "month" | "custom";
+const PROMO_PERIODS: { id: PromoPeriod; label: string }[] = [
+  { id: "all", label: "Doimiy" },
+  { id: "today", label: "Bugun" },
+  { id: "yesterday", label: "Kecha" },
+  { id: "month", label: "Shu oy" },
+];
+
 function PromoSection({ promo }: { promo: Stats["promo"] }) {
-  const ads = promo.filter((p) => AD_PROMOS.includes(p.promo));
+  const [period, setPeriod] = useState<PromoPeriod>("all");
+  const [month, setMonth] = useState("");
+  const [data, setData] = useState<Stats["promo"]>(promo);
+
+  useEffect(() => {
+    if (period === "all") {
+      setData(promo);
+      return;
+    }
+    if (period === "custom" && !month) return;
+    const qs = period === "custom" ? `period=custom&month=${month}` : `period=${period}`;
+    fetch(`/api/admin/promo-stats?${qs}`, { cache: "no-store" })
+      .then((r) => (r.ok ? r.json() : { promo: [] }))
+      .then((d: { promo: Stats["promo"] }) => setData(d.promo ?? []))
+      .catch(() => setData([]));
+  }, [period, month, promo]);
+
+  const ads = data.filter((p) => AD_PROMOS.includes(p.promo));
 
   const byId: Record<string, Stats["promo"][number]> = {};
-  for (const p of promo) byId[p.promo] = p;
+  for (const p of data) byId[p.promo] = p;
   const donateClicks = byId["donate_button"]?.clicks ?? 0;
   const donateCopies = byId["donate_copy"]?.clicks ?? 0;
   const donateAuto = byId["donate_auto"]?.impressions ?? 0;
@@ -278,6 +303,38 @@ function PromoSection({ promo }: { promo: Stats["promo"] }) {
 
   return (
     <div className="space-y-6">
+      {/* Time filter */}
+      <section className="flex flex-wrap items-center gap-2">
+        {PROMO_PERIODS.map((opt) => (
+          <button
+            key={opt.id}
+            onClick={() => {
+              setPeriod(opt.id);
+              setMonth("");
+            }}
+            className={`px-3 py-1.5 text-xs rounded-lg border transition-colors ${
+              period === opt.id
+                ? "bg-primary text-primary-foreground border-primary"
+                : "border-border hover:bg-accent"
+            }`}
+          >
+            {opt.label}
+          </button>
+        ))}
+        <input
+          type="month"
+          value={month}
+          onChange={(e) => {
+            setMonth(e.target.value);
+            setPeriod(e.target.value ? "custom" : "all");
+          }}
+          className={`px-2 py-1.5 text-xs rounded-lg border bg-background text-foreground ${
+            period === "custom" ? "border-primary" : "border-border"
+          }`}
+          title="Muayyan oy"
+        />
+      </section>
+
       <section className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <StatCard label="Jami ko'rsatildi" value={totals.impressions} />
         <StatCard label="Bosildi (CTA)" value={totals.clicks} />

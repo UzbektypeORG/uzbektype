@@ -13,14 +13,24 @@ export default function AnimatedSupportLabel({
   donate: string;
 }) {
   const [showDonate, setShowDonate] = useState(false);
+  const [typing, setTyping] = useState(false);
   const supportRef = useRef<HTMLSpanElement>(null);
   const donateRef = useRef<HTMLSpanElement>(null);
   const [width, setWidth] = useState<number>();
 
+  // Freeze the crossfade while the user is typing a test.
   useEffect(() => {
+    setTyping(document.documentElement.getAttribute("data-typing") === "true");
+    const handler = (e: Event) => setTyping((e as CustomEvent).detail === true);
+    window.addEventListener("uz:typing", handler);
+    return () => window.removeEventListener("uz:typing", handler);
+  }, []);
+
+  useEffect(() => {
+    if (typing) return; // don't swap the label mid-test
     const id = setInterval(() => setShowDonate((v) => !v), 6000);
     return () => clearInterval(id);
-  }, []);
+  }, [typing]);
 
   // Re-measure whenever the shown label (or its text) changes.
   useEffect(() => {

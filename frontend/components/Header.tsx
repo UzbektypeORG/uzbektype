@@ -567,6 +567,26 @@ export default function Header({ lang }: HeaderProps) {
             </Link>
           )}
 
+          {/* Language — compact UZ | RU | EN toggle, above the auth/start buttons */}
+          <div className="flex items-center gap-1.5 mt-1">
+            {(["uz", "ru", "en"] as Language[]).map((langOption) => (
+              <button
+                key={langOption}
+                onClick={() => {
+                  changeLang(langOption);
+                  setIsMobileMenuOpen(false);
+                }}
+                className={`flex-1 px-2 py-1.5 text-xs font-semibold rounded-md border transition-colors ${
+                  lang === langOption
+                    ? "bg-primary text-primary-foreground border-primary"
+                    : "text-muted-foreground border-border hover:bg-accent"
+                }`}
+              >
+                {langOption.toUpperCase()}
+              </button>
+            ))}
+          </div>
+
           {/* Start Button - only on non-test pages */}
           {!isTestPage && (
             <Link
@@ -607,27 +627,6 @@ export default function Header({ lang }: HeaderProps) {
             </button>
           )}
 
-          {/* Language Selector for Mobile */}
-          <div className="border-t border-border pt-4 mt-2">
-            <div className="text-xs text-muted-foreground mb-2">Language / Til / Язык</div>
-            <div className="flex flex-col gap-2">
-              {(Object.keys(languages) as Language[]).map((langOption) => (
-                <button
-                  key={langOption}
-                  onClick={() => {
-                    changeLang(langOption);
-                    setIsMobileMenuOpen(false);
-                  }}
-                  className={`px-4 py-2 text-left text-sm hover:bg-accent transition-colors rounded flex items-center gap-2 ${
-                    lang === langOption ? "font-semibold bg-accent/50" : ""
-                  }`}
-                >
-                  <span>{languages[langOption].flag}</span>
-                  <span>{languages[langOption].name}</span>
-                </button>
-              ))}
-            </div>
-          </div>
         </div>
       </div>
 
