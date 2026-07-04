@@ -1,5 +1,8 @@
 "use client";
 
+import { useEffect } from "react";
+import { trackPromo } from "@/lib/track-promo";
+
 interface TelegramJoinModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -30,12 +33,21 @@ const content = {
 };
 
 export default function TelegramJoinModal({ isOpen, onClose, lang }: TelegramJoinModalProps) {
+  useEffect(() => {
+    if (isOpen) trackPromo("uzbektype_modal", "impression", lang);
+  }, [isOpen, lang]);
+
   if (!isOpen) return null;
   const t = content[lang];
 
+  const handleDismiss = () => {
+    trackPromo("uzbektype_modal", "dismiss", lang);
+    onClose();
+  };
+
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
+      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={handleDismiss} />
 
       <div className="relative bg-background border border-border rounded-lg p-6 w-full max-w-md shadow-xl animate-fade-in">
         <div className="flex flex-col items-center text-center">
@@ -50,7 +62,7 @@ export default function TelegramJoinModal({ isOpen, onClose, lang }: TelegramJoi
 
           <div className="flex gap-2 w-full">
             <button
-              onClick={onClose}
+              onClick={handleDismiss}
               className="flex-1 px-4 py-2.5 text-sm rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent/50 transition-colors"
             >
               {t.later}
@@ -59,7 +71,10 @@ export default function TelegramJoinModal({ isOpen, onClose, lang }: TelegramJoi
               href={TELEGRAM_URL}
               target="_blank"
               rel="noopener noreferrer"
-              onClick={() => setTimeout(onClose, 200)}
+              onClick={() => {
+                trackPromo("uzbektype_modal", "click", lang);
+                setTimeout(onClose, 200);
+              }}
               className="flex-1 px-4 py-2.5 text-sm rounded-lg bg-[#229ED9] text-white hover:opacity-90 transition-all font-medium text-center"
             >
               {t.cta}

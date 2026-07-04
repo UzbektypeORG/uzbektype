@@ -1,5 +1,8 @@
 "use client";
 
+import { useEffect } from "react";
+import { trackPromo } from "@/lib/track-promo";
+
 interface AuthorChannelModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -35,12 +38,22 @@ const content = {
 };
 
 export default function AuthorChannelModal({ isOpen, onClose, lang }: AuthorChannelModalProps) {
+  // One impression each time the modal opens.
+  useEffect(() => {
+    if (isOpen) trackPromo("author_modal", "impression", lang);
+  }, [isOpen, lang]);
+
   if (!isOpen) return null;
   const t = content[lang];
 
+  const handleDismiss = () => {
+    trackPromo("author_modal", "dismiss", lang);
+    onClose();
+  };
+
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
+      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={handleDismiss} />
 
       <div className="relative bg-background border border-border rounded-lg p-6 w-full max-w-md shadow-xl animate-fade-in">
         <div className="flex flex-col items-center text-center">
@@ -56,7 +69,7 @@ export default function AuthorChannelModal({ isOpen, onClose, lang }: AuthorChan
 
           <div className="flex gap-2 w-full">
             <button
-              onClick={onClose}
+              onClick={handleDismiss}
               className="flex-1 px-4 py-2.5 text-sm rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent/50 transition-colors"
             >
               {t.later}
@@ -66,6 +79,7 @@ export default function AuthorChannelModal({ isOpen, onClose, lang }: AuthorChan
               target="_blank"
               rel="noopener noreferrer"
               onClick={() => {
+                trackPromo("author_modal", "click", lang);
                 // They're opening the channel — stop re-prompting on future tests.
                 try {
                   localStorage.setItem("uzbektype_author_joined", "true");

@@ -12,6 +12,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import type { TestConfig, TypingStats, WpmDataPoint } from "@/types";
+import { trackPromo } from "@/lib/track-promo";
 
 interface TestResultsProps {
   config: TestConfig;
@@ -156,6 +157,11 @@ export default function TestResults({
     }, 1500);
     return () => clearTimeout(timer);
   }, []);
+
+  // One banner impression per results screen.
+  useEffect(() => {
+    trackPromo("author_banner", "impression", config.language);
+  }, [config.language]);
 
   // Animated values
   const animatedWpm = useCountUp(stats.wpm, 1500);
@@ -306,6 +312,7 @@ export default function TestResults({
         href="https://t.me/shavkatovio"
         target="_blank"
         rel="noopener noreferrer"
+        onClick={() => trackPromo("author_banner", "click", config.language)}
         className="group relative block w-full overflow-hidden rounded-xl min-h-[90px] md:min-h-[110px] bg-gradient-to-r from-[#229ED9]/10 via-[#229ED9]/5 to-transparent border border-[#229ED9]/30 hover:border-[#229ED9]/60 hover:shadow-lg hover:shadow-[#229ED9]/10 transition-all duration-300"
       >
         {/* Decorative glow */}

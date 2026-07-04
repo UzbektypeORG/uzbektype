@@ -62,13 +62,21 @@ interface Stats {
     testCount: number;
     bestWpm: number;
   }>;
+  promo: Array<{
+    promo: string;
+    impressions: number;
+    uniqueUsers: number;
+    clicks: number;
+    dismisses: number;
+  }>;
 }
 
-type Tab = "overview" | "top" | "recent" | "users" | "visits";
+type Tab = "overview" | "top" | "recent" | "users" | "visits" | "promo";
 
 const TABS: { id: Tab; label: string; icon: string }[] = [
   { id: "overview", label: "Umumiy", icon: "M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z" },
   { id: "visits", label: "Tashriflar", icon: "M3.5 18.49l6-6.01 4 4L22 6.92l-1.41-1.41-7.09 7.97-4-4L2 16.99z" },
+  { id: "promo", label: "Reklama", icon: "M18 11v2h4v-2h-4zm-1.17 6.94l2.4 1.8 1.2-1.6-2.4-1.8-1.2 1.6zM20.03 4.86l-1.2-1.6-2.4 1.8 1.2 1.6 2.4-1.8zM4 9c-1.1 0-2 .9-2 2v2c0 1.1.9 2 2 2h1v4h2v-4h1l5 3V6L8 9H4zm11.5 3c0-1.33-.58-2.53-1.5-3.35v6.69c.92-.81 1.5-2.01 1.5-3.34z" },
   { id: "top", label: "Top", icon: "M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" },
   { id: "recent", label: "Oxirgi testlar", icon: "M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z" },
   { id: "users", label: "Foydalanuvchilar", icon: "M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z" },
@@ -216,6 +224,7 @@ export default function AdminDashboard() {
 
             {activeTab === "overview" && <OverviewSection stats={stats} />}
             {activeTab === "visits" && <VisitsSection timeline={stats.visitorTimeline} />}
+            {activeTab === "promo" && <PromoSection promo={stats.promo} />}
             {activeTab === "top" && <TopUsersSection stats={stats} onUserClick={(id) => router.push(`/admode/users/${id}`)} />}
             {activeTab === "recent" && <RecentSection stats={stats} onUserClick={(id) => router.push(`/admode/users/${id}`)} />}
             {activeTab === "users" && (
@@ -231,6 +240,81 @@ export default function AdminDashboard() {
           </div>
         </main>
       </div>
+    </div>
+  );
+}
+
+const PROMO_LABELS: Record<string, string> = {
+  author_modal: "@shavkatovio — modal",
+  author_banner: "@shavkatovio — banner (natija)",
+  uzbektype_modal: "@uzbektype — modal",
+};
+
+function pct(part: number, whole: number): string {
+  if (!whole) return "—";
+  return `${((part / whole) * 100).toFixed(1)}%`;
+}
+
+function PromoSection({ promo }: { promo: Stats["promo"] }) {
+  const totals = promo.reduce(
+    (a, p) => ({
+      impressions: a.impressions + p.impressions,
+      uniqueUsers: a.uniqueUsers + p.uniqueUsers,
+      clicks: a.clicks + p.clicks,
+      dismisses: a.dismisses + p.dismisses,
+    }),
+    { impressions: 0, uniqueUsers: 0, clicks: 0, dismisses: 0 }
+  );
+
+  return (
+    <div className="space-y-6">
+      <section className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <StatCard label="Jami ko'rsatildi" value={totals.impressions} />
+        <StatCard label="Bosildi (CTA)" value={totals.clicks} />
+        <StatCard label="Yopildi (×)" value={totals.dismisses} />
+        <StatCard label="Foydalanuvchi (ko'rgan)" value={totals.uniqueUsers} />
+      </section>
+
+      <section className="border border-border rounded-xl p-5 md:p-6">
+        <h3 className="text-base font-semibold mb-4">Reklama bo'yicha tahlil</h3>
+        {promo.length === 0 ? (
+          <p className="text-sm text-muted-foreground">
+            Hozircha ma'lumot yo'q. Foydalanuvchilar reklamani ko'rgach shu yerda paydo bo'ladi.
+          </p>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm border-collapse min-w-[640px]">
+              <thead>
+                <tr className="text-left text-xs text-muted-foreground border-b border-border">
+                  <th className="py-2 pr-3 font-medium">Reklama</th>
+                  <th className="py-2 px-3 font-medium text-right">Ko'rsatildi</th>
+                  <th className="py-2 px-3 font-medium text-right">Foydalanuvchi</th>
+                  <th className="py-2 px-3 font-medium text-right">Bosildi</th>
+                  <th className="py-2 px-3 font-medium text-right">CTR</th>
+                  <th className="py-2 px-3 font-medium text-right">Yopildi</th>
+                  <th className="py-2 pl-3 font-medium text-right">Yopish %</th>
+                </tr>
+              </thead>
+              <tbody>
+                {promo.map((p) => (
+                  <tr key={p.promo} className="border-b border-border/50">
+                    <td className="py-2.5 pr-3 font-medium">{PROMO_LABELS[p.promo] ?? p.promo}</td>
+                    <td className="py-2.5 px-3 text-right font-mono">{p.impressions}</td>
+                    <td className="py-2.5 px-3 text-right font-mono">{p.uniqueUsers}</td>
+                    <td className="py-2.5 px-3 text-right font-mono">{p.clicks}</td>
+                    <td className="py-2.5 px-3 text-right font-mono text-primary">{pct(p.clicks, p.impressions)}</td>
+                    <td className="py-2.5 px-3 text-right font-mono">{p.dismisses}</td>
+                    <td className="py-2.5 pl-3 text-right font-mono text-muted-foreground">{pct(p.dismisses, p.impressions)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+        <p className="text-xs text-muted-foreground mt-4">
+          CTR = bosilgan ÷ ko'rsatilgan. &quot;Foydalanuvchi&quot; — reklamani ko'rgan noyob brauzerlar soni.
+        </p>
+      </section>
     </div>
   );
 }

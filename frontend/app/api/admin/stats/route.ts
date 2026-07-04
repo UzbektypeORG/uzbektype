@@ -157,8 +157,35 @@ export async function GET() {
     .orderBy(desc(users.createdAt))
     .limit(200);
 
+  // Promo analytics — per-promo impressions, unique viewers (by anon_id),
+  // CTA clicks and dismissals. Powers the "Reklama" tab.
+  const promoRows = await db.execute<{
+    promo: string;
+    impressions: number;
+    uniqueUsers: number;
+    clicks: number;
+    dismisses: number;
+  }>(sql`
+    SELECT
+      promo,
+      COUNT(*) FILTER (WHERE event = 'impression')::int AS impressions,
+      COUNT(DISTINCT anon_id) FILTER (WHERE event = 'impression')::int AS "uniqueUsers",
+      COUNT(*) FILTER (WHERE event = 'click')::int AS clicks,
+      COUNT(*) FILTER (WHERE event = 'dismiss')::int AS dismisses
+    FROM promo_event
+    GROUP BY promo
+    ORDER BY impressions DESC
+  `);
+
   // Cast Drizzle row results — accuracy comes back as a string (numeric type).
   return NextResponse.json({
+    promo: promoRows.map((p) => ({
+      promo: p.promo,
+      impressions: Number(p.impressions),
+      uniqueUsers: Number(p.uniqueUsers),
+      clicks: Number(p.clicks),
+      dismisses: Number(p.dismisses),
+    })),
     totals: {
       users: totals?.userCount ?? 0,
       results: totals?.resultCount ?? 0,

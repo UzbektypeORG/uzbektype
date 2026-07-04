@@ -111,6 +111,27 @@ export const testResults = pgTable(
   ]
 );
 
+// One row per promo interaction (impression / click / dismiss). Powers the
+// admin "Reklama" analytics: how many users saw each promo, how many clicked
+// the CTA, how many dismissed it. anon_id (same id as daily_visit) gives the
+// unique-user count without needing an auth lookup on this hot path.
+export const promoEvents = pgTable(
+  "promo_event",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    promo: varchar("promo", { length: 40 }).notNull(), // 'author_modal' | 'author_banner' | 'uzbektype_modal'
+    event: varchar("event", { length: 16 }).notNull(), // 'impression' | 'click' | 'dismiss'
+    anonId: varchar("anon_id", { length: 64 }),
+    userId: uuid("user_id"),
+    lang: varchar("lang", { length: 2 }),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (table) => [
+    index("promo_event_promo_idx").on(table.promo),
+    index("promo_event_created_at_idx").on(table.createdAt),
+  ]
+);
+
 // One row per browser per day. Anonymous and signed-in browsers both ping;
 // the signedIn flag lets the admin panel break down totals.
 export const dailyVisits = pgTable(
