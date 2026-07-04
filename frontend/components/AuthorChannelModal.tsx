@@ -15,7 +15,7 @@ const CHANNEL_URL = "https://t.me/shavkatovio";
 // pitch — a typing-practice audience bridges naturally to AI / digital skills.
 const content = {
   uz: {
-    title: "Raqamli ko'nikmangizni keyingi bosqichga",
+    title: "Raqamli ko'nikmangiz uchun keyingi bosqich",
     subtitle:
       "AI yangiliklari, avtomatlashtirish va raqamli ko'nikmalar bo'yicha foydali kontent — @shavkatovio kanalida.",
     cta: "Kanalga obuna bo'lish",
