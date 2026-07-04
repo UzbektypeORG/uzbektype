@@ -126,9 +126,11 @@ export default function LeaderboardWidget({
   const { handleLogin, isLoggingIn } = useGoogleLogin(lang);
   const [entries, setEntries] = useState<Entry[]>([]);
   const [me, setMe] = useState<MeRank | null>(null);
+  const [loading, setLoading] = useState(true);
   const t = content[lang];
 
   useEffect(() => {
+    setLoading(true);
     fetch(`/api/leaderboard?period=${period}&difficulty=${difficulty}`, { cache: "no-store" })
       .then((r) => (r.ok ? r.json() : Promise.reject(r.status)))
       .then((data: { top: Entry[]; me: MeRank | null }) => {
@@ -138,7 +140,8 @@ export default function LeaderboardWidget({
       .catch(() => {
         setEntries([]);
         setMe(null);
-      });
+      })
+      .finally(() => setLoading(false));
   }, [period, difficulty, user, limit]);
 
   const userRank = me?.rank ?? null;
@@ -196,12 +199,21 @@ export default function LeaderboardWidget({
       </div>
 
       <ol className="space-y-1 mb-3 min-h-[40px]">
-        {entries.length === 0 && (
+        {loading &&
+          Array.from({ length: limit || 5 }).map((_, i) => (
+            <li key={`sk-${i}`} className="flex items-center gap-2 px-2 py-1.5">
+              <span className="w-5 h-3 shimmer rounded" />
+              <span className="w-6 h-6 shimmer rounded-full flex-shrink-0" />
+              <span className="h-3 shimmer rounded flex-1 max-w-[120px]" />
+              <span className="w-8 h-3 shimmer rounded ml-auto" />
+            </li>
+          ))}
+        {!loading && entries.length === 0 && (
           <li className="text-center text-[11px] text-muted-foreground py-4">
             {t.noResults}
           </li>
         )}
-        {entries.map((entry) => {
+        {!loading && entries.map((entry) => {
           const isUserSlot = mounted && user !== null && entry.userId === user.id;
           return (
             <li

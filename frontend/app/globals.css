@@ -432,3 +432,28 @@ a {
     animation: none;
   }
 }
+
+/* Skeleton shimmer — used by the leaderboard loading placeholders */
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+.shimmer {
+  background-color: hsl(var(--foreground) / 0.06);
+  background-image: linear-gradient(
+    90deg,
+    transparent 0%,
+    hsl(var(--foreground) / 0.05) 20%,
+    hsl(var(--foreground) / 0.14) 50%,
+    hsl(var(--foreground) / 0.05) 80%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  background-repeat: no-repeat;
+  animation: shimmer 1.4s infinite linear;
+}
+@media (prefers-reduced-motion: reduce) {
+  .shimmer {
+    animation: none;
+  }
+}

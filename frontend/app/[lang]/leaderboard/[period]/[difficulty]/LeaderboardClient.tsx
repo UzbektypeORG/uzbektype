@@ -181,6 +181,10 @@ export default function LeaderboardClient({ lang, period, difficulty }: { lang: 
           </div>
         </div>
 
+        {loading ? (
+          <LeaderboardSkeleton />
+        ) : (
+          <>
         <div className="rounded-2xl border border-border bg-gradient-to-b from-transparent via-accent/10 to-accent/30 p-5 md:p-6 max-w-3xl mx-auto">
           <div className="grid grid-cols-3 items-end gap-3 md:gap-4">
             {[top3[1], top3[0], top3[2]].map((entry) => entry ? (
@@ -267,6 +271,8 @@ export default function LeaderboardClient({ lang, period, difficulty }: { lang: 
             </table>
           </div>
         </section>
+          </>
+        )}
 
         {mounted && !user && (
           <div className="border border-dashed border-border rounded-lg p-6 text-center space-y-3">
@@ -297,6 +303,45 @@ export default function LeaderboardClient({ lang, period, difficulty }: { lang: 
         </div>
       </div>
     </main>
+  );
+}
+
+// Shown while the leaderboard data is in flight — mirrors the podium + table
+// shape with a shimmer so the screen never looks empty.
+function LeaderboardSkeleton() {
+  const pillars = [
+    { h: 130, avatar: 52 }, // 2nd
+    { h: 180, avatar: 64 }, // 1st
+    { h: 95, avatar: 52 },  // 3rd
+  ];
+  return (
+    <>
+      <div className="rounded-2xl border border-border bg-gradient-to-b from-transparent via-accent/10 to-accent/30 p-5 md:p-6 max-w-3xl mx-auto">
+        <div className="grid grid-cols-3 items-end gap-3 md:gap-4">
+          {pillars.map((p, i) => (
+            <div key={i} className="flex flex-col items-center">
+              <div className="shimmer rounded-full mb-2" style={{ width: p.avatar, height: p.avatar }} />
+              <div className="shimmer rounded h-3 w-16 mb-1.5" />
+              <div className="shimmer rounded h-4 w-10 mb-2" />
+              <div className="shimmer rounded-lg w-full mx-2" style={{ height: p.h }} />
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <section className="border border-border rounded-lg overflow-hidden">
+        <div className="divide-y divide-border/50">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div key={i} className="flex items-center gap-3 py-3.5 px-4">
+              <div className="shimmer rounded h-4 w-4" />
+              <div className="shimmer rounded-full h-8 w-8" />
+              <div className="shimmer rounded h-3.5 flex-1 max-w-[180px]" />
+              <div className="shimmer rounded h-4 w-12 ml-auto" />
+            </div>
+          ))}
+        </div>
+      </section>
+    </>
   );
 }
 
