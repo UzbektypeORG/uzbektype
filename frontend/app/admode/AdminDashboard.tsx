@@ -66,6 +66,7 @@ interface Stats {
     promo: string;
     impressions: number;
     uniqueUsers: number;
+    uniqueClickers: number;
     clicks: number;
     dismisses: number;
   }>;
@@ -350,7 +351,7 @@ function PromoSection({ promo }: { promo: Stats["promo"] }) {
           </p>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-sm border-collapse min-w-[640px]">
+            <table className="w-full text-sm border-collapse min-w-[760px]">
               <thead>
                 <tr className="text-left text-xs text-muted-foreground border-b border-border">
                   <th className="py-2 pr-3 font-medium">Reklama</th>
@@ -358,6 +359,7 @@ function PromoSection({ promo }: { promo: Stats["promo"] }) {
                   <th className="py-2 px-3 font-medium text-right">Foydalanuvchi</th>
                   <th className="py-2 px-3 font-medium text-right">Bosildi</th>
                   <th className="py-2 px-3 font-medium text-right">CTR</th>
+                  <th className="py-2 px-3 font-medium text-right">Foyd. CTR</th>
                   <th className="py-2 px-3 font-medium text-right">Yopildi</th>
                   <th className="py-2 pl-3 font-medium text-right">Yopish %</th>
                 </tr>
@@ -370,6 +372,7 @@ function PromoSection({ promo }: { promo: Stats["promo"] }) {
                     <td className="py-2.5 px-3 text-right font-mono">{p.uniqueUsers}</td>
                     <td className="py-2.5 px-3 text-right font-mono">{p.clicks}</td>
                     <td className="py-2.5 px-3 text-right font-mono text-primary">{pct(p.clicks, p.impressions)}</td>
+                    <td className="py-2.5 px-3 text-right font-mono text-primary">{pct(p.uniqueClickers, p.uniqueUsers)}</td>
                     <td className="py-2.5 px-3 text-right font-mono">{p.dismisses}</td>
                     <td className="py-2.5 pl-3 text-right font-mono text-muted-foreground">{pct(p.dismisses, p.impressions)}</td>
                   </tr>
@@ -379,7 +382,10 @@ function PromoSection({ promo }: { promo: Stats["promo"] }) {
           </div>
         )}
         <p className="text-xs text-muted-foreground mt-4">
-          CTR = bosilgan ÷ ko'rsatilgan. &quot;Foydalanuvchi&quot; — reklamani ko'rgan noyob brauzerlar soni.
+          CTR = bosilgan ÷ ko'rsatilgan (ko'rsatish asosida). Foyd. CTR = bosgan
+          noyob foydalanuvchilar ÷ ko'rgan noyob foydalanuvchilar (ya'ni ko'rgan
+          odamlarning necha foizi bosgan). &quot;Foydalanuvchi&quot; — reklamani
+          ko'rgan noyob brauzerlar soni.
         </p>
       </section>
 
@@ -617,6 +623,16 @@ function UsersSection({
 }) {
   const [period, setPeriod] = useState<VisitorPeriod>("today");
   const bucket = visitorBreakdown[period];
+  // Registered users whose sign-up date falls in the selected period, so the
+  // list matches the chosen filter (today / week / month / all-time).
+  const periodUsers = useMemo(() => {
+    if (period === "allTime") return users;
+    const start = new Date();
+    start.setHours(0, 0, 0, 0);
+    if (period === "week") start.setDate(start.getDate() - 6);
+    else if (period === "month") start.setDate(start.getDate() - 29);
+    return users.filter((u) => new Date(u.createdAt) >= start);
+  }, [users, period]);
   return (
     <div className="space-y-4">
       <section className="border border-border rounded-xl p-5 md:p-6">
@@ -647,7 +663,10 @@ function UsersSection({
 
       <section className="border border-border rounded-xl p-5 md:p-6">
         <div className="flex items-center justify-between mb-4 gap-3 flex-wrap">
-          <p className="text-sm text-muted-foreground">Ro&apos;yxatdan o&apos;tganlar ro&apos;yxati: {total}</p>
+          <p className="text-sm text-muted-foreground">
+            Ro&apos;yxatdan o&apos;tganlar ({PERIOD_LABELS[period]}): {periodUsers.length}
+            <span className="opacity-60"> / jami {total}</span>
+          </p>
           <input
             type="text"
             value={search}
@@ -668,7 +687,7 @@ function UsersSection({
             </tr>
           </thead>
           <tbody>
-            {users.map((u) => (
+            {periodUsers.map((u) => (
               <tr
                 key={u.id}
                 onClick={() => onUserClick(u.id)}
@@ -688,7 +707,7 @@ function UsersSection({
                 </td>
               </tr>
             ))}
-            {users.length === 0 && (
+            {periodUsers.length === 0 && (
               <tr>
                 <td colSpan={5} className="py-6 text-center text-sm text-muted-foreground">
                   Topilmadi

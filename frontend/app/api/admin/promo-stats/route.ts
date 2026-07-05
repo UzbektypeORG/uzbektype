@@ -36,6 +36,7 @@ export async function GET(req: Request) {
     promo: string;
     impressions: number;
     uniqueUsers: number;
+    uniqueClickers: number;
     clicks: number;
     dismisses: number;
   }>(sql`
@@ -43,6 +44,7 @@ export async function GET(req: Request) {
       promo,
       COUNT(*) FILTER (WHERE event = 'impression')::int AS impressions,
       COUNT(DISTINCT anon_id) FILTER (WHERE event = 'impression')::int AS "uniqueUsers",
+      COUNT(DISTINCT anon_id) FILTER (WHERE event = 'click')::int AS "uniqueClickers",
       COUNT(*) FILTER (WHERE event = 'click')::int AS clicks,
       COUNT(*) FILTER (WHERE event = 'dismiss')::int AS dismisses
     FROM promo_event
@@ -56,6 +58,7 @@ export async function GET(req: Request) {
       promo: p.promo,
       impressions: Number(p.impressions),
       uniqueUsers: Number(p.uniqueUsers),
+      uniqueClickers: Number(p.uniqueClickers),
       clicks: Number(p.clicks),
       dismisses: Number(p.dismisses),
     })),

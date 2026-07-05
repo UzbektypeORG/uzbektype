@@ -161,7 +161,7 @@ export async function GET() {
       users.createdAt
     )
     .orderBy(desc(users.createdAt))
-    .limit(200);
+    .limit(10000);
 
   // Promo analytics — per-promo impressions, unique viewers (by anon_id),
   // CTA clicks and dismissals. Powers the "Reklama" tab.
@@ -169,6 +169,7 @@ export async function GET() {
     promo: string;
     impressions: number;
     uniqueUsers: number;
+    uniqueClickers: number;
     clicks: number;
     dismisses: number;
   }>(sql`
@@ -176,6 +177,7 @@ export async function GET() {
       promo,
       COUNT(*) FILTER (WHERE event = 'impression')::int AS impressions,
       COUNT(DISTINCT anon_id) FILTER (WHERE event = 'impression')::int AS "uniqueUsers",
+      COUNT(DISTINCT anon_id) FILTER (WHERE event = 'click')::int AS "uniqueClickers",
       COUNT(*) FILTER (WHERE event = 'click')::int AS clicks,
       COUNT(*) FILTER (WHERE event = 'dismiss')::int AS dismisses
     FROM promo_event
@@ -189,6 +191,7 @@ export async function GET() {
       promo: p.promo,
       impressions: Number(p.impressions),
       uniqueUsers: Number(p.uniqueUsers),
+      uniqueClickers: Number(p.uniqueClickers),
       clicks: Number(p.clicks),
       dismisses: Number(p.dismisses),
     })),
