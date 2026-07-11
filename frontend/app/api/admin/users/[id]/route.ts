@@ -6,6 +6,34 @@ import { desc, eq, sql } from "drizzle-orm";
 export const dynamic = "force-dynamic";
 export const fetchCache = "force-no-store";
 
+// Permanently delete a user. ON DELETE CASCADE on test_result / account /
+// session means their results and auth rows go with them.
+export async function DELETE(
+  _req: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  if (!(await isAdmin())) {
+    return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+  }
+
+  const { id } = await params;
+  if (!id || typeof id !== "string") {
+    return NextResponse.json({ error: "invalid_id" }, { status: 400 });
+  }
+
+  const [existing] = await db
+    .select({ id: users.id })
+    .from(users)
+    .where(eq(users.id, id))
+    .limit(1);
+  if (!existing) {
+    return NextResponse.json({ error: "not_found" }, { status: 404 });
+  }
+
+  await db.delete(users).where(eq(users.id, id));
+  return NextResponse.json({ ok: true });
+}
+
 export async function GET(
   _req: Request,
   { params }: { params: Promise<{ id: string }> }

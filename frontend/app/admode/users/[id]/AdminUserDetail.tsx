@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import ThemeToggle from "@/components/ThemeToggle";
@@ -69,8 +70,10 @@ function avatarFor(u: UserData): string {
 }
 
 export default function AdminUserDetail({ userId }: { userId: string }) {
+  const router = useRouter();
   const [data, setData] = useState<Data | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState(false);
   const [diffFilter, setDiffFilter] = useState<(typeof DIFFICULTIES)[number]>("all");
   const [langFilter, setLangFilter] = useState<(typeof LANGUAGES)[number]>("all");
 
@@ -96,6 +99,27 @@ export default function AdminUserDetail({ userId }: { userId: string }) {
       .slice(-30)
       .map((r, i) => ({ index: i + 1, wpm: r.wpm, accuracy: r.accuracy }));
   }, [filteredResults]);
+
+  const handleDelete = async () => {
+    if (!data || deleting) return;
+    const ok = window.confirm(
+      `"${fullName(data.user)}" (${data.user.email}) foydalanuvchisini va uning BARCHA natijalarini butunlay o'chirmoqchimisiz?\n\nBu amalni ortga qaytarib bo'lmaydi.`
+    );
+    if (!ok) return;
+    setDeleting(true);
+    try {
+      const res = await fetch(`/api/admin/users/${userId}`, { method: "DELETE" });
+      if (res.ok) {
+        router.push("/admode");
+      } else {
+        alert("O'chirishda xato yuz berdi.");
+        setDeleting(false);
+      }
+    } catch {
+      alert("O'chirishda xato yuz berdi.");
+      setDeleting(false);
+    }
+  };
 
   if (error) {
     return (
@@ -142,6 +166,19 @@ export default function AdminUserDetail({ userId }: { userId: string }) {
             </p>
             <p className="text-xs text-muted-foreground font-mono break-all">ID: {user.id}</p>
           </div>
+          <button
+            onClick={handleDelete}
+            disabled={deleting}
+            className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg border border-red-500/50 text-red-600 dark:text-red-400 hover:bg-red-500 hover:text-white disabled:opacity-50 transition-colors self-start"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="3 6 5 6 21 6" />
+              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+              <line x1="10" y1="11" x2="10" y2="17" />
+              <line x1="14" y1="11" x2="14" y2="17" />
+            </svg>
+            {deleting ? "O'chirilmoqda…" : "Foydalanuvchini o'chirish"}
+          </button>
         </section>
 
         {/* Totals */}
