@@ -7,6 +7,8 @@
 // Keep entries lower-cased; comparison is case-insensitive and trimmed.
 const BANNED = new Set<string>([
   "abdurahmonkarimov453@gmail.com", // 488 WPM then 197 WPM — fabricated scores, twice
+  "jaloliddindavlatov0@gmail.com", // "Rezzy Top" — burst-topped every difficulty then vanished
+  "arslonovalisher095@gmail.com", // topped every difficulty; had a duplicate account too
 ]);
 
 export function isBannedEmail(email: string | null | undefined): boolean {
