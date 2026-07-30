@@ -5,6 +5,7 @@ import { eq, sql } from "drizzle-orm";
 import { sendChannelMessage } from "@/lib/telegram";
 import { verifyTestToken } from "@/lib/test-token";
 import { isBannedEmail } from "@/lib/banned-emails";
+import { analyzeRun, parseTelemetry } from "@/lib/anti-cheat";
 
 // ─── Anti-cheat tuning ──────────────────────────────────────────────────────
 // Per-difficulty WPM ceilings. Harder text is typed slower, so each cap sits
@@ -81,6 +82,7 @@ type Body = {
   totalChars?: unknown;
   timeElapsed?: unknown;
   token?: unknown;
+  telemetry?: unknown;
 };
 
 function isInt(v: unknown, min: number, max: number): v is number {
@@ -165,6 +167,27 @@ export async function POST(req: Request) {
   // Physical plausibility ceilings — anything above is dropped silently.
   if (serverWpm > (MAX_WPM[body.difficulty] ?? 150)) return silentDrop();
   if (body.totalChars / t > MAX_CPS) return silentDrop();
+
+  // Behavioural check. The caps above only stop *impossible* numbers; a
+  // console autotyper tuned to a believable 130 WPM passes all of them. This
+  // looks at HOW the run was typed instead: script-dispatched key events
+  // (isTrusted === false) and a metronomic keystroke rhythm no human produces.
+  const verdict = analyzeRun({
+    telemetry: parseTelemetry(body.telemetry),
+    wpm: serverWpm,
+    timeElapsed: t,
+    totalChars: body.totalChars,
+    correctedChars: body.correctedChars,
+    incorrectChars: body.incorrectChars,
+  });
+  if (verdict.bot) {
+    // Server log only — the response stays indistinguishable from a save, so
+    // the script author never learns which signal gave them away.
+    console.warn(
+      `[anti-cheat] drop user=${session.user.id} wpm=${serverWpm} score=${verdict.score} reasons=${verdict.reasons.join(",")}`
+    );
+    return silentDrop();
+  }
   // ──────────────────────────────────────────────────────────────────────────
 
   // Snapshot the previous all-time max for this difficulty BEFORE inserting,

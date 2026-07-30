@@ -2,11 +2,12 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import type { TestConfig, TypingStats, WpmDataPoint } from "@/types";
+import { MAX_GAPS, type KeystrokeTelemetry } from "@/lib/anti-cheat";
 
 interface TypingTestProps {
   config: TestConfig;
   text: string;
-  onComplete: (stats: TypingStats & { timeElapsed: number; wpmHistory: WpmDataPoint[]; rawWpm: number; consistency: number }) => void;
+  onComplete: (stats: TypingStats & { timeElapsed: number; wpmHistory: WpmDataPoint[]; rawWpm: number; consistency: number; telemetry: KeystrokeTelemetry }) => void;
   animationSpeed: number;
   correctCharColor: 'default' | 'blue' | 'yellow' | 'green';
   animationMode: 'bounce' | 'fade';
@@ -28,6 +29,30 @@ export default function TypingTest({ config, text: initialText, onComplete, anim
 
   // Track positions where errors occurred (for corrected chars tracking)
   const errorPositions = useRef<Set<number>>(new Set());
+
+  // ─── Anti-cheat telemetry ─────────────────────────────────────────────────
+  // Recorded for every keystroke and shipped with the result so the server can
+  // judge whether a human typed it. `untrusted` counts events the browser did
+  // NOT generate (isTrusted === false) — i.e. a devtools autotyper — and
+  // `gaps` carries the typing rhythm, which no setTimeout loop reproduces.
+  // Nothing is blocked here on purpose: a caught script must look like it
+  // worked, exactly like the silent drop in /api/results, so the author gets
+  // no feedback to iterate against.
+  const telemetryRef = useRef<KeystrokeTelemetry>({ v: 1, gaps: [], chars: 0, back: 0, untrusted: 0 });
+  const lastKeyTimeRef = useRef<number | null>(null);
+
+  const recordKeystroke = (isTrusted: boolean, kind: "char" | "back", count = 1) => {
+    const t = telemetryRef.current;
+    if (!isTrusted) t.untrusted++;
+    if (kind === "char") t.chars += count;
+    else t.back++;
+
+    const now = Date.now();
+    if (lastKeyTimeRef.current !== null && t.gaps.length < MAX_GAPS) {
+      t.gaps.push(Math.round(now - lastKeyTimeRef.current));
+    }
+    lastKeyTimeRef.current = now;
+  };
 
   // For time-based tests: extend text when user reaches the end
   const [text, setText] = useState(initialText);
@@ -52,6 +77,8 @@ export default function TypingTest({ config, text: initialText, onComplete, anim
     setText(initialText);
     baseTextRef.current = initialText;
     errorPositions.current.clear();
+    telemetryRef.current = { v: 1, gaps: [], chars: 0, back: 0, untrusted: 0 };
+    lastKeyTimeRef.current = null;
   }, [initialText]);
 
   const currentCharRef = useRef<HTMLSpanElement>(null);
@@ -176,7 +203,7 @@ export default function TypingTest({ config, text: initialText, onComplete, anim
       consistency = avgWpm > 0 ? Math.max(0, Math.min(100, Math.round(100 - (stdDev / avgWpm) * 100))) : 100;
     }
 
-    onComplete({ ...stats, timeElapsed, wpmHistory, rawWpm, consistency });
+    onComplete({ ...stats, timeElapsed, wpmHistory, rawWpm, consistency, telemetry: telemetryRef.current });
   };
 
   const handleKeyPress = (e: KeyboardEvent) => {
@@ -192,6 +219,7 @@ export default function TypingTest({ config, text: initialText, onComplete, anim
     // Handle backspace
     if (e.key === "Backspace") {
       e.preventDefault();
+      recordKeystroke(e.isTrusted, "back");
       setUserInput((prev) => prev.slice(0, -1));
       return;
     }
@@ -200,6 +228,8 @@ export default function TypingTest({ config, text: initialText, onComplete, anim
     if (e.key.length === 1) {
       e.preventDefault();
       if (!isTimeBased && userInput.length >= text.length) return;
+
+      recordKeystroke(e.isTrusted, "char");
 
       // Track error positions
       const currentPos = userInput.length;
@@ -216,6 +246,13 @@ export default function TypingTest({ config, text: initialText, onComplete, anim
     if (isFinished) return;
 
     const newValue = e.target.value;
+
+    // Same telemetry, mobile path: one entry per input event. A multi-char
+    // jump (autocorrect, swipe input) counts as that many characters but as a
+    // single rhythm sample.
+    const delta = newValue.length - userInput.length;
+    if (delta > 0) recordKeystroke(e.nativeEvent.isTrusted, "char", delta);
+    else if (delta < 0) recordKeystroke(e.nativeEvent.isTrusted, "back");
 
     // Start timer on first input
     if (!startTime && newValue.length > 0) {

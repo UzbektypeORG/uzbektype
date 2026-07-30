@@ -18,6 +18,7 @@ import LoginCtaBanner from "@/components/LoginCtaBanner";
 import { getTestText } from "@/lib/getTestText";
 import { calculateStars } from "@/lib/calculateStars";
 import { saveTestResult } from "@/lib/localStorage";
+import type { KeystrokeTelemetry } from "@/lib/anti-cheat";
 import type { TestConfig, TypingStats, Language, TestType, Difficulty, WpmDataPoint } from "@/types";
 
 const testTypes: TestType[] = ["10s", "30s", "60s", "10w", "30w", "60w"];
@@ -213,7 +214,7 @@ export default function TestPage() {
     requestTestToken(testConfig);
   }, [typeParam, lang, topic, requestTestToken]);
 
-  const handleTestComplete = (stats: TypingStats & { timeElapsed: number; wpmHistory: WpmDataPoint[]; rawWpm: number; consistency: number }) => {
+  const handleTestComplete = (stats: TypingStats & { timeElapsed: number; wpmHistory: WpmDataPoint[]; rawWpm: number; consistency: number; telemetry: KeystrokeTelemetry }) => {
     if (!config) return;
 
     const calculatedStars = calculateStars({
@@ -255,6 +256,9 @@ export default function TestPage() {
         totalChars: stats.totalChars,
         timeElapsed: stats.timeElapsed,
         token: testTokenRef.current,
+        // Keystroke rhythm + synthetic-event count. The server decides from
+        // this whether a human typed the run; see lib/anti-cheat.ts.
+        telemetry: stats.telemetry,
       }),
     })
       .then((r) => (r.ok ? r.json() : null))
