@@ -12,7 +12,6 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import type { TestConfig, TypingStats, WpmDataPoint } from "@/types";
-import { trackPromo } from "@/lib/track-promo";
 
 interface TestResultsProps {
   config: TestConfig;
@@ -64,9 +63,6 @@ const labels = {
     easy: "Oson",
     medium: "O'rta",
     hard: "Qiyin",
-    tgTitle: "@shavkatovio kanaliga qo'shiling",
-    tgSubtitle: "AI yangiliklari va raqamli ko'nikmalar bo'yicha foydali kontent",
-    tgCta: "Qo'shilish",
   },
   en: {
     wpm: "WPM",
@@ -81,9 +77,6 @@ const labels = {
     easy: "Easy",
     medium: "Medium",
     hard: "Hard",
-    tgTitle: "Join the @shavkatovio channel",
-    tgSubtitle: "Practical content on AI news and digital skills",
-    tgCta: "Join",
   },
   ru: {
     wpm: "WPM",
@@ -98,9 +91,6 @@ const labels = {
     easy: "Лёгкий",
     medium: "Средний",
     hard: "Сложный",
-    tgTitle: "Канал @shavkatovio",
-    tgSubtitle: "Полезный контент об AI и цифровых навыках",
-    tgCta: "Вступить",
   },
 };
 
@@ -157,11 +147,6 @@ export default function TestResults({
     }, 1500);
     return () => clearTimeout(timer);
   }, []);
-
-  // One banner impression per results screen.
-  useEffect(() => {
-    trackPromo("author_banner", "impression", config.language);
-  }, [config.language]);
 
   // Animated values
   const animatedWpm = useCountUp(stats.wpm, 1500);
@@ -306,46 +291,6 @@ export default function TestResults({
           <div className="text-[9px] md:text-xs text-muted-foreground mt-0.5">{t.time}</div>
         </div>
       </div>
-
-      {/* Telegram CTA Banner */}
-      <a
-        href="https://t.me/shavkatovio"
-        target="_blank"
-        rel="noopener noreferrer"
-        onClick={() => trackPromo("author_banner", "click", config.language)}
-        className="group relative block w-full overflow-hidden rounded-xl min-h-[90px] md:min-h-[110px] bg-gradient-to-r from-[#229ED9]/10 via-[#229ED9]/5 to-transparent border border-[#229ED9]/30 hover:border-[#229ED9]/60 hover:shadow-lg hover:shadow-[#229ED9]/10 transition-all duration-300"
-      >
-        {/* Decorative glow */}
-        <div className="pointer-events-none absolute -right-12 -top-12 w-40 h-40 rounded-full bg-[#229ED9]/15 blur-2xl group-hover:bg-[#229ED9]/25 transition-colors duration-300" />
-
-        <div className="relative flex items-center justify-between gap-3 px-4 md:px-6 py-3 md:py-4 h-full">
-          <div className="flex items-center gap-3 md:gap-4 min-w-0">
-            {/* Telegram icon */}
-            <div className="flex-shrink-0 w-10 h-10 md:w-12 md:h-12 rounded-full bg-[#229ED9] flex items-center justify-center shadow-md shadow-[#229ED9]/30 group-hover:scale-105 transition-transform duration-300">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="white">
-                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 0 0-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .38z" />
-              </svg>
-            </div>
-
-            <div className="min-w-0">
-              <div className="text-sm md:text-base font-semibold text-foreground truncate">
-                {t.tgTitle}
-              </div>
-              <div className="text-[11px] md:text-xs text-muted-foreground truncate">
-                {t.tgSubtitle}
-              </div>
-            </div>
-          </div>
-
-          {/* CTA pill */}
-          <div className="flex-shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 md:px-4 md:py-2 rounded-full bg-[#229ED9] text-white text-xs md:text-sm font-medium shadow-md shadow-[#229ED9]/20 group-hover:shadow-lg group-hover:shadow-[#229ED9]/40 group-hover:translate-x-0.5 transition-all duration-300">
-            {t.tgCta}
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M5 12h14M13 5l7 7-7 7" />
-            </svg>
-          </div>
-        </div>
-      </a>
 
       {/* Actions */}
       <div className="flex justify-center gap-2 md:gap-3">

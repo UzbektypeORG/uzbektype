@@ -119,7 +119,7 @@ export const promoEvents = pgTable(
   "promo_event",
   {
     id: uuid("id").defaultRandom().primaryKey(),
-    promo: varchar("promo", { length: 40 }).notNull(), // 'author_modal' | 'author_banner' | 'uzbektype_modal'
+    promo: varchar("promo", { length: 40 }).notNull(), // 'uzbektype_modal'
     event: varchar("event", { length: 16 }).notNull(), // 'impression' | 'click' | 'dismiss'
     anonId: varchar("anon_id", { length: 64 }),
     userId: uuid("user_id"),

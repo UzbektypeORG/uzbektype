@@ -10,10 +10,7 @@ import TestResults from "@/components/typing/TestResults";
 import RecordCelebration from "@/components/RecordCelebration";
 import FeedbackModal from "@/components/FeedbackModal";
 import TelegramJoinModal from "@/components/TelegramJoinModal";
-import AuthorChannelModal from "@/components/AuthorChannelModal";
-import DonateModal from "@/components/DonateModal";
 import LeaderboardWidget from "@/components/LeaderboardWidget";
-import { trackPromo } from "@/lib/track-promo";
 import LoginCtaBanner from "@/components/LoginCtaBanner";
 import { getTestText } from "@/lib/getTestText";
 import { calculateStars } from "@/lib/calculateStars";
@@ -108,8 +105,6 @@ export default function TestPage() {
   const [animationMode, setAnimationMode] = useState<'bounce' | 'fade'>('bounce');
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
   const [showTelegramModal, setShowTelegramModal] = useState(false);
-  const [showAuthorModal, setShowAuthorModal] = useState(false);
-  const [showDonateModal, setShowDonateModal] = useState(false);
   const [showMobileWarning, setShowMobileWarning] = useState(false);
   const [recordType, setRecordType] = useState<"personal" | "top" | null>(null);
   // Server-issued anti-cheat token, minted at test start and required by
@@ -279,10 +274,9 @@ export default function TestPage() {
       }, 1500); // Show after results appear
     }
 
-    // Channel promo modals, keyed off a test-count milestone. Signed-in users
+    // Channel promo modal, keyed off a test-count milestone. Signed-in users
     // count post-login tests separately so someone who signs in after a few
     // anonymous tests still hits the milestone instead of missing the cutoff.
-    // Milestones are spaced so the prompts never stack (3 / 7-feedback / 10).
     let loggedInTests = 0;
     if (session) {
       loggedInTests =
@@ -291,26 +285,7 @@ export default function TestPage() {
     }
     const testCount = session ? loggedInTests : completedTests;
 
-    // Donate modal — auto-opens once, right after the 15th test.
-    if (!localStorage.getItem("uzbektype_donate_auto_shown") && testCount === 15) {
-      localStorage.setItem("uzbektype_donate_auto_shown", "true");
-      trackPromo("donate_auto", "impression", config.language);
-      setTimeout(() => setShowDonateModal(true), 1700);
-    }
-    // Author channel (@shavkatovio) — recurring prompt on every 3rd test
-    // (3, 6, 9, …). Stops once the user actually opens the channel, so it
-    // keeps nudging non-subscribers without nagging people who already joined.
-    // The 15th test is skipped here — it belongs to the donate prompt above.
-    else if (
-      !localStorage.getItem("uzbektype_author_joined") &&
-      testCount > 0 &&
-      testCount % 3 === 0
-    ) {
-      setTimeout(() => setShowAuthorModal(true), 1700);
-    }
-
-    // Site channel (@uzbektype) — once, at the 10th test. 10 isn't a multiple
-    // of 3, so it never lands on the same test as the author prompt.
+    // Site channel (@uzbektype) — once, at the 10th test.
     if (!localStorage.getItem("uzbektype_telegram_invited") && testCount === 10) {
       setTimeout(() => setShowTelegramModal(true), 1700);
     }
@@ -321,12 +296,6 @@ export default function TestPage() {
   const handleTelegramClose = () => {
     setShowTelegramModal(false);
     localStorage.setItem("uzbektype_telegram_invited", "true");
-  };
-
-  const handleAuthorClose = () => {
-    // Just dismiss — the every-3rd-test spacing handles re-prompting. The prompt
-    // only stops for good once the user opens the channel (flag set in the modal).
-    setShowAuthorModal(false);
   };
 
   const handleFeedbackSubmit = async (feedback: string) => {
@@ -416,14 +385,6 @@ export default function TestPage() {
       if (timer) clearTimeout(timer);
     };
   }, []);
-
-  // Broadcast typing state so global chrome (the header donate button) can
-  // freeze its heart-beat + label crossfade while a test is being typed.
-  useEffect(() => {
-    document.documentElement.setAttribute("data-typing", isTyping ? "true" : "false");
-    window.dispatchEvent(new CustomEvent("uz:typing", { detail: isTyping }));
-  }, [isTyping]);
-  useEffect(() => () => document.documentElement.removeAttribute("data-typing"), []);
 
   const handleAnimationSpeedChange = (speed: number) => {
     setAnimationSpeed(speed);
@@ -702,20 +663,6 @@ export default function TestPage() {
       <TelegramJoinModal
         isOpen={showTelegramModal}
         onClose={handleTelegramClose}
-        lang={lang}
-      />
-
-      {/* Author channel modal (@shavkatovio) — at the 3rd test */}
-      <AuthorChannelModal
-        isOpen={showAuthorModal}
-        onClose={handleAuthorClose}
-        lang={lang}
-      />
-
-      {/* Donate modal — auto-opens after the 15th test */}
-      <DonateModal
-        isOpen={showDonateModal}
-        onClose={() => setShowDonateModal(false)}
         lang={lang}
       />
 

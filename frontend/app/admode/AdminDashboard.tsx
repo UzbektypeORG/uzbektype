@@ -246,8 +246,6 @@ export default function AdminDashboard() {
 }
 
 const PROMO_LABELS: Record<string, string> = {
-  author_modal: "@shavkatovio — modal",
-  author_banner: "@shavkatovio — banner (natija)",
   uzbektype_modal: "@uzbektype — modal",
 };
 
@@ -256,7 +254,7 @@ function pct(part: number, whole: number): string {
   return `${((part / whole) * 100).toFixed(1)}%`;
 }
 
-const AD_PROMOS = ["author_modal", "author_banner", "uzbektype_modal"];
+const AD_PROMOS = ["uzbektype_modal"];
 
 type PromoPeriod = "all" | "today" | "yesterday" | "month" | "custom";
 const PROMO_PERIODS: { id: PromoPeriod; label: string }[] = [
@@ -285,12 +283,6 @@ function PromoSection({ promo }: { promo: Stats["promo"] }) {
   }, [period, month, promo]);
 
   const ads = data.filter((p) => AD_PROMOS.includes(p.promo));
-
-  const byId: Record<string, Stats["promo"][number]> = {};
-  for (const p of data) byId[p.promo] = p;
-  const donateClicks = byId["donate_button"]?.clicks ?? 0;
-  const donateCopies = byId["donate_copy"]?.clicks ?? 0;
-  const donateAuto = byId["donate_auto"]?.impressions ?? 0;
 
   const totals = ads.reduce(
     (a, p) => ({
@@ -386,20 +378,6 @@ function PromoSection({ promo }: { promo: Stats["promo"] }) {
           noyob foydalanuvchilar ÷ ko'rgan noyob foydalanuvchilar (ya'ni ko'rgan
           odamlarning necha foizi bosgan). &quot;Foydalanuvchi&quot; — reklamani
           ko'rgan noyob brauzerlar soni.
-        </p>
-      </section>
-
-      <section className="border border-border rounded-xl p-5 md:p-6">
-        <h3 className="text-base font-semibold mb-4">💛 Donat</h3>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          <StatCard label="Donat tugma bosilgan" value={donateClicks} />
-          <StatCard label="Karta nusxa olingan" value={donateCopies} />
-          <StatCard label="Avto ochilgan (15-test)" value={donateAuto} />
-        </div>
-        <p className="text-xs text-muted-foreground mt-4">
-          «Donat tugma bosilgan» — donat oynasi tugma orqali ochilgan; «nusxa
-          olingan» — karta raqami nusxalab olingan; «avto ochilgan» — foydalanuvchi
-          15-testni tugatgach oyna avtomatik ochilgan.
         </p>
       </section>
     </div>

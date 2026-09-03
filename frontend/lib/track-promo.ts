@@ -4,13 +4,7 @@
 
 const ANON_ID_KEY = "uzbektype_anon_id";
 
-export type PromoName =
-  | "author_modal"
-  | "author_banner"
-  | "uzbektype_modal"
-  | "donate_button"
-  | "donate_copy"
-  | "donate_auto";
+export type PromoName = "uzbektype_modal";
 export type PromoEventType = "impression" | "click" | "dismiss";
 
 function getAnonId(): string | null {
