@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { notFound, useParams, useSearchParams } from "next/navigation";
-import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { Timer, RotateCcw, MoveVertical, Blend } from "lucide-react";
 import TypingTest from "@/components/typing/TypingTest";
@@ -111,7 +110,6 @@ export default function TestPage() {
   // /api/results to save the score. Held in a ref so the latest value is
   // always available inside handleTestComplete without re-binding the callback.
   const testTokenRef = useRef<string | null>(null);
-  const { data: session } = useSession();
 
   // Mint a fresh anti-cheat token for the given config (signed-in users only;
   // anonymous users get 401 and simply have no token — their results aren't
@@ -274,19 +272,15 @@ export default function TestPage() {
       }, 1500); // Show after results appear
     }
 
-    // Channel promo modal, keyed off a test-count milestone. Signed-in users
-    // count post-login tests separately so someone who signs in after a few
-    // anonymous tests still hits the milestone instead of missing the cutoff.
-    let loggedInTests = 0;
-    if (session) {
-      loggedInTests =
-        parseInt(localStorage.getItem("uzbektype_logged_in_tests") || "0") + 1;
-      localStorage.setItem("uzbektype_logged_in_tests", loggedInTests.toString());
-    }
-    const testCount = session ? loggedInTests : completedTests;
+    // @katovuz channel — every 5th test, until the user actually joins. Own
+    // dedicated counter (not the shared completedTests one above) so the
+    // milestone is a clean "every 5 tests from today", not thrown off by
+    // whatever count a long-time user already had before this promo shipped.
+    const katovuzTestCount =
+      parseInt(localStorage.getItem("uzbektype_katovuz_test_count") || "0") + 1;
+    localStorage.setItem("uzbektype_katovuz_test_count", katovuzTestCount.toString());
 
-    // @katovuz channel — every 5th test, until the user actually joins.
-    if (!localStorage.getItem("uzbektype_katovuz_joined") && testCount % 5 === 0) {
+    if (!localStorage.getItem("uzbektype_katovuz_joined") && katovuzTestCount % 5 === 0) {
       setTimeout(() => setShowKatovuzModal(true), 1700);
     }
 
