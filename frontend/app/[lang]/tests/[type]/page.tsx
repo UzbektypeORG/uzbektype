@@ -9,7 +9,7 @@ import TypingTest from "@/components/typing/TypingTest";
 import TestResults from "@/components/typing/TestResults";
 import RecordCelebration from "@/components/RecordCelebration";
 import FeedbackModal from "@/components/FeedbackModal";
-import TelegramJoinModal from "@/components/TelegramJoinModal";
+import KatovuzChannelModal from "@/components/KatovuzChannelModal";
 import LeaderboardWidget from "@/components/LeaderboardWidget";
 import LoginCtaBanner from "@/components/LoginCtaBanner";
 import { getTestText } from "@/lib/getTestText";
@@ -104,7 +104,7 @@ export default function TestPage() {
   const [correctCharColor, setCorrectCharColor] = useState<'default' | 'blue' | 'yellow' | 'green'>('default');
   const [animationMode, setAnimationMode] = useState<'bounce' | 'fade'>('bounce');
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
-  const [showTelegramModal, setShowTelegramModal] = useState(false);
+  const [showKatovuzModal, setShowKatovuzModal] = useState(false);
   const [showMobileWarning, setShowMobileWarning] = useState(false);
   const [recordType, setRecordType] = useState<"personal" | "top" | null>(null);
   // Server-issued anti-cheat token, minted at test start and required by
@@ -285,17 +285,20 @@ export default function TestPage() {
     }
     const testCount = session ? loggedInTests : completedTests;
 
-    // Site channel (@uzbektype) — once, at the 10th test.
-    if (!localStorage.getItem("uzbektype_telegram_invited") && testCount === 10) {
-      setTimeout(() => setShowTelegramModal(true), 1700);
+    // @katovuz channel — every 5th test, until the user actually joins.
+    if (!localStorage.getItem("uzbektype_katovuz_joined") && testCount % 5 === 0) {
+      setTimeout(() => setShowKatovuzModal(true), 1700);
     }
 
     setResult(stats);
   };
 
-  const handleTelegramClose = () => {
-    setShowTelegramModal(false);
-    localStorage.setItem("uzbektype_telegram_invited", "true");
+  const handleKatovuzClose = () => {
+    setShowKatovuzModal(false);
+  };
+
+  const handleKatovuzJoin = () => {
+    localStorage.setItem("uzbektype_katovuz_joined", "true");
   };
 
   const handleFeedbackSubmit = async (feedback: string) => {
@@ -659,10 +662,11 @@ export default function TestPage() {
         lang={lang}
       />
 
-      {/* Site channel modal (@uzbektype) — at the 10th test */}
-      <TelegramJoinModal
-        isOpen={showTelegramModal}
-        onClose={handleTelegramClose}
+      {/* @katovuz channel modal — every 5th test */}
+      <KatovuzChannelModal
+        isOpen={showKatovuzModal}
+        onClose={handleKatovuzClose}
+        onJoin={handleKatovuzJoin}
         lang={lang}
       />
 

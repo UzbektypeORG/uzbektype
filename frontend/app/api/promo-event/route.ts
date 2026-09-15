@@ -8,7 +8,7 @@ export const fetchCache = "force-no-store";
 // impression) and the unique-user count is keyed off anon_id, so a per-request
 // session lookup would just burn compute for no analytic gain.
 
-const PROMOS = ["uzbektype_modal"];
+const PROMOS = ["katovuz_modal", "katovuz_banner"];
 const EVENTS = ["impression", "click", "dismiss"];
 const LANGS = ["uz", "en", "ru"];
 

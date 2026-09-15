@@ -3,45 +3,46 @@
 import { useEffect } from "react";
 import { trackPromo } from "@/lib/track-promo";
 
-interface TelegramJoinModalProps {
+interface KatovuzChannelModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onJoin: () => void;
   lang: "uz" | "en" | "ru";
 }
 
-const TELEGRAM_URL = "https://t.me/uzbektype";
+const CHANNEL_URL = "https://t.me/katovuz";
 
 const content = {
   uz: {
-    title: "Uzbektype rasmiy kanaliga qo'shiling",
-    subtitle: "Yangiliklar, yangi imkoniyatlar va yozuv tezligi bo'yicha maslahatlar — rasmiy Telegram kanalimizda",
+    title: "@katovuz kanaliga qo'shiling",
+    subtitle: "IT, raqamli ko'nikmalar va foydali loyihalar haqida qisqa postlar",
     cta: "Kanalga o'tish",
     later: "Keyinroq",
   },
   en: {
-    title: "Join the official Uzbektype channel",
-    subtitle: "News, new features and typing-speed tips — on our official Telegram channel",
+    title: "Join the @katovuz channel",
+    subtitle: "Short posts on IT, digital skills and useful side projects",
     cta: "Open channel",
     later: "Later",
   },
   ru: {
-    title: "Присоединяйтесь к официальному каналу Uzbektype",
-    subtitle: "Новости, новые возможности и советы по скорости печати — в нашем официальном Telegram-канале",
+    title: "Присоединяйтесь к каналу @katovuz",
+    subtitle: "Короткие посты об IT, цифровых навыках и полезных проектах",
     cta: "Открыть канал",
     later: "Позже",
   },
 };
 
-export default function TelegramJoinModal({ isOpen, onClose, lang }: TelegramJoinModalProps) {
+export default function KatovuzChannelModal({ isOpen, onClose, onJoin, lang }: KatovuzChannelModalProps) {
   useEffect(() => {
-    if (isOpen) trackPromo("uzbektype_modal", "impression", lang);
+    if (isOpen) trackPromo("katovuz_modal", "impression", lang);
   }, [isOpen, lang]);
 
   if (!isOpen) return null;
   const t = content[lang];
 
   const handleDismiss = () => {
-    trackPromo("uzbektype_modal", "dismiss", lang);
+    trackPromo("katovuz_modal", "dismiss", lang);
     onClose();
   };
 
@@ -68,11 +69,12 @@ export default function TelegramJoinModal({ isOpen, onClose, lang }: TelegramJoi
               {t.later}
             </button>
             <a
-              href={TELEGRAM_URL}
+              href={CHANNEL_URL}
               target="_blank"
               rel="noopener noreferrer"
               onClick={() => {
-                trackPromo("uzbektype_modal", "click", lang);
+                trackPromo("katovuz_modal", "click", lang);
+                onJoin();
                 setTimeout(onClose, 200);
               }}
               className="flex-1 px-4 py-2.5 text-sm rounded-lg bg-[#229ED9] text-white hover:opacity-90 transition-all font-medium text-center"
