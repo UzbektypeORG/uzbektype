@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { X } from "lucide-react";
 import { trackPromo } from "@/lib/track-promo";
 
 interface KatovuzChannelModalProps {
@@ -17,19 +18,19 @@ const content = {
     title: "@katovuz kanaliga qo'shiling",
     subtitle: "IT, raqamli ko'nikmalar va foydali loyihalar haqida qisqa postlar",
     cta: "Kanalga o'tish",
-    later: "Keyinroq",
+    close: "Yopish",
   },
   en: {
     title: "Join the @katovuz channel",
     subtitle: "Short posts on IT, digital skills and useful side projects",
     cta: "Open channel",
-    later: "Later",
+    close: "Close",
   },
   ru: {
     title: "Присоединяйтесь к каналу @katovuz",
     subtitle: "Короткие посты об IT, цифровых навыках и полезных проектах",
     cta: "Открыть канал",
-    later: "Позже",
+    close: "Закрыть",
   },
 };
 
@@ -48,9 +49,17 @@ export default function KatovuzChannelModal({ isOpen, onClose, onJoin, lang }: K
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={handleDismiss} />
+      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
 
       <div className="relative bg-background border border-border rounded-lg p-6 w-full max-w-md shadow-xl animate-fade-in">
+        <button
+          onClick={handleDismiss}
+          aria-label={t.close}
+          className="absolute top-3 right-3 text-muted-foreground/60 hover:text-foreground transition-colors"
+        >
+          <X size={18} />
+        </button>
+
         <div className="flex flex-col items-center text-center">
           <div className="mb-4 w-16 h-16 rounded-full bg-[#229ED9]/10 flex items-center justify-center">
             <svg width="36" height="36" viewBox="0 0 24 24" fill="#229ED9">
@@ -61,27 +70,19 @@ export default function KatovuzChannelModal({ isOpen, onClose, onJoin, lang }: K
           <h2 className="text-lg font-semibold mb-2">{t.title}</h2>
           <p className="text-sm text-muted-foreground mb-6">{t.subtitle}</p>
 
-          <div className="flex gap-2 w-full">
-            <button
-              onClick={handleDismiss}
-              className="flex-1 px-4 py-2.5 text-sm rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent/50 transition-colors"
-            >
-              {t.later}
-            </button>
-            <a
-              href={CHANNEL_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={() => {
-                trackPromo("katovuz_modal", "click", lang);
-                onJoin();
-                setTimeout(onClose, 200);
-              }}
-              className="flex-1 px-4 py-2.5 text-sm rounded-lg bg-[#229ED9] text-white hover:opacity-90 transition-all font-medium text-center"
-            >
-              {t.cta}
-            </a>
-          </div>
+          <a
+            href={CHANNEL_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={() => {
+              trackPromo("katovuz_modal", "click", lang);
+              onJoin();
+              setTimeout(onClose, 200);
+            }}
+            className="w-full px-4 py-2.5 text-sm rounded-lg bg-[#229ED9] text-white hover:opacity-90 transition-all font-medium text-center"
+          >
+            {t.cta}
+          </a>
         </div>
       </div>
     </div>
