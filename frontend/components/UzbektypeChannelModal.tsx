@@ -4,46 +4,46 @@ import { useEffect } from "react";
 import { X } from "lucide-react";
 import { trackPromo } from "@/lib/track-promo";
 
-interface KatovuzChannelModalProps {
+interface UzbektypeChannelModalProps {
   isOpen: boolean;
   onClose: () => void;
   onJoin: () => void;
   lang: "uz" | "en" | "ru";
 }
 
-const CHANNEL_URL = "https://t.me/katovuz";
+const CHANNEL_URL = "https://t.me/uzbektype";
 
 const content = {
   uz: {
-    title: "@katovuz kanaliga qo'shiling",
-    subtitle: "IT, raqamli ko'nikmalar va foydali loyihalar haqida qisqa postlar",
+    title: "@uzbektype kanaliga qo'shiling",
+    subtitle: "Yangiliklar, yangi imkoniyatlar va yozuv tezligi bo'yicha maslahatlar",
     cta: "Kanalga o'tish",
     close: "Yopish",
   },
   en: {
-    title: "Join the @katovuz channel",
-    subtitle: "Short posts on IT, digital skills and useful side projects",
+    title: "Join the @uzbektype channel",
+    subtitle: "News, new features and typing-speed tips",
     cta: "Open channel",
     close: "Close",
   },
   ru: {
-    title: "Присоединяйтесь к каналу @katovuz",
-    subtitle: "Короткие посты об IT, цифровых навыках и полезных проектах",
+    title: "Присоединяйтесь к каналу @uzbektype",
+    subtitle: "Новости, новые возможности и советы по скорости печати",
     cta: "Открыть канал",
     close: "Закрыть",
   },
 };
 
-export default function KatovuzChannelModal({ isOpen, onClose, onJoin, lang }: KatovuzChannelModalProps) {
+export default function UzbektypeChannelModal({ isOpen, onClose, onJoin, lang }: UzbektypeChannelModalProps) {
   useEffect(() => {
-    if (isOpen) trackPromo("katovuz_modal", "impression", lang);
+    if (isOpen) trackPromo("uzbektype_modal", "impression", lang);
   }, [isOpen, lang]);
 
   if (!isOpen) return null;
   const t = content[lang];
 
   const handleDismiss = () => {
-    trackPromo("katovuz_modal", "dismiss", lang);
+    trackPromo("uzbektype_modal", "dismiss", lang);
     onClose();
   };
 
@@ -75,7 +75,7 @@ export default function KatovuzChannelModal({ isOpen, onClose, onJoin, lang }: K
             target="_blank"
             rel="noopener noreferrer"
             onClick={() => {
-              trackPromo("katovuz_modal", "click", lang);
+              trackPromo("uzbektype_modal", "click", lang);
               onJoin();
               setTimeout(onClose, 200);
             }}

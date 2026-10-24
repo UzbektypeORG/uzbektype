@@ -64,8 +64,8 @@ const labels = {
     easy: "Oson",
     medium: "O'rta",
     hard: "Qiyin",
-    tgTitle: "@katovuz kanaliga qo'shiling",
-    tgSubtitle: "IT, raqamli ko'nikmalar va foydali loyihalar haqida qisqa postlar",
+    tgTitle: "@uzbektype kanaliga qo'shiling",
+    tgSubtitle: "Yangiliklar, yangi imkoniyatlar va yozuv tezligi bo'yicha maslahatlar",
     tgCta: "Qo'shilish",
   },
   en: {
@@ -81,8 +81,8 @@ const labels = {
     easy: "Easy",
     medium: "Medium",
     hard: "Hard",
-    tgTitle: "Join the @katovuz channel",
-    tgSubtitle: "Short posts on IT, digital skills and useful side projects",
+    tgTitle: "Join the @uzbektype channel",
+    tgSubtitle: "News, new features and typing-speed tips",
     tgCta: "Join",
   },
   ru: {
@@ -98,8 +98,8 @@ const labels = {
     easy: "Лёгкий",
     medium: "Средний",
     hard: "Сложный",
-    tgTitle: "Канал @katovuz",
-    tgSubtitle: "Короткие посты об IT, цифровых навыках и полезных проектах",
+    tgTitle: "Канал @uzbektype",
+    tgSubtitle: "Новости, новые возможности и советы по скорости печати",
     tgCta: "Вступить",
   },
 };
@@ -160,7 +160,7 @@ export default function TestResults({
 
   // One banner impression per results screen.
   useEffect(() => {
-    trackPromo("katovuz_banner", "impression", config.language);
+    trackPromo("uzbektype_banner", "impression", config.language);
   }, [config.language]);
 
   // Animated values
@@ -309,10 +309,10 @@ export default function TestResults({
 
       {/* Telegram CTA Banner */}
       <a
-        href="https://t.me/katovuz"
+        href="https://t.me/uzbektype"
         target="_blank"
         rel="noopener noreferrer"
-        onClick={() => trackPromo("katovuz_banner", "click", config.language)}
+        onClick={() => trackPromo("uzbektype_banner", "click", config.language)}
         className="group relative block w-full overflow-hidden rounded-xl min-h-[90px] md:min-h-[110px] bg-gradient-to-r from-[#229ED9]/10 via-[#229ED9]/5 to-transparent border border-[#229ED9]/30 hover:border-[#229ED9]/60 hover:shadow-lg hover:shadow-[#229ED9]/10 transition-all duration-300"
       >
         {/* Decorative glow */}

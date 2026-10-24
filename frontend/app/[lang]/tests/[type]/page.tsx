@@ -8,7 +8,7 @@ import TypingTest from "@/components/typing/TypingTest";
 import TestResults from "@/components/typing/TestResults";
 import RecordCelebration from "@/components/RecordCelebration";
 import FeedbackModal from "@/components/FeedbackModal";
-import KatovuzChannelModal from "@/components/KatovuzChannelModal";
+import UzbektypeChannelModal from "@/components/UzbektypeChannelModal";
 import LeaderboardWidget from "@/components/LeaderboardWidget";
 import LoginCtaBanner from "@/components/LoginCtaBanner";
 import { getTestText } from "@/lib/getTestText";
@@ -103,7 +103,7 @@ export default function TestPage() {
   const [correctCharColor, setCorrectCharColor] = useState<'default' | 'blue' | 'yellow' | 'green'>('default');
   const [animationMode, setAnimationMode] = useState<'bounce' | 'fade'>('bounce');
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
-  const [showKatovuzModal, setShowKatovuzModal] = useState(false);
+  const [showChannelModal, setShowChannelModal] = useState(false);
   const [showMobileWarning, setShowMobileWarning] = useState(false);
   const [recordType, setRecordType] = useState<"personal" | "top" | null>(null);
   // Server-issued anti-cheat token, minted at test start and required by
@@ -272,27 +272,27 @@ export default function TestPage() {
       }, 1500); // Show after results appear
     }
 
-    // @katovuz channel — every 5th test, until the user actually joins. Own
+    // @uzbektype channel — every 5th test, until the user actually joins. Own
     // dedicated counter (not the shared completedTests one above) so the
     // milestone is a clean "every 5 tests from today", not thrown off by
     // whatever count a long-time user already had before this promo shipped.
-    const katovuzTestCount =
-      parseInt(localStorage.getItem("uzbektype_katovuz_test_count") || "0") + 1;
-    localStorage.setItem("uzbektype_katovuz_test_count", katovuzTestCount.toString());
+    const channelTestCount =
+      parseInt(localStorage.getItem("uzbektype_channel_test_count") || "0") + 1;
+    localStorage.setItem("uzbektype_channel_test_count", channelTestCount.toString());
 
-    if (!localStorage.getItem("uzbektype_katovuz_joined") && katovuzTestCount % 5 === 0) {
-      setTimeout(() => setShowKatovuzModal(true), 1700);
+    if (!localStorage.getItem("uzbektype_channel_joined") && channelTestCount % 5 === 0) {
+      setTimeout(() => setShowChannelModal(true), 1700);
     }
 
     setResult(stats);
   };
 
-  const handleKatovuzClose = () => {
-    setShowKatovuzModal(false);
+  const handleChannelClose = () => {
+    setShowChannelModal(false);
   };
 
-  const handleKatovuzJoin = () => {
-    localStorage.setItem("uzbektype_katovuz_joined", "true");
+  const handleChannelJoin = () => {
+    localStorage.setItem("uzbektype_channel_joined", "true");
   };
 
   const handleFeedbackSubmit = async (feedback: string) => {
@@ -656,11 +656,11 @@ export default function TestPage() {
         lang={lang}
       />
 
-      {/* @katovuz channel modal — every 5th test */}
-      <KatovuzChannelModal
-        isOpen={showKatovuzModal}
-        onClose={handleKatovuzClose}
-        onJoin={handleKatovuzJoin}
+      {/* @uzbektype channel modal — every 5th test */}
+      <UzbektypeChannelModal
+        isOpen={showChannelModal}
+        onClose={handleChannelClose}
+        onJoin={handleChannelJoin}
         lang={lang}
       />
 
