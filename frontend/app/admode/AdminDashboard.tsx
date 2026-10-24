@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Bar, BarChart, CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import ThemeToggle from "@/components/ThemeToggle";
+import { hasLink } from "@/lib/name-filter";
 
 type VisitorBucket = { total: number; signedIn: number; guests: number };
 type VisitorPeriod = "today" | "week" | "month" | "allTime";
@@ -226,7 +227,7 @@ export default function AdminDashboard() {
             {activeTab === "overview" && <OverviewSection stats={stats} />}
             {activeTab === "visits" && <VisitsSection timeline={stats.visitorTimeline} />}
             {activeTab === "promo" && <PromoSection promo={stats.promo} />}
-            {activeTab === "top" && <TopUsersSection stats={stats} onUserClick={(id) => router.push(`/admode/users/${id}`)} />}
+            {activeTab === "top" && <TopUsersSection onUserClick={(id) => router.push(`/admode/users/${id}`)} />}
             {activeTab === "recent" && <RecentSection stats={stats} onUserClick={(id) => router.push(`/admode/users/${id}`)} />}
             {activeTab === "users" && (
               <UsersSection
@@ -246,8 +247,8 @@ export default function AdminDashboard() {
 }
 
 const PROMO_LABELS: Record<string, string> = {
-  katovuz_modal: "@katovuz — modal",
-  katovuz_banner: "@katovuz — banner",
+  uzbektype_modal: "@uzbektype — modal",
+  uzbektype_banner: "@uzbektype — banner",
 };
 
 function pct(part: number, whole: number): string {
@@ -255,7 +256,7 @@ function pct(part: number, whole: number): string {
   return `${((part / whole) * 100).toFixed(1)}%`;
 }
 
-const AD_PROMOS = ["katovuz_modal", "katovuz_banner"];
+const AD_PROMOS = ["uzbektype_modal", "uzbektype_banner"];
 
 type PromoPeriod = "all" | "today" | "yesterday" | "month" | "custom";
 const PROMO_PERIODS: { id: PromoPeriod; label: string }[] = [
@@ -461,40 +462,113 @@ function OverviewSection({ stats }: { stats: Stats }) {
   );
 }
 
-type TopLimit = 10 | 25 | 100 | "all";
-const TOP_LIMITS: { id: TopLimit; label: string }[] = [
-  { id: 10, label: "Top 10" },
-  { id: 25, label: "Top 25" },
-  { id: 100, label: "Top 100" },
-  { id: "all", label: "Doimiy" },
+type LbPeriod = "weekly" | "monthly" | "alltime";
+type LbDifficulty = "easy" | "medium" | "hard";
+const LB_PERIODS: { id: LbPeriod; label: string }[] = [
+  { id: "weekly", label: "Hafta" },
+  { id: "monthly", label: "Oy" },
+  { id: "alltime", label: "Doimiy" },
+];
+const LB_DIFFICULTIES: { id: LbDifficulty; label: string }[] = [
+  { id: "easy", label: "Oson" },
+  { id: "medium", label: "O'rta" },
+  { id: "hard", label: "Qiyin" },
 ];
 
-function TopUsersSection({ stats, onUserClick }: { stats: Stats; onUserClick: (id: string) => void }) {
-  const [limit, setLimit] = useState<TopLimit>(10);
-  const visible = limit === "all" ? stats.topUsers : stats.topUsers.slice(0, limit);
+type LbRow = {
+  userId: string;
+  email: string;
+  firstName: string | null;
+  lastName: string | null;
+  name: string | null;
+  avatarUrl: string | null;
+  bestWpm: number;
+  avgAccuracy: number;
+  testCount: number;
+  rank: number;
+};
+
+// Mirrors the public leaderboard (same period + difficulty filters), so the
+// admin sees exactly who is on display and can open or delete them.
+function TopUsersSection({ onUserClick }: { onUserClick: (id: string) => void }) {
+  const [period, setPeriod] = useState<LbPeriod>("weekly");
+  const [difficulty, setDifficulty] = useState<LbDifficulty>("easy");
+  const [rows, setRows] = useState<LbRow[] | null>(null);
+  const [reload, setReload] = useState(0);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+
+  useEffect(() => {
+    setRows(null);
+    fetch(`/api/admin/leaderboard?period=${period}&difficulty=${difficulty}`, { cache: "no-store" })
+      .then((r) => (r.ok ? r.json() : { top: [] }))
+      .then((d: { top: LbRow[] }) => setRows(d.top ?? []))
+      .catch(() => setRows([]));
+  }, [period, difficulty, reload]);
+
+  const handleDelete = async (u: LbRow) => {
+    if (deletingId) return;
+    const ok = window.confirm(
+      `"${fullName(u)}" (${u.email}) foydalanuvchisini va uning BARCHA natijalarini butunlay o'chirmoqchimisiz?\n\nBu amalni ortga qaytarib bo'lmaydi.`
+    );
+    if (!ok) return;
+    setDeletingId(u.userId);
+    try {
+      const res = await fetch(`/api/admin/users/${u.userId}`, { method: "DELETE" });
+      if (!res.ok) alert("O'chirishda xato yuz berdi.");
+      setReload((n) => n + 1);
+    } catch {
+      alert("O'chirishda xato yuz berdi.");
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
+  const adCount = rows?.filter((u) => hasLink(fullName(u))).length ?? 0;
+
   return (
     <section className="border border-border rounded-xl p-5 md:p-6">
       <div className="flex items-center justify-between mb-4 gap-3 flex-wrap">
-        <p className="text-sm text-muted-foreground">
-          Ko&apos;rsatilmoqda: {visible.length} / {stats.topUsers.length}
-        </p>
         <div className="flex gap-1 p-0.5 rounded-lg border border-border bg-accent/30">
-          {TOP_LIMITS.map((l) => (
+          {LB_PERIODS.map((p) => (
             <button
-              key={String(l.id)}
-              onClick={() => setLimit(l.id)}
+              key={p.id}
+              onClick={() => setPeriod(p.id)}
               className={`px-3 py-1 text-xs rounded-md transition-colors ${
-                limit === l.id
+                period === p.id
                   ? "bg-background shadow-sm font-medium"
                   : "text-muted-foreground hover:text-foreground"
               }`}
             >
-              {l.label}
+              {p.label}
+            </button>
+          ))}
+        </div>
+        <div className="flex gap-1 p-0.5 rounded-lg border border-border bg-accent/30">
+          {LB_DIFFICULTIES.map((d) => (
+            <button
+              key={d.id}
+              onClick={() => setDifficulty(d.id)}
+              className={`px-3 py-1 text-xs rounded-md transition-colors ${
+                difficulty === d.id
+                  ? "bg-background shadow-sm font-medium"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              {d.label}
             </button>
           ))}
         </div>
       </div>
-      {visible.length > 0 ? (
+      {adCount > 0 && (
+        <p className="text-xs text-red-600 mb-3">
+          Ismida sayt/kanal reklamasi bor: {adCount} ta. Saytda ularning ismidagi havola yashiriladi.
+        </p>
+      )}
+      {rows === null ? (
+        <div className="flex justify-center py-8">
+          <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+        </div>
+      ) : rows.length > 0 ? (
         <div className="overflow-x-auto -mx-4 md:mx-0">
           <table className="w-full text-sm">
             <thead>
@@ -502,29 +576,54 @@ function TopUsersSection({ stats, onUserClick }: { stats: Stats; onUserClick: (i
                 <th className="text-left py-2 px-3 font-medium w-10">#</th>
                 <th className="text-left py-2 px-3 font-medium">Foydalanuvchi</th>
                 <th className="text-left py-2 px-3 font-medium hidden md:table-cell">Email</th>
-                <th className="text-right py-2 px-3 font-medium">Eng yaxshi WPM</th>
-                <th className="text-right py-2 px-3 font-medium">Testlar</th>
+                <th className="text-right py-2 px-3 font-medium">WPM</th>
+                <th className="text-right py-2 px-3 font-medium hidden sm:table-cell">Aniqlik</th>
+                <th className="text-right py-2 px-3 font-medium hidden sm:table-cell">Testlar</th>
+                <th className="text-right py-2 px-3 font-medium">Amallar</th>
               </tr>
             </thead>
             <tbody>
-              {visible.map((u, i) => (
-                <tr
-                  key={u.userId}
-                  onClick={() => onUserClick(u.userId)}
-                  className="border-b border-border/50 last:border-0 cursor-pointer hover:bg-accent/40 transition-colors"
-                >
-                  <td className="py-2 px-3 font-mono text-muted-foreground">{i + 1}</td>
-                  <td className="py-2 px-3">
-                    <div className="flex items-center gap-2">
-                      <img src={avatarFor(u)} alt={fullName(u)} className="w-7 h-7 rounded-full bg-accent" style={{ imageRendering: "pixelated" }} />
-                      <span className="font-medium">{fullName(u)}</span>
-                    </div>
-                  </td>
-                  <td className="py-2 px-3 text-muted-foreground hidden md:table-cell">{u.email}</td>
-                  <td className="py-2 px-3 text-right font-mono font-semibold">{u.bestWpm}</td>
-                  <td className="py-2 px-3 text-right font-mono text-muted-foreground">{u.testCount}</td>
-                </tr>
-              ))}
+              {rows.map((u) => {
+                const name = fullName(u);
+                const isAd = hasLink(name);
+                return (
+                  <tr key={u.userId} className={`border-b border-border/50 last:border-0 ${isAd ? "bg-red-500/5" : ""}`}>
+                    <td className="py-2 px-3 font-mono text-muted-foreground">{u.rank}</td>
+                    <td className="py-2 px-3">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <img src={avatarFor(u)} alt={name} className="w-7 h-7 rounded-full bg-accent shrink-0" style={{ imageRendering: "pixelated" }} />
+                        <span className="font-medium truncate">{name}</span>
+                        {isAd && (
+                          <span className="shrink-0 text-[10px] px-1.5 py-0.5 rounded bg-red-500/15 text-red-600 font-medium">
+                            Reklama
+                          </span>
+                        )}
+                      </div>
+                    </td>
+                    <td className="py-2 px-3 text-muted-foreground hidden md:table-cell">{u.email}</td>
+                    <td className="py-2 px-3 text-right font-mono font-semibold">{u.bestWpm}</td>
+                    <td className="py-2 px-3 text-right font-mono hidden sm:table-cell">{u.avgAccuracy}%</td>
+                    <td className="py-2 px-3 text-right font-mono text-muted-foreground hidden sm:table-cell">{u.testCount}</td>
+                    <td className="py-2 px-3">
+                      <div className="flex justify-end gap-1.5">
+                        <button
+                          onClick={() => onUserClick(u.userId)}
+                          className="px-2.5 py-1 text-xs rounded-md border border-border hover:border-foreground transition-colors"
+                        >
+                          Profil
+                        </button>
+                        <button
+                          onClick={() => handleDelete(u)}
+                          disabled={deletingId !== null}
+                          className="px-2.5 py-1 text-xs rounded-md border border-red-500/40 text-red-600 hover:bg-red-500/10 transition-colors disabled:opacity-40"
+                        >
+                          {deletingId === u.userId ? "…" : "O'chirish"}
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>

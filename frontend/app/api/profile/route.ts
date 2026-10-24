@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { db, users } from "@/db";
 import { eq } from "drizzle-orm";
+import { hasLink } from "@/lib/name-filter";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -35,11 +36,13 @@ export async function PATCH(req: Request) {
   if (typeof body.firstName === "string") {
     const fn = normalizeName(body.firstName);
     if (fn.length > 30) return NextResponse.json({ error: "first_name_too_long" }, { status: 400 });
+    if (hasLink(fn)) return NextResponse.json({ error: "name_has_link" }, { status: 400 });
     update.firstName = fn;
   }
   if (typeof body.lastName === "string") {
     const ln = normalizeName(body.lastName);
     if (ln.length > 30) return NextResponse.json({ error: "last_name_too_long" }, { status: 400 });
+    if (hasLink(ln)) return NextResponse.json({ error: "name_has_link" }, { status: 400 });
     update.lastName = ln;
   }
   if (typeof body.avatarUrl === "string") {

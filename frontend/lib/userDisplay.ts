@@ -1,3 +1,5 @@
+import { stripLinks } from "@/lib/name-filter";
+
 type UserLike = {
   id?: string | null;
   email?: string | null;
@@ -9,9 +11,10 @@ type UserLike = {
 
 export function displayName(u: UserLike | null | undefined): string {
   if (!u) return "—";
-  const parts = [u.firstName, u.lastName].filter(Boolean);
-  if (parts.length > 0) return parts.join(" ");
-  return u.name ?? "—";
+  // stripLinks masks ad names saved before the profile API rejected them.
+  const full = stripLinks([u.firstName, u.lastName].filter(Boolean).join(" "));
+  if (full) return full;
+  return stripLinks(u.name ?? "") || "—";
 }
 
 // Default avatar = pixel-art seeded by user identity (each user gets a unique

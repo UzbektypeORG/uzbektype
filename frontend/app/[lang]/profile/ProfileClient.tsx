@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { useGoogleLogin } from "@/lib/useGoogleLogin";
 import { displayName, avatarSrc } from "@/lib/userDisplay";
+import { hasLink } from "@/lib/name-filter";
 
 type Language = "uz" | "en" | "ru";
 
@@ -28,6 +29,7 @@ const content = {
     loginRequired: "Profilni o'zgartirish uchun avval Google bilan kiring",
     loginCta: "Google bilan kirish",
     loginLoading: "Kuting...",
+    nameHasLink: "Ismda nuqta (.) yoki @ belgisini ishlatmang",
   },
   en: {
     title: "Profile",
@@ -47,6 +49,7 @@ const content = {
     loginRequired: "Sign in with Google to edit your profile",
     loginCta: "Sign in with Google",
     loginLoading: "Loading...",
+    nameHasLink: "Please don't use a dot (.) or @ in your name",
   },
   ru: {
     title: "Профиль",
@@ -66,6 +69,7 @@ const content = {
     loginRequired: "Войдите через Google, чтобы редактировать профиль",
     loginCta: "Войти через Google",
     loginLoading: "Загрузка...",
+    nameHasLink: "Не используйте точку (.) или @ в имени",
   },
 };
 
@@ -139,7 +143,9 @@ export default function ProfileClient({ lang }: { lang: Language }) {
     }
   }, [user]);
 
-  const canSaveName = firstName.trim().length > 0 && lastName.trim().length > 0;
+  // Names were being used as ads ("Ali nimadir.uz"); the API rejects these too.
+  const nameHasLink = hasLink(firstName) || hasLink(lastName);
+  const canSaveName = firstName.trim().length > 0 && lastName.trim().length > 0 && !nameHasLink;
 
   // Avatar click = local preview only. Header keeps showing the saved value.
   const handlePickAvatar = (seed: string) => {
@@ -147,7 +153,7 @@ export default function ProfileClient({ lang }: { lang: Language }) {
   };
 
   const handleSave = async () => {
-    if (!user || saving) return;
+    if (!user || saving || nameHasLink) return;
 
     const payload: { firstName?: string; lastName?: string; avatarUrl?: string } = {};
 
@@ -314,6 +320,7 @@ export default function ProfileClient({ lang }: { lang: Language }) {
               />
             </div>
           </div>
+          {nameHasLink && <p className="text-xs text-red-600">{t.nameHasLink}</p>}
         </section>
 
         {/* Avatar section */}
@@ -381,7 +388,7 @@ export default function ProfileClient({ lang }: { lang: Language }) {
         <div className="flex items-center justify-center gap-3 pt-2">
           <button
             onClick={handleSave}
-            disabled={!hasUnsavedChanges || saving}
+            disabled={!hasUnsavedChanges || saving || nameHasLink}
             className="px-8 py-3 rounded-lg bg-primary text-primary-foreground hover:opacity-90 transition-all text-sm font-medium disabled:opacity-40 disabled:cursor-not-allowed min-w-[140px]"
           >
             {saving ? "…" : t.save}

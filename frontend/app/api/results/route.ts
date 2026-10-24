@@ -5,6 +5,7 @@ import { eq, sql } from "drizzle-orm";
 import { sendChannelMessage } from "@/lib/telegram";
 import { verifyTestToken } from "@/lib/test-token";
 import { isBannedEmail } from "@/lib/banned-emails";
+import { stripLinks } from "@/lib/name-filter";
 import { analyzeRun, parseTelemetry } from "@/lib/anti-cheat";
 
 // ─── Anti-cheat tuning ──────────────────────────────────────────────────────
@@ -276,9 +277,10 @@ async function announceRecord(params: {
       .where(eq(users.id, params.userId))
       .limit(1);
 
+    // stripLinks: the channel post must never carry someone's ad link.
     const fullName =
-      [u?.firstName, u?.lastName].filter(Boolean).join(" ").trim() ||
-      u?.name?.trim() ||
+      stripLinks([u?.firstName, u?.lastName].filter(Boolean).join(" ").trim()) ||
+      stripLinks(u?.name?.trim() ?? "") ||
       "Anonim";
 
     const message = params.debug
