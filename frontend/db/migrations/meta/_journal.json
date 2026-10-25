@@ -15,6 +15,13 @@
       "when": 1777361803001,
       "tag": "0001_ambitious_meltdown",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1792919006266,
+      "tag": "0002_banned_email",
+      "breakpoints": true
     }
   ]
 }

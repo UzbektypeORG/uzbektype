@@ -22,7 +22,7 @@ export async function POST(req: Request) {
   // Banned address: hand back a syntactically valid but meaningless token so
   // the UI behaves normally, while /api/results silently drops the result.
   // No error here, so the client shows no warning.
-  if (isBannedEmail(session.user.email)) {
+  if (await isBannedEmail(session.user.email)) {
     return NextResponse.json({ token: "banned" });
   }
 

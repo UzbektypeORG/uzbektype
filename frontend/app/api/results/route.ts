@@ -131,7 +131,7 @@ export async function POST(req: Request) {
   // score just never reaches the database or leaderboard.
 
   // Permanently banned address (repeat offender) — drop regardless of score.
-  if (isBannedEmail(session.user.email)) return silentDrop();
+  if (await isBannedEmail(session.user.email)) return silentDrop();
 
   const now = Date.now();
   const token = verifyTestToken(body.token, now, TOKEN_MAX_AGE_MS);

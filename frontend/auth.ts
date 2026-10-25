@@ -4,12 +4,25 @@ import { DrizzleAdapter } from "@auth/drizzle-adapter";
 import { unstable_noStore as noStore } from "next/cache";
 import { eq } from "drizzle-orm";
 import { db, users } from "@/db";
+import { isBannedEmail } from "@/lib/banned-emails";
+import { sendSignupAlert } from "@/lib/signup-alert";
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   adapter: DrizzleAdapter(db),
   providers: [Google],
   session: { strategy: "database" },
+  events: {
+    // First sign-in only: alert the admin on Telegram with a "Bloklash" button.
+    async createUser({ user }) {
+      await sendSignupAlert(user);
+    },
+  },
   callbacks: {
+    // Blocked addresses (Telegram "Bloklash" or the hard-coded list) can
+    // neither sign in nor sign up again — runs before the user row is created.
+    async signIn({ user }) {
+      return !(await isBannedEmail(user.email));
+    },
     async session({ session, user, trigger, newSession }) {
       if (!session.user) return session;
 

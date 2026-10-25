@@ -148,3 +148,15 @@ export const dailyVisits = pgTable(
     index("daily_visit_date_idx").on(table.visitDate),
   ]
 );
+
+// Emails blocked from the Telegram "Bloklash" button. Blocking also deletes
+// the user row; this table is what stops the same Google account from simply
+// signing up again (auth signIn callback rejects any address listed here).
+export const bannedEmails = pgTable("banned_email", {
+  email: text("email").primaryKey(), // stored lower-cased
+  reason: text("reason"),
+  // Id of the user row deleted at ban time. Telegram callback_data caps at
+  // 64 bytes, so the "unblock" button refers to this rather than the email.
+  userId: uuid("user_id"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (table) => [index("banned_email_user_id_idx").on(table.userId)]);
