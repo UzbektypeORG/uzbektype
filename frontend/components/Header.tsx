@@ -7,6 +7,7 @@ import { useRouter, usePathname } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
 import { useGoogleLogin } from "@/lib/useGoogleLogin";
 import { displayName, avatarSrc } from "@/lib/userDisplay";
+import AlphabetSwitch from "@/components/new-alphabet/AlphabetSwitch";
 
 type Language = "uz" | "en" | "ru";
 
@@ -68,6 +69,7 @@ export default function Header({ lang }: HeaderProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isDark, setIsDark] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const { data: session } = useSession();
   const user = session?.user ?? null;
   const { handleLogin: handleGoogleLogin, isLoggingIn } = useGoogleLogin(lang);
@@ -77,6 +79,13 @@ export default function Header({ lang }: HeaderProps) {
 
   // Check if we're on a test page
   const isTestPage = pathname.includes('/tests/');
+  const isNewAlphabetPage = pathname.endsWith('/yangi-alifbo');
+  // Play screens get the Oʻzbekcha / Özbekça switch in the navbar.
+  const isPlayPage = isTestPage || isNewAlphabetPage;
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     // Language is now controlled by the URL, not localStorage
@@ -183,6 +192,8 @@ export default function Header({ lang }: HeaderProps) {
 
         {/* Desktop Navigation */}
         <nav className="hidden md:flex items-center gap-6">
+          {isPlayPage && <AlphabetSwitch lang={lang} isNew={isNewAlphabetPage} />}
+
           <Link
             href={`/${lang}/leaderboard/weekly/easy`}
             className="text-sm hover:text-foreground transition-colors flex items-center gap-1.5"
@@ -269,7 +280,7 @@ export default function Header({ lang }: HeaderProps) {
           </div>
 
           {/* Start Button - only show on landing page */}
-          {!isTestPage && (
+          {!isPlayPage && (
             <Link
               href={`/${lang}/tests/30s-easy`}
               className="px-4 py-1.5 text-sm rounded bg-primary text-primary-foreground hover:opacity-90 transition-all font-medium"
@@ -387,6 +398,7 @@ export default function Header({ lang }: HeaderProps) {
 
         {/* Mobile Menu Button */}
         <div className="md:hidden flex items-center gap-2">
+          {isPlayPage && <AlphabetSwitch lang={lang} isNew={isNewAlphabetPage} compact />}
           {/* Hamburger Button */}
           <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -539,7 +551,7 @@ export default function Header({ lang }: HeaderProps) {
           </div>
 
           {/* Start Button - only on non-test pages */}
-          {!isTestPage && (
+          {!isPlayPage && (
             <Link
               href={`/${lang}/tests/30s-easy`}
               onClick={() => setIsMobileMenuOpen(false)}
@@ -585,7 +597,7 @@ export default function Header({ lang }: HeaderProps) {
           open. Portaled to <body> so the header's own backdrop-filter doesn't
           trap this fixed overlay. Sits below the header (z-40 < z-50), so the
           top bar + dropdown stay sharp. */}
-      {typeof document !== "undefined" &&
+      {mounted &&
         createPortal(
           <div
             aria-hidden
