@@ -32,6 +32,15 @@ export default function sitemap(): MetadataRoute.Sitemap {
       alternates: { languages: hreflangs("") },
     });
 
+    // New-alphabet practice page (2026 reform) — high-demand news topic
+    entries.push({
+      url: `${baseUrl}/${lang}/yangi-alifbo`,
+      lastModified: new Date("2026-10-25"),
+      changeFrequency: "weekly",
+      priority: 0.9,
+      alternates: { languages: hreflangs("/yangi-alifbo") },
+    });
+
     // Blog index
     entries.push({
       url: `${baseUrl}/${lang}/blog`,

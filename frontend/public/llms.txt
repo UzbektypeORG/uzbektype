@@ -1,0 +1,23 @@
+# UzbekType
+
+> UzbekType (uzbektype.uz) is a free online typing speed test for Uzbek, English and Russian. It measures WPM and accuracy, has weekly and monthly leaderboards, and needs no sign-up to take a test.
+
+## New Uzbek alphabet (2026)
+
+- [New alphabet typing test](https://www.uzbektype.uz/uz/yangi-alifbo): practise typing Ö, Ğ, Ş, Ç in the 2026 Uzbek alphabet; includes a converter from the current spelling.
+- [New Uzbek alphabet 2026 — complete guide](https://www.uzbektype.uz/en/blog/new-uzbek-alphabet-2026): what changed, when it takes effect, official sources.
+
+Key facts (from the law text, lex.uz/uz/docs/8548754):
+- Law No. O'RQ-1184, signed 21 October 2026; enters into force 22 April 2027 (six months after official publication).
+- Oʻ → Ö, Gʻ → Ğ, Sh → Ş, Ch → Ç. The alphabet has 28 letters plus the tutuq sign (ʼ). Ng is no longer a separate letter.
+- Documents, national currency and securities in the old alphabet remain valid.
+
+## Typing tests
+
+- [30-second typing test](https://www.uzbektype.uz/uz/tests/30s-medium)
+- [Uzbek Latin typing test](https://www.uzbektype.uz/uz/tests/uzbek-latin)
+- [Leaderboard](https://www.uzbektype.uz/uz/leaderboard/weekly/easy)
+
+## Guides
+
+- [Blog](https://www.uzbektype.uz/uz/blog): typing speed, WPM, touch typing and keyboard practice guides in Uzbek, English and Russian.

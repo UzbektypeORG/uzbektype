@@ -5,6 +5,7 @@ import Noise from "@/components/Noise";
 import StartButton from "@/components/StartButton";
 import FooterFeedback from "@/components/FooterFeedback";
 import LeaderboardWidget from "@/components/LeaderboardWidget";
+import NewAlphabetButton from "@/components/new-alphabet/NewAlphabetButton";
 
 type Language = "uz" | "en" | "ru";
 
@@ -389,6 +390,8 @@ export default async function LandingPage({ params }: { params: Promise<{ lang: 
 
   return (
     <main className="min-h-screen relative">
+      <NewAlphabetButton lang={currentLang} />
+
       {/* Global Noise Overlay - Fixed on screen */}
       <Noise
         patternSize={300}

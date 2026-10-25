@@ -35,6 +35,9 @@ import { ruContent as yozishTestiOnlaynRu } from "./blog/yozish-testi-onlayn/ru"
 import { uzContent as klaviaturaLayoutUz } from "./blog/klaviatura-layout-taqqoslash/uz";
 import { enContent as klaviaturaLayoutEn } from "./blog/klaviatura-layout-taqqoslash/en";
 import { ruContent as klaviaturaLayoutRu } from "./blog/klaviatura-layout-taqqoslash/ru";
+import { uzContent as yangiAlifboUz } from "./blog/yangi-ozbek-alifbosi-2026/uz";
+import { enContent as yangiAlifboEn } from "./blog/yangi-ozbek-alifbosi-2026/en";
+import { ruContent as yangiAlifboRu } from "./blog/yangi-ozbek-alifbosi-2026/ru";
 
 export type Language = "uz" | "en" | "ru";
 
@@ -53,9 +56,81 @@ export interface BlogPost {
   primaryKeyword: Record<Language, string>;
   // schema.org type for the article
   articleType: "Article" | "HowTo";
+  // Optional Q&A, emitted as FAQPage JSON-LD (rich results + AI answers).
+  // Keep it in sync with the FAQ section written in `content`.
+  faq?: Record<Language, { q: string; a: string }[]>;
+  // Optional CTA override; defaults to the 30s easy typing test.
+  cta?: { href: string; label: Record<Language, string> };
 }
 
 export const blogPosts: BlogPost[] = [
+  {
+    id: "yangi-ozbek-alifbosi-2026",
+    publishedAt: "2026-10-25",
+    updatedAt: "2026-10-25",
+    slugs: {
+      uz: "yangi-ozbek-alifbosi-2026",
+      en: "new-uzbek-alphabet-2026",
+      ru: "novyy-uzbekskiy-alfavit-2026",
+    },
+    titles: {
+      uz: "Yangi o'zbek alifbosi 2026: Ö, Ğ, Ş, Ç — nima o'zgardi va qachon kuchga kiradi",
+      en: "New Uzbek Alphabet 2026: Ö, Ğ, Ş, Ç — What Changed and When It Takes Effect",
+      ru: "Новый узбекский алфавит 2026: Ö, Ğ, Ş, Ç — что изменилось и когда вступает в силу",
+    },
+    excerpts: {
+      uz: "O'RQ-1184-son qonun bo'yicha Oʻ, Gʻ, Sh, Ch o'rniga Ö, Ğ, Ş, Ç keladi, alifbo 28 harf va tutuq belgisidan iborat bo'ladi. Qonun 2027-yil 22-aprelda kuchga kiradi. Rasmiy manbalar asosida to'liq qo'llanma.",
+      en: "Under Law O'RQ-1184, Oʻ, Gʻ, Sh and Ch become Ö, Ğ, Ş and Ç, and the alphabet has 28 letters plus the tutuq sign. It takes effect on 22 April 2027. A complete guide based on official sources.",
+      ru: "По закону O'RQ-1184 вместо Oʻ, Gʻ, Sh, Ch появляются Ö, Ğ, Ş, Ç, а алфавит состоит из 28 букв и знака тутук. Закон вступает в силу 22 апреля 2027 года. Полное руководство по официальным источникам.",
+    },
+    content: {
+      uz: yangiAlifboUz,
+      en: yangiAlifboEn,
+      ru: yangiAlifboRu,
+    },
+    readTime: {
+      uz: "6 daqiqa",
+      en: "6 min read",
+      ru: "6 мин чтения",
+    },
+    primaryKeyword: {
+      uz: "yangi o'zbek alifbosi",
+      en: "new uzbek alphabet",
+      ru: "новый узбекский алфавит",
+    },
+    articleType: "Article",
+    faq: {
+      uz: [
+        { q: "Yangi o'zbek alifbosi qachon kuchga kiradi?", a: "2027-yil 22-aprelda — O'RQ-1184-son qonun rasmiy e'lon qilinganidan olti oy o'tib. Qonun 2026-yil 21-oktabrda imzolangan." },
+        { q: "Yangi alifboda nechta harf bor?", a: "28 ta harf va 1 ta tutuq belgisi (ʼ)." },
+        { q: "Qaysi harflar o'zgardi?", a: "Oʻ → Ö, Gʻ → Ğ, Sh → Ş, Ch → Ç. Qolgan harflar o'zgarmaydi." },
+        { q: "Pasportimni almashtirishim kerakmi?", a: "Yo'q. Qonunning 2-moddasiga ko'ra, eski alifbodagi hujjatlar, milliy valyuta va qimmatli qog'ozlar o'z kuchida qoladi." },
+        { q: "Yangi alifboda yozishni qayerda mashq qilsam bo'ladi?", a: "UzbekType'dagi yangi alifbo typing testida (uzbektype.uz/uz/yangi-alifbo) — bepul, ro'yxatdan o'tmasdan." },
+      ],
+      en: [
+        { q: "When does the new Uzbek alphabet take effect?", a: "On 22 April 2027 — six months after the official publication of Law O'RQ-1184, which was signed on 21 October 2026." },
+        { q: "How many letters does the new alphabet have?", a: "28 letters and 1 tutuq (apostrophe) sign." },
+        { q: "Which letters changed?", a: "Oʻ → Ö, Gʻ → Ğ, Sh → Ş, Ch → Ç. All other letters stay the same." },
+        { q: "Do I need a new passport?", a: "No. Under Article 2 of the law, documents, national currency and securities in the old alphabet remain valid." },
+        { q: "Where can I practise typing the new alphabet?", a: "On UzbekType's new alphabet typing test (uzbektype.uz/en/yangi-alifbo) — free, no sign-up." },
+      ],
+      ru: [
+        { q: "Когда вступает в силу новый узбекский алфавит?", a: "22 апреля 2027 года — через шесть месяцев после официального опубликования закона O'RQ-1184, подписанного 21 октября 2026 года." },
+        { q: "Сколько букв в новом алфавите?", a: "28 букв и 1 знак тутук (апостроф)." },
+        { q: "Какие буквы изменились?", a: "Oʻ → Ö, Gʻ → Ğ, Sh → Ş, Ch → Ç. Остальные буквы не меняются." },
+        { q: "Нужно ли менять паспорт?", a: "Нет. По статье 2 закона документы, национальная валюта и ценные бумаги на старом алфавите сохраняют силу." },
+        { q: "Где потренироваться печатать на новом алфавите?", a: "В тесте печати на новом алфавите UzbekType (uzbektype.uz/ru/yangi-alifbo) — бесплатно и без регистрации." },
+      ],
+    },
+    cta: {
+      href: "/yangi-alifbo",
+      label: {
+        uz: "Yangi alifboda yozishni sinab ko'ring",
+        en: "Try typing in the new alphabet",
+        ru: "Попробуйте печатать на новом алфавите",
+      },
+    },
+  },
   {
     id: "tez-yozish-organish",
     publishedAt: "2026-04-28",

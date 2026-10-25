@@ -254,11 +254,24 @@ export default function BlogArticleView({ post, lang }: { post: BlogPost; lang: 
     ],
   };
 
+  const faqSchema = post.faq && {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: post.faq[lang].map((item) => ({
+      "@type": "Question",
+      name: item.q,
+      acceptedAnswer: { "@type": "Answer", text: item.a },
+    })),
+  };
+
+  const ctaHref = post.cta ? `/${lang}${post.cta.href}` : `/${lang}/tests/30s-easy`;
+  const ctaText = post.cta ? post.cta.label[lang] : t.cta;
+
   return (
     <main className="min-h-screen">
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify([articleSchema, breadcrumbSchema]) }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify([articleSchema, breadcrumbSchema, ...(faqSchema ? [faqSchema] : [])]) }}
       />
 
       <article className="max-w-3xl mx-auto px-4 sm:px-6 py-10 md:py-16">
@@ -278,6 +291,12 @@ export default function BlogArticleView({ post, lang }: { post: BlogPost; lang: 
           </p>
           <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground pt-2">
             <span>{t.published}: <time dateTime={post.publishedAt}>{post.publishedAt}</time></span>
+            {post.updatedAt !== post.publishedAt && (
+              <>
+                <span>•</span>
+                <span>{t.updated}: <time dateTime={post.updatedAt}>{post.updatedAt}</time></span>
+              </>
+            )}
             <span>•</span>
             <span>{post.readTime[lang]} {t.readTime}</span>
           </div>
@@ -285,9 +304,9 @@ export default function BlogArticleView({ post, lang }: { post: BlogPost; lang: 
 
         {/* Top CTA — encourages reader to start a test before they even read */}
         <div className="mb-10 p-4 md:p-5 rounded-xl border border-primary/30 bg-primary/5 flex items-center justify-between gap-3 flex-wrap">
-          <span className="text-sm md:text-base font-medium">{t.cta}</span>
+          <span className="text-sm md:text-base font-medium">{ctaText}</span>
           <Link
-            href={`/${lang}/tests/30s-easy`}
+            href={ctaHref}
             className="px-5 py-2 rounded-lg bg-primary text-primary-foreground hover:opacity-90 transition-all text-sm font-medium whitespace-nowrap"
           >
             {lang === "uz" ? "Sinab ko'rish" : lang === "ru" ? "Попробовать" : "Try it"} →
@@ -301,9 +320,9 @@ export default function BlogArticleView({ post, lang }: { post: BlogPost; lang: 
         {/* Bottom CTA */}
         <section className="mt-16 pt-10 border-t border-border">
           <div className="rounded-2xl border border-primary/30 bg-primary/5 p-6 md:p-8 text-center space-y-4">
-            <p className="text-lg md:text-xl font-semibold">{t.cta}</p>
+            <p className="text-lg md:text-xl font-semibold">{ctaText}</p>
             <Link
-              href={`/${lang}/tests/30s-easy`}
+              href={ctaHref}
               className="inline-block px-8 py-3 rounded-lg bg-primary text-primary-foreground hover:opacity-90 transition-all font-medium"
             >
               {lang === "uz" ? "Sinashni boshlash" : lang === "ru" ? "Начать тест" : "Start typing test"} →
