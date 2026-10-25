@@ -29,7 +29,7 @@ const content = {
     loginRequired: "Profilni o'zgartirish uchun avval Google bilan kiring",
     loginCta: "Google bilan kirish",
     loginLoading: "Kuting...",
-    nameHasLink: "Ismda nuqta (.) yoki @ belgisini ishlatmang",
+    nameHasLink: "Faqat ism va familiyangizni yozing (nuqta va @ belgisiz)",
   },
   en: {
     title: "Profile",
@@ -49,7 +49,7 @@ const content = {
     loginRequired: "Sign in with Google to edit your profile",
     loginCta: "Sign in with Google",
     loginLoading: "Loading...",
-    nameHasLink: "Please don't use a dot (.) or @ in your name",
+    nameHasLink: "Please enter only your first and last name (no dots or @)",
   },
   ru: {
     title: "Профиль",
@@ -69,7 +69,7 @@ const content = {
     loginRequired: "Войдите через Google, чтобы редактировать профиль",
     loginCta: "Войти через Google",
     loginLoading: "Загрузка...",
-    nameHasLink: "Не используйте точку (.) или @ в имени",
+    nameHasLink: "Укажите только имя и фамилию (без точек и @)",
   },
 };
 
