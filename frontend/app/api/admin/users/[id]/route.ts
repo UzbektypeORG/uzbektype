@@ -2,14 +2,16 @@ import { NextResponse } from "next/server";
 import { isAdmin } from "@/lib/adminAuth";
 import { db, users, testResults } from "@/db";
 import { desc, eq, sql } from "drizzle-orm";
+import { banUser, sendPanelBanAlert } from "@/lib/signup-alert";
 
 export const dynamic = "force-dynamic";
 export const fetchCache = "force-no-store";
 
 // Permanently delete a user. ON DELETE CASCADE on test_result / account /
-// session means their results and auth rows go with them.
+// session means their results and auth rows go with them. With ?ban=1 the
+// email is also blocked, so the same Google account can't sign up again.
 export async function DELETE(
-  _req: Request,
+  req: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   if (!(await isAdmin())) {
@@ -22,12 +24,22 @@ export async function DELETE(
   }
 
   const [existing] = await db
-    .select({ id: users.id })
+    .select({ id: users.id, email: users.email, firstName: users.firstName, lastName: users.lastName, name: users.name })
     .from(users)
     .where(eq(users.id, id))
     .limit(1);
   if (!existing) {
     return NextResponse.json({ error: "not_found" }, { status: 404 });
+  }
+
+  if (new URL(req.url).searchParams.get("ban") === "1") {
+    await banUser(id);
+    await sendPanelBanAlert({
+      id,
+      email: existing.email,
+      name: [existing.firstName, existing.lastName].filter(Boolean).join(" ") || existing.name || "",
+    });
+    return NextResponse.json({ ok: true, banned: true });
   }
 
   await db.delete(users).where(eq(users.id, id));

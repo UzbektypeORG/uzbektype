@@ -73,7 +73,7 @@ export default function AdminUserDetail({ userId }: { userId: string }) {
   const router = useRouter();
   const [data, setData] = useState<Data | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [deleting, setDeleting] = useState(false);
+  const [deleting, setDeleting] = useState<"delete" | "ban" | null>(null);
   const [diffFilter, setDiffFilter] = useState<(typeof DIFFICULTIES)[number]>("all");
   const [langFilter, setLangFilter] = useState<(typeof LANGUAGES)[number]>("all");
 
@@ -100,24 +100,27 @@ export default function AdminUserDetail({ userId }: { userId: string }) {
       .map((r, i) => ({ index: i + 1, wpm: r.wpm, accuracy: r.accuracy }));
   }, [filteredResults]);
 
-  const handleDelete = async () => {
+  // "ban" also blocks the email, so the same Google account can't sign up again.
+  const handleDelete = async (mode: "delete" | "ban") => {
     if (!data || deleting) return;
     const ok = window.confirm(
-      `"${fullName(data.user)}" (${data.user.email}) foydalanuvchisini va uning BARCHA natijalarini butunlay o'chirmoqchimisiz?\n\nBu amalni ortga qaytarib bo'lmaydi.`
+      mode === "ban"
+        ? `"${fullName(data.user)}" (${data.user.email}) foydalanuvchisini BLOKLAMOQCHIMISIZ?\n\nAkkaunt va barcha natijalari o'chadi, bu gmail bilan qayta ro'yxatdan o'ta olmaydi. Blokni Telegram botdan bekor qilish mumkin.`
+        : `"${fullName(data.user)}" (${data.user.email}) foydalanuvchisini va uning BARCHA natijalarini butunlay o'chirmoqchimisiz?\n\nBu amalni ortga qaytarib bo'lmaydi.`
     );
     if (!ok) return;
-    setDeleting(true);
+    setDeleting(mode);
     try {
-      const res = await fetch(`/api/admin/users/${userId}`, { method: "DELETE" });
+      const res = await fetch(`/api/admin/users/${userId}${mode === "ban" ? "?ban=1" : ""}`, { method: "DELETE" });
       if (res.ok) {
         router.push("/admode");
       } else {
         alert("O'chirishda xato yuz berdi.");
-        setDeleting(false);
+        setDeleting(null);
       }
     } catch {
       alert("O'chirishda xato yuz berdi.");
-      setDeleting(false);
+      setDeleting(null);
     }
   };
 
@@ -166,10 +169,22 @@ export default function AdminUserDetail({ userId }: { userId: string }) {
             </p>
             <p className="text-xs text-muted-foreground font-mono break-all">ID: {user.id}</p>
           </div>
+          <div className="flex gap-2 self-start flex-wrap">
           <button
-            onClick={handleDelete}
-            disabled={deleting}
-            className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg border border-red-500/50 text-red-600 dark:text-red-400 hover:bg-red-500 hover:text-white disabled:opacity-50 transition-colors self-start"
+            onClick={() => handleDelete("ban")}
+            disabled={deleting !== null}
+            className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg bg-red-600 text-white hover:bg-red-700 disabled:opacity-50 transition-colors"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="10" />
+              <line x1="4.93" y1="4.93" x2="19.07" y2="19.07" />
+            </svg>
+            {deleting === "ban" ? "Bloklanmoqda…" : "Bloklash"}
+          </button>
+          <button
+            onClick={() => handleDelete("delete")}
+            disabled={deleting !== null}
+            className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg border border-red-500/50 text-red-600 dark:text-red-400 hover:bg-red-500 hover:text-white disabled:opacity-50 transition-colors"
           >
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <polyline points="3 6 5 6 21 6" />
@@ -177,8 +192,9 @@ export default function AdminUserDetail({ userId }: { userId: string }) {
               <line x1="10" y1="11" x2="10" y2="17" />
               <line x1="14" y1="11" x2="14" y2="17" />
             </svg>
-            {deleting ? "O'chirilmoqda…" : "Foydalanuvchini o'chirish"}
+            {deleting === "delete" ? "O'chirilmoqda…" : "Foydalanuvchini o'chirish"}
           </button>
+          </div>
         </section>
 
         {/* Totals */}

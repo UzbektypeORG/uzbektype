@@ -505,15 +505,18 @@ function TopUsersSection({ onUserClick }: { onUserClick: (id: string) => void })
       .catch(() => setRows([]));
   }, [period, difficulty, reload]);
 
-  const handleDelete = async (u: LbRow) => {
+  // "ban" also blocks the email, so the same Google account can't sign up again.
+  const handleDelete = async (u: LbRow, mode: "delete" | "ban") => {
     if (deletingId) return;
     const ok = window.confirm(
-      `"${fullName(u)}" (${u.email}) foydalanuvchisini va uning BARCHA natijalarini butunlay o'chirmoqchimisiz?\n\nBu amalni ortga qaytarib bo'lmaydi.`
+      mode === "ban"
+        ? `"${fullName(u)}" (${u.email}) foydalanuvchisini BLOKLAMOQCHIMISIZ?\n\nAkkaunt va barcha natijalari o'chadi, bu gmail bilan qayta ro'yxatdan o'ta olmaydi. Blokni Telegram botdan bekor qilish mumkin.`
+        : `"${fullName(u)}" (${u.email}) foydalanuvchisini va uning BARCHA natijalarini butunlay o'chirmoqchimisiz?\n\nBu amalni ortga qaytarib bo'lmaydi.`
     );
     if (!ok) return;
     setDeletingId(u.userId);
     try {
-      const res = await fetch(`/api/admin/users/${u.userId}`, { method: "DELETE" });
+      const res = await fetch(`/api/admin/users/${u.userId}${mode === "ban" ? "?ban=1" : ""}`, { method: "DELETE" });
       if (!res.ok) alert("O'chirishda xato yuz berdi.");
       setReload((n) => n + 1);
     } catch {
@@ -613,7 +616,14 @@ function TopUsersSection({ onUserClick }: { onUserClick: (id: string) => void })
                           Profil
                         </button>
                         <button
-                          onClick={() => handleDelete(u)}
+                          onClick={() => handleDelete(u, "ban")}
+                          disabled={deletingId !== null}
+                          className="px-2.5 py-1 text-xs rounded-md bg-red-600 text-white hover:bg-red-700 transition-colors disabled:opacity-40"
+                        >
+                          {deletingId === u.userId ? "…" : "Bloklash"}
+                        </button>
+                        <button
+                          onClick={() => handleDelete(u, "delete")}
                           disabled={deletingId !== null}
                           className="px-2.5 py-1 text-xs rounded-md border border-red-500/40 text-red-600 hover:bg-red-500/10 transition-colors disabled:opacity-40"
                         >

@@ -35,6 +35,31 @@ export async function sendSignupAlert(user: { id?: string; name?: string | null;
   await sendAdminMessage(text, keyboards.initial(user.id));
 }
 
+// A name passes the link filter on sign-up and gets swapped for an ad later,
+// so every rename is reported too, with the same block button.
+export async function sendNameChangeAlert(
+  user: { id: string; email: string },
+  oldName: string,
+  newName: string
+) {
+  const text =
+    `✏️ <b>Ism o'zgardi</b>\n\n` +
+    `Eski: ${htmlEscape(oldName || "—")}\n` +
+    `Yangi: <b>${htmlEscape(newName || "—")}</b>\n` +
+    `📧 ${htmlEscape(user.email)}`;
+  await sendAdminMessage(text, keyboards.initial(user.id));
+}
+
+// Admin-panel bans get a Telegram message too, so they can be undone from
+// the same "Blokdan chiqarish" button as bans made in Telegram.
+export async function sendPanelBanAlert(user: { id: string; email: string; name: string }) {
+  const text =
+    `🚫 <b>Admin paneldan bloklandi</b>\n\n` +
+    `👤 ${htmlEscape(user.name || "—")}\n` +
+    `📧 ${htmlEscape(user.email)}`;
+  await sendAdminMessage(text, keyboards.banned(user.id));
+}
+
 // Blocks the email and deletes the user (results, sessions and accounts go
 // with it via ON DELETE CASCADE, so they're signed out immediately).
 // Returns the email, or null if the user no longer exists.
