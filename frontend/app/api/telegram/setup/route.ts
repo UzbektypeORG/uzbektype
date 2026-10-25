@@ -39,7 +39,9 @@ export async function GET(req: Request) {
   }
 
   const info = (await api("getWebhookInfo")) as { result?: Record<string, unknown> };
+  const me = (await api("getMe")) as { result?: { username?: string } };
   return NextResponse.json({
+    bot: me.result?.username ? `@${me.result.username}` : null,
     applied,
     webhook: info.result ?? info,
     adminChatIdSet: !!process.env.TELEGRAM_ADMIN_CHAT_ID,
