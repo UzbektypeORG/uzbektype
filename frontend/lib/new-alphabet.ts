@@ -44,8 +44,6 @@ const COMBOS: Record<string, { base: string; modifiers: string }> = {
   ç: { base: "c", modifiers: "hH" },
 };
 
-export const SPECIAL_LETTERS = ["ö", "ğ", "ş", "ç"] as const;
-
 // True when `typed` is the first key of the two-key form of `expected`
 // (e.g. "o" while "ö" is expected) — shown as pending rather than wrong.
 export function isComboPrefix(typed: string, expected: string): boolean {
@@ -53,29 +51,16 @@ export function isComboPrefix(typed: string, expected: string): boolean {
   return !!combo && typed.toLowerCase() === combo.base && (typed === typed.toUpperCase()) === (expected === expected.toUpperCase());
 }
 
-// Apostrophe look-alikes all count as the tutuq sign.
-const APOSTROPHES = "'ʻ‘’`ʼ";
-
-export function charsMatch(typed: string, expected: string): boolean {
-  if (typed === expected) return true;
-  return APOSTROPHES.includes(typed) && APOSTROPHES.includes(expected);
-}
-
-// Appends `chars` to `typed`, folding two-key forms into new letters where
-// the target text expects one.
-export function appendTyped(typed: string, chars: string, target: string, combos: boolean): string {
-  let out = typed;
-  for (const ch of chars) {
-    if (combos && out.length > 0) {
-      const i = out.length - 1;
-      const expected = target[i];
-      const combo = expected ? COMBOS[expected.toLowerCase()] : undefined;
-      if (combo && isComboPrefix(out[i], expected) && combo.modifiers.includes(ch)) {
-        out = out.slice(0, i) + expected;
-        continue;
-      }
-    }
-    if (out.length < target.length) out += ch;
+// If `ch` completes a two-key form whose first key is the last char of
+// `typed` (e.g. typed ends in "o", ch is "'", target expects "ö"), returns
+// `typed` with that char replaced by the new letter; otherwise null.
+export function foldCombo(typed: string, ch: string, target: string): string | null {
+  const i = typed.length - 1;
+  if (i < 0) return null;
+  const expected = target[i];
+  const combo = expected ? COMBOS[expected.toLowerCase()] : undefined;
+  if (combo && isComboPrefix(typed[i], expected) && combo.modifiers.includes(ch)) {
+    return typed.slice(0, i) + expected;
   }
-  return out;
+  return null;
 }

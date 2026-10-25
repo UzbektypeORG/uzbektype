@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import type { TestConfig, TypingStats, WpmDataPoint } from "@/types";
 import { MAX_GAPS, type KeystrokeTelemetry } from "@/lib/anti-cheat";
+import { foldCombo, isComboPrefix } from "@/lib/new-alphabet";
 
 interface TypingTestProps {
   config: TestConfig;
@@ -14,9 +15,12 @@ interface TypingTestProps {
   // Fires true when the user starts typing, false when the test finishes —
   // lets the parent fade the settings bar out while a test is in progress.
   onActiveChange?: (active: boolean) => void;
+  // New-alphabet mode (/yangi-alifbo): the two-key forms o' g' sh ch fold
+  // into ö ğ ş ç, since keyboards don't have those letters yet.
+  foldCombos?: boolean;
 }
 
-export default function TypingTest({ config, text: initialText, onComplete, animationSpeed, correctCharColor, animationMode, onActiveChange }: TypingTestProps) {
+export default function TypingTest({ config, text: initialText, onComplete, animationSpeed, correctCharColor, animationMode, onActiveChange, foldCombos = false }: TypingTestProps) {
   const [userInput, setUserInput] = useState("");
   const [startTime, setStartTime] = useState<number | null>(null);
   const [currentTime, setCurrentTime] = useState(0);
@@ -209,6 +213,17 @@ export default function TypingTest({ config, text: initialText, onComplete, anim
   const handleKeyPress = (e: KeyboardEvent) => {
     if (isFinished) return;
 
+    // Keys typed into another field on the page (a converter, a form) are
+    // not test input.
+    const target = e.target as HTMLElement | null;
+    if (
+      target &&
+      target !== hiddenInputRef.current &&
+      (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable)
+    ) {
+      return;
+    }
+
     // Start timer on first keypress
     if (!startTime && e.key.length === 1) {
       setStartTime(Date.now());
@@ -231,9 +246,20 @@ export default function TypingTest({ config, text: initialText, onComplete, anim
 
       recordKeystroke(e.isTrusted, "char");
 
+      if (foldCombos) {
+        const folded = foldCombo(userInput, e.key, text);
+        if (folded !== null) {
+          setUserInput(folded);
+          return;
+        }
+        // A pending first key ("o" for "ö") that wasn't completed is an error.
+        const prev = userInput.length - 1;
+        if (prev >= 0 && userInput[prev] !== text[prev]) errorPositions.current.add(prev);
+      }
+
       // Track error positions
       const currentPos = userInput.length;
-      if (e.key !== text[currentPos]) {
+      if (e.key !== text[currentPos] && !(foldCombos && isComboPrefix(e.key, text[currentPos]))) {
         errorPositions.current.add(currentPos);
       }
 
@@ -245,7 +271,12 @@ export default function TypingTest({ config, text: initialText, onComplete, anim
   const handleMobileInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (isFinished) return;
 
-    const newValue = e.target.value;
+    let newValue = e.target.value;
+    if (foldCombos && newValue.length > userInput.length && newValue.startsWith(userInput)) {
+      let folded = userInput;
+      for (const ch of newValue.slice(userInput.length)) folded = foldCombo(folded, ch, text) ?? folded + ch;
+      newValue = folded;
+    }
 
     // Same telemetry, mobile path: one entry per input event. A multi-char
     // jump (autocorrect, swipe input) counts as that many characters but as a
@@ -263,7 +294,8 @@ export default function TypingTest({ config, text: initialText, onComplete, anim
 
     // Track error positions for newly typed characters
     for (let i = userInput.length; i < newValue.length; i++) {
-      if (newValue[i] !== text[i]) {
+      const pendingCombo = foldCombos && i === newValue.length - 1 && isComboPrefix(newValue[i], text[i]);
+      if (newValue[i] !== text[i] && !pendingCombo) {
         errorPositions.current.add(i);
       }
     }
@@ -360,7 +392,10 @@ export default function TypingTest({ config, text: initialText, onComplete, anim
         let animationClass = "";
 
         if (currentIndex < userInput.length) {
-          const isCorrect = userInput[currentIndex] === char;
+          const isCorrect =
+            userInput[currentIndex] === char ||
+            // First key of a two-key letter, still waiting for its second key.
+            (foldCombos && currentIndex === userInput.length - 1 && isComboPrefix(userInput[currentIndex], char));
           className = isCorrect ? `char-correct-${correctCharColor}` : "char-incorrect";
           if (!isAnimationDisabled) {
             if (animationMode === 'bounce') {
@@ -429,7 +464,7 @@ export default function TypingTest({ config, text: initialText, onComplete, anim
   useEffect(() => {
     window.addEventListener("keydown", handleKeyPress);
     return () => window.removeEventListener("keydown", handleKeyPress);
-  }, [userInput, startTime, isFinished, text, isTimeBased]);
+  }, [userInput, startTime, isFinished, text, isTimeBased, foldCombos]);
 
   // Auto-focus hidden input on mount (helps mobile)
   useEffect(() => {

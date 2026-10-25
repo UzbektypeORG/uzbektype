@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Keyboard, Scale, CalendarDays, ArrowRight } from "lucide-react";
-import NewAlphabetTest from "@/components/new-alphabet/NewAlphabetTest";
+import NewAlphabetPlay from "@/components/new-alphabet/NewAlphabetPlay";
 import NewAlphabetConverter from "@/components/new-alphabet/NewAlphabetConverter";
 import { NEW_ALPHABET, LETTER_CHANGES } from "@/lib/new-alphabet";
 
@@ -298,10 +298,13 @@ export default async function NewAlphabetPage({ params }: { params: Promise<{ la
   };
 
   return (
-    <main className="min-h-screen pt-24 md:pt-28 pb-16 px-4 md:px-6">
+    <main className="min-h-screen">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
 
-      <div className="max-w-4xl mx-auto space-y-14">
+      {/* First screen: the same play UI as the main test page */}
+      <NewAlphabetPlay lang={lang} />
+
+      <div className="max-w-4xl mx-auto space-y-14 px-4 md:px-6 pt-12 pb-16 border-t border-border">
         {/* Hero: answer-first summary so search snippets and AI answers can quote it */}
         <section className="text-center space-y-4">
           <a
@@ -315,13 +318,7 @@ export default async function NewAlphabetPage({ params }: { params: Promise<{ la
           </a>
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight">{c.h1}</h1>
           <p className="text-base md:text-lg text-muted-foreground max-w-3xl mx-auto leading-relaxed">{c.summary}</p>
-        </section>
-
-        {/* The test itself */}
-        <section className="border border-border rounded-2xl p-4 md:p-6" aria-labelledby="test-title">
-          <h2 id="test-title" className="text-xl md:text-2xl font-bold mb-1">{c.testTitle}</h2>
-          <p className="text-xs text-muted-foreground mb-4">{c.testNote}</p>
-          <NewAlphabetTest lang={lang} />
+          <p className="text-xs text-muted-foreground">{c.testNote}</p>
         </section>
 
         {/* What changed */}
