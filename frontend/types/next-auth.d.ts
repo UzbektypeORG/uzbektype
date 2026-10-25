@@ -7,6 +7,7 @@ declare module "next-auth" {
       firstName: string | null;
       lastName: string | null;
       avatarUrl: string | null;
+      nameChangedAt: string | null;
     } & DefaultSession["user"];
   }
 
@@ -14,5 +15,6 @@ declare module "next-auth" {
     firstName?: string | null;
     lastName?: string | null;
     avatarUrl?: string | null;
+    nameChangedAt?: Date | null;
   }
 }

@@ -28,6 +28,8 @@ export const users = pgTable("user", {
   firstName: text("first_name"),
   lastName: text("last_name"),
   avatarUrl: text("avatar_url"),
+  // Last first/last-name change; the profile API allows one per 14 days.
+  nameChangedAt: timestamp("name_changed_at", { mode: "date" }),
 
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),

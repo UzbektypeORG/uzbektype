@@ -30,6 +30,8 @@ const content = {
     loginCta: "Google bilan kirish",
     loginLoading: "Kuting...",
     nameHasLink: "Faqat ism va familiyangizni yozing (nuqta va @ belgisiz)",
+    nameLocked: (d: string) => `Ismni 14 kunda bir marta o'zgartirish mumkin. Keyingi safar: ${d}`,
+    nameCooldownHint: "Diqqat: ismni saqlagach, keyingi 14 kun o'zgartira olmaysiz",
   },
   en: {
     title: "Profile",
@@ -50,6 +52,8 @@ const content = {
     loginCta: "Sign in with Google",
     loginLoading: "Loading...",
     nameHasLink: "Please enter only your first and last name (no dots or @)",
+    nameLocked: (d: string) => `Your name can be changed once every 14 days. Next change: ${d}`,
+    nameCooldownHint: "Note: once saved, your name can't be changed for 14 days",
   },
   ru: {
     title: "Профиль",
@@ -70,6 +74,8 @@ const content = {
     loginCta: "Войти через Google",
     loginLoading: "Загрузка...",
     nameHasLink: "Укажите только имя и фамилию (без точек и @)",
+    nameLocked: (d: string) => `Имя можно менять раз в 14 дней. Следующее изменение: ${d}`,
+    nameCooldownHint: "Внимание: после сохранения имя нельзя будет менять 14 дней",
   },
 };
 
@@ -104,13 +110,18 @@ function GoogleIcon() {
   );
 }
 
-async function patchProfile(payload: { firstName?: string; lastName?: string; avatarUrl?: string }) {
+const NAME_COOLDOWN_MS = 14 * 24 * 60 * 60 * 1000;
+
+async function patchProfile(
+  payload: { firstName?: string; lastName?: string; avatarUrl?: string }
+): Promise<{ nameChangedAt: string | null }> {
   const res = await fetch("/api/profile", {
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
   });
   if (!res.ok) throw new Error(`profile_update_failed_${res.status}`);
+  return res.json();
 }
 
 export default function ProfileClient({ lang }: { lang: Language }) {
@@ -145,7 +156,12 @@ export default function ProfileClient({ lang }: { lang: Language }) {
 
   // Names were being used as ads ("Ali nimadir.uz"); the API rejects these too.
   const nameHasLink = hasLink(firstName) || hasLink(lastName);
-  const canSaveName = firstName.trim().length > 0 && lastName.trim().length > 0 && !nameHasLink;
+  // Mirrors the API's one-change-per-14-days rule so the form can say so up front.
+  const nameChangedAt = user?.nameChangedAt ? new Date(user.nameChangedAt).getTime() : null;
+  const nameLockedUntil =
+    nameChangedAt && Date.now() - nameChangedAt < NAME_COOLDOWN_MS ? new Date(nameChangedAt + NAME_COOLDOWN_MS) : null;
+  const canSaveName =
+    firstName.trim().length > 0 && lastName.trim().length > 0 && !nameHasLink && !nameLockedUntil;
 
   // Avatar click = local preview only. Header keeps showing the saved value.
   const handlePickAvatar = (seed: string) => {
@@ -153,7 +169,7 @@ export default function ProfileClient({ lang }: { lang: Language }) {
   };
 
   const handleSave = async () => {
-    if (!user || saving || nameHasLink) return;
+    if (!user || saving || (nameHasLink && !nameLockedUntil)) return;
 
     const payload: { firstName?: string; lastName?: string; avatarUrl?: string } = {};
 
@@ -177,10 +193,11 @@ export default function ProfileClient({ lang }: { lang: Language }) {
 
     setSaving(true);
     try {
-      await patchProfile(payload);
+      const saved = await patchProfile(payload);
       await update({
         user: {
           ...session?.user,
+          ...(saved.nameChangedAt && { nameChangedAt: saved.nameChangedAt }),
           ...(payload.firstName !== undefined && { firstName: payload.firstName }),
           ...(payload.lastName !== undefined && { lastName: payload.lastName }),
           ...(payload.avatarUrl !== undefined && { avatarUrl: payload.avatarUrl }),
@@ -298,10 +315,11 @@ export default function ProfileClient({ lang }: { lang: Language }) {
                 type="text"
                 value={firstName}
                 onChange={(e) => setFirstName(e.target.value)}
+                disabled={!!nameLockedUntil}
                 onBlur={() => setFirstName(normalizeName(firstName))}
                 placeholder={t.firstNamePlaceholder}
                 maxLength={30}
-                className="w-full px-4 py-2.5 rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/50 text-sm"
+                className="w-full px-4 py-2.5 rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/50 text-sm disabled:opacity-60 disabled:cursor-not-allowed"
               />
             </div>
             <div>
@@ -312,15 +330,22 @@ export default function ProfileClient({ lang }: { lang: Language }) {
                 type="text"
                 value={lastName}
                 onChange={(e) => setLastName(e.target.value)}
+                disabled={!!nameLockedUntil}
                 onBlur={() => setLastName(normalizeName(lastName))}
                 placeholder={t.lastNamePlaceholder}
                 maxLength={30}
-                className="w-full px-4 py-2.5 rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/50 text-sm"
+                className="w-full px-4 py-2.5 rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/50 text-sm disabled:opacity-60 disabled:cursor-not-allowed"
                 onKeyDown={(e) => { if (e.key === "Enter" && hasUnsavedChanges) handleSave(); }}
               />
             </div>
           </div>
-          {nameHasLink && <p className="text-xs text-red-600">{t.nameHasLink}</p>}
+          {nameLockedUntil ? (
+            <p className="text-xs text-muted-foreground">{t.nameLocked(nameLockedUntil.toLocaleDateString())}</p>
+          ) : nameHasLink ? (
+            <p className="text-xs text-red-600">{t.nameHasLink}</p>
+          ) : (
+            <p className="text-xs text-muted-foreground">{t.nameCooldownHint}</p>
+          )}
         </section>
 
         {/* Avatar section */}
@@ -388,7 +413,7 @@ export default function ProfileClient({ lang }: { lang: Language }) {
         <div className="flex items-center justify-center gap-3 pt-2">
           <button
             onClick={handleSave}
-            disabled={!hasUnsavedChanges || saving || nameHasLink}
+            disabled={!hasUnsavedChanges || saving || (nameHasLink && !nameLockedUntil)}
             className="px-8 py-3 rounded-lg bg-primary text-primary-foreground hover:opacity-90 transition-all text-sm font-medium disabled:opacity-40 disabled:cursor-not-allowed min-w-[140px]"
           >
             {saving ? "…" : t.save}

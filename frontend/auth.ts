@@ -53,6 +53,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       session.user.firstName = fresh?.firstName ?? u.firstName ?? null;
       session.user.lastName = fresh?.lastName ?? u.lastName ?? null;
       session.user.avatarUrl = fresh?.avatarUrl ?? u.avatarUrl ?? null;
+      session.user.nameChangedAt = fresh?.nameChangedAt ?? (u.nameChangedAt ? new Date(u.nameChangedAt).toISOString() : null);
 
       return session;
     },

@@ -22,6 +22,13 @@
       "when": 1792919006266,
       "tag": "0002_banned_email",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1792920806513,
+      "tag": "0003_name_changed_at",
+      "breakpoints": true
     }
   ]
 }

@@ -13,6 +13,10 @@ export const fetchCache = "force-no-store";
 // direct API call put an arbitrary (ad) image on the leaderboard.
 const AVATAR_PATTERN = /^https:\/\/api\.dicebear\.com\/7\.x\/pixel-art\/svg\?seed=[a-z0-9]{1,20}$/;
 
+// One name change per 14 days: an ad name can't be swapped in right after
+// the real one passed review, and a ban-and-rename loop gets slow.
+const NAME_COOLDOWN_MS = 14 * 24 * 60 * 60 * 1000;
+
 function normalizeName(value: string): string {
   return value
     .trim()
@@ -34,7 +38,7 @@ export async function PATCH(req: Request) {
     | null;
   if (!body) return NextResponse.json({ error: "invalid_body" }, { status: 400 });
 
-  const update: { firstName?: string; lastName?: string; avatarUrl?: string; updatedAt: Date } = {
+  const update: { firstName?: string; lastName?: string; avatarUrl?: string; nameChangedAt?: Date; updatedAt: Date } = {
     updatedAt: new Date(),
   };
 
@@ -56,7 +60,13 @@ export async function PATCH(req: Request) {
   }
 
   const [current] = await db
-    .select({ email: users.email, firstName: users.firstName, lastName: users.lastName, name: users.name })
+    .select({
+      email: users.email,
+      firstName: users.firstName,
+      lastName: users.lastName,
+      name: users.name,
+      nameChangedAt: users.nameChangedAt,
+    })
     .from(users)
     .where(eq(users.id, session.user.id))
     .limit(1);
@@ -69,6 +79,17 @@ export async function PATCH(req: Request) {
   // Each half can pass alone while the pair reads as an ad ("Site" + "Uz").
   if (hasLink(newName)) return NextResponse.json({ error: "name_has_link" }, { status: 400 });
 
+  if (newName !== oldName) {
+    const last = current.nameChangedAt?.getTime();
+    if (last && Date.now() - last < NAME_COOLDOWN_MS) {
+      return NextResponse.json(
+        { error: "name_change_too_soon", nextAllowedAt: new Date(last + NAME_COOLDOWN_MS).toISOString() },
+        { status: 429 }
+      );
+    }
+    update.nameChangedAt = new Date();
+  }
+
   await db.update(users).set(update).where(eq(users.id, session.user.id));
 
   if (newName !== oldName) {
@@ -79,5 +100,5 @@ export async function PATCH(req: Request) {
       newName
     );
   }
-  return NextResponse.json({ ok: true });
+  return NextResponse.json({ ok: true, nameChangedAt: update.nameChangedAt?.toISOString() ?? null });
 }
