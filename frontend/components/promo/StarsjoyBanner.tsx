@@ -1,16 +1,37 @@
 "use client";
 
-import { useEffect } from "react";
-import { trackPromo } from "@/lib/track-promo";
+import { useEffect, useState } from "react";
+import { trackPromo, type PromoName } from "@/lib/track-promo";
 import type { Language } from "@/types";
 
 // Starsjoy (Telegram Stars & Premium) banner on the results screen: one line
-// of text, shown in full, plus an arrow. Three designs to choose from; the
-// live one is STARSJOY_VARIANT. Analytics match the old results banner: one
-// impression per results screen, one click event.
+// of text, shown in full, plus an arrow. Three designs take turns: each
+// browser starts on a random one and moves to the next on every results
+// screen. Each design has its own analytics key (one impression per results
+// screen, one event per click), so the admin Reklama tab compares them.
 
 export type StarsjoyVariant = "premium" | "minimal" | "personal";
-export const STARSJOY_VARIANT: StarsjoyVariant = "premium";
+export const STARSJOY_VARIANTS: StarsjoyVariant[] = ["premium", "minimal", "personal"];
+
+const PROMO_KEYS: Record<StarsjoyVariant, PromoName> = {
+  premium: "starsjoy_premium",
+  minimal: "starsjoy_minimal",
+  personal: "starsjoy_personal",
+};
+
+const ROTATION_KEY = "uzbektype_starsjoy_next";
+
+function nextVariant(): StarsjoyVariant {
+  const random = Math.floor(Math.random() * STARSJOY_VARIANTS.length);
+  try {
+    const stored = parseInt(localStorage.getItem(ROTATION_KEY) ?? "", 10);
+    const i = Number.isInteger(stored) ? stored % STARSJOY_VARIANTS.length : random;
+    localStorage.setItem(ROTATION_KEY, String(i + 1));
+    return STARSJOY_VARIANTS[i];
+  } catch {
+    return STARSJOY_VARIANTS[random];
+  }
+}
 
 const STARSJOY_URL = "https://t.me/StarsjoyBot?start=uzbektype";
 
@@ -56,19 +77,25 @@ const STYLES: Record<StarsjoyVariant, { card: string; icon: string; text: string
 
 export default function StarsjoyBanner({
   lang,
-  variant = STARSJOY_VARIANT,
+  variant: forced,
   track = true,
 }: {
   lang: Language;
+  // Pins one design (preview page); otherwise the rotation picks.
   variant?: StarsjoyVariant;
   // Off on preview pages so they don't skew the real numbers.
   track?: boolean;
 }) {
+  // Picked once per results screen. The banner only renders after a test, in
+  // the browser, so reading localStorage here is safe.
+  const [rotated] = useState<StarsjoyVariant>(() => forced ?? nextVariant());
+  const variant = forced ?? rotated;
   const s = STYLES[variant];
+  const promoKey = PROMO_KEYS[variant];
 
   useEffect(() => {
-    if (track) trackPromo("starsjoy_banner", "impression", lang);
-  }, [track, lang]);
+    if (track) trackPromo(promoKey, "impression", lang);
+  }, [track, lang, promoKey]);
 
   return (
     <a
@@ -76,7 +103,7 @@ export default function StarsjoyBanner({
       target="_blank"
       rel="noopener noreferrer"
       onClick={() => {
-        if (track) trackPromo("starsjoy_banner", "click", lang);
+        if (track) trackPromo(promoKey, "click", lang);
       }}
       className={`group relative flex items-center gap-3 md:gap-4 w-full overflow-hidden rounded-xl px-4 md:px-6 py-4 md:py-5 transition-all duration-300 ${s.card}`}
     >

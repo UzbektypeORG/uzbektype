@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import TestResults from "@/components/typing/TestResults";
-import { STARSJOY_VARIANT, type StarsjoyVariant } from "@/components/promo/StarsjoyBanner";
+import type { StarsjoyVariant } from "@/components/promo/StarsjoyBanner";
 import type { Language, TestConfig } from "@/types";
 
 // Preview of the results screen with each Starsjoy banner design. Uses the
@@ -30,7 +30,7 @@ const SAMPLE_STATS = {
 };
 
 export default function StarsjoyPreview({ lang }: { lang: Language }) {
-  const [variant, setVariant] = useState<StarsjoyVariant>(STARSJOY_VARIANT);
+  const [variant, setVariant] = useState<StarsjoyVariant>("premium");
   const [key, setKey] = useState(0);
   const config: TestConfig = { language: lang, testType: "30s", difficulty: "medium" };
   const current = VARIANTS.find((v) => v.id === variant)!;
@@ -51,13 +51,12 @@ export default function StarsjoyPreview({ lang }: { lang: Language }) {
               }`}
             >
               {v.name}
-              {v.id === STARSJOY_VARIANT && <span className="ml-1.5 text-[9px] align-top text-primary">●</span>}
             </button>
           ))}
         </div>
         <p className="text-xs md:text-sm text-muted-foreground max-w-xl">{current.note}</p>
         <p className="text-[11px] text-muted-foreground/80 max-w-xl">
-          ● — hozir saytda yoqilgan variant. Bu sahifada statistika o&apos;chirilgan; saytda har bir natija ekrani 1 ta ko&apos;rish, har bir bosish 1 ta bosish bo&apos;lib admin paneldagi &quot;Reklama&quot; tabiga tushadi.
+          Saytda uchala variant navbat bilan chiqadi: har bir foydalanuvchida birinchisi tasodifiy, keyin har natijada navbatdagisi. Statistika har variant bo&apos;yicha alohida admin paneldagi &quot;Reklama&quot; tabida. Bu sahifada statistika o&apos;chirilgan.
         </p>
       </div>
 
