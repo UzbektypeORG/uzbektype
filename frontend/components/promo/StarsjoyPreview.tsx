@@ -11,7 +11,7 @@ import type { Language, TestConfig } from "@/types";
 const VARIANTS: { id: StarsjoyVariant; name: string; note: string }[] = [
   { id: "premium", name: "A · Premium", note: "Telegram Premium ranglari: binafsha-pushti gradient, oltin yulduz. Eng ko'zga tashlanadigan." },
   { id: "minimal", name: "B · Minimal", note: "Sayt uslubidagi oq-qora karta. Sokin, natijalardan chalg'itmaydi." },
-  { id: "personal", name: "C · Shaxsiy", note: "Foydalanuvchining WPM natijasi bilan: \"72 WPM — zo'r natija!\". Kayfiyat yuqori paytni ushlaydi." },
+  { id: "personal", name: "C · Qora-oltin", note: "Qora karta, oltin yulduz va oltin tugma. Kontrast eng yuqori." },
 ];
 
 const SAMPLE_STATS = {

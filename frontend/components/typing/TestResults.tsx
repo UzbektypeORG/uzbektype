@@ -298,7 +298,7 @@ export default function TestResults({
         </div>
       </div>
 
-      <StarsjoyBanner lang={config.language} wpm={stats.wpm} variant={promoVariant} track={promoTracking} />
+      <StarsjoyBanner lang={config.language} variant={promoVariant} track={promoTracking} />
 
       {/* Actions */}
       <div className="flex justify-center gap-2 md:gap-3">
