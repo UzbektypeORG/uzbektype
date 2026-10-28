@@ -249,6 +249,7 @@ export default function AdminDashboard() {
 const PROMO_LABELS: Record<string, string> = {
   uzbektype_modal: "@uzbektype — modal",
   uzbektype_banner: "@uzbektype — banner",
+  starsjoy_banner: "Starsjoy — natija banneri",
 };
 
 function pct(part: number, whole: number): string {
@@ -256,7 +257,7 @@ function pct(part: number, whole: number): string {
   return `${((part / whole) * 100).toFixed(1)}%`;
 }
 
-const AD_PROMOS = ["uzbektype_modal", "uzbektype_banner"];
+const AD_PROMOS = ["uzbektype_modal", "uzbektype_banner", "starsjoy_banner"];
 
 type PromoPeriod = "all" | "today" | "yesterday" | "month" | "custom";
 const PROMO_PERIODS: { id: PromoPeriod; label: string }[] = [
