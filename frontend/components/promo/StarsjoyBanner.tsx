@@ -20,22 +20,6 @@ const TEXT: Record<Language, string> = {
   ru: "Купите Telegram Premium и Stars!",
 };
 
-const STAR_PATH = "M12 2.5l2.83 5.73 6.32.92-4.57 4.46 1.08 6.3L12 16.93l-5.66 2.98 1.08-6.3L2.85 9.15l6.32-.92L12 2.5z";
-
-function GoldStar({ size = 22 }: { size?: number }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden="true">
-      <defs>
-        <linearGradient id="sj-gold" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stopColor="#FFD84D" />
-          <stop offset="100%" stopColor="#F59E0B" />
-        </linearGradient>
-      </defs>
-      <path fill="url(#sj-gold)" d={STAR_PATH} />
-    </svg>
-  );
-}
-
 function Arrow() {
   return (
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -48,7 +32,7 @@ const STYLES: Record<StarsjoyVariant, { card: string; icon: string; text: string
   // Telegram Premium's violet-to-pink with a gold Stars accent.
   premium: {
     card: "border border-[#B455F5]/30 hover:border-[#B455F5]/60 bg-gradient-to-r from-[#6D5BFF]/[0.12] via-[#B455F5]/[0.08] to-[#F2709C]/5 hover:shadow-lg hover:shadow-[#B455F5]/15",
-    icon: "bg-gradient-to-br from-[#6D5BFF] via-[#B455F5] to-[#F2709C] shadow-md shadow-[#B455F5]/30",
+    icon: "shadow-md shadow-[#B455F5]/30",
     text: "text-foreground",
     arrow: "bg-gradient-to-r from-[#6D5BFF] via-[#B455F5] to-[#F2709C] text-white shadow-md shadow-[#B455F5]/25",
     glow: "bg-[#B455F5]/20 group-hover:bg-[#B455F5]/30",
@@ -56,14 +40,14 @@ const STYLES: Record<StarsjoyVariant, { card: string; icon: string; text: string
   // The site's own black-and-white look.
   minimal: {
     card: "border border-border hover:border-foreground",
-    icon: "bg-amber-400/10",
+    icon: "ring-1 ring-border",
     text: "text-foreground",
     arrow: "border border-border text-muted-foreground group-hover:text-foreground group-hover:border-foreground",
   },
   // Inverted card with gold.
   personal: {
     card: "bg-foreground hover:shadow-xl hover:shadow-amber-500/10",
-    icon: "bg-background/10",
+    icon: "ring-1 ring-background/20",
     text: "text-background",
     arrow: "bg-gradient-to-r from-amber-300 to-amber-500 text-black shadow-md shadow-amber-500/20",
     glow: "bg-amber-400/20 group-hover:bg-amber-400/30",
@@ -99,17 +83,9 @@ export default function StarsjoyBanner({
       {s.glow && (
         <span className={`pointer-events-none absolute -right-10 -top-12 w-44 h-44 rounded-full blur-2xl transition-colors ${s.glow}`} aria-hidden="true" />
       )}
-      <span className={`relative flex-shrink-0 w-11 h-11 md:w-12 md:h-12 rounded-full flex items-center justify-center group-hover:scale-105 transition-transform ${s.icon}`}>
-        {variant === "premium" ? (
-          <>
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="white" aria-hidden="true">
-              <path d={STAR_PATH} />
-            </svg>
-            <span className="absolute -right-1 -bottom-1"><GoldStar size={16} /></span>
-          </>
-        ) : (
-          <GoldStar size={variant === "personal" ? 26 : 22} />
-        )}
+      {/* Starsjoy logo (copied from the Starsjoy project, downscaled to 192px) */}
+      <span className={`relative flex-shrink-0 w-11 h-11 md:w-12 md:h-12 rounded-full overflow-hidden group-hover:scale-105 transition-transform ${s.icon}`}>
+        <img src="/promo/starsjoy-logo.png" alt="Starsjoy" width={48} height={48} className="w-full h-full object-cover" />
       </span>
       <span className={`relative flex-1 min-w-0 text-base md:text-lg font-semibold leading-snug ${s.text}`}>{TEXT[lang]}</span>
       <span className={`relative flex-shrink-0 w-9 h-9 md:w-10 md:h-10 rounded-full flex items-center justify-center group-hover:translate-x-0.5 transition-all duration-300 ${s.arrow}`}>
