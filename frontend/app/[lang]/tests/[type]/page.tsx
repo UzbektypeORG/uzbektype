@@ -14,6 +14,7 @@ import LoginCtaBanner from "@/components/LoginCtaBanner";
 import { getTestText } from "@/lib/getTestText";
 import { calculateStars } from "@/lib/calculateStars";
 import { saveTestResult } from "@/lib/localStorage";
+import { submitFeedback } from "@/lib/submit-feedback";
 import type { KeystrokeTelemetry } from "@/lib/anti-cheat";
 import type { TestConfig, TypingStats, Language, TestType, Difficulty, WpmDataPoint } from "@/types";
 
@@ -295,30 +296,8 @@ export default function TestPage() {
     localStorage.setItem("uzbektype_channel_joined", "true");
   };
 
-  const handleFeedbackSubmit = async (feedback: string) => {
-    const sheetUrl = "https://script.google.com/macros/s/AKfycby-IiWY0K3DKTYsy3G3Rknj_8O-Ux67qkIAV9ChaGrG4jJsGOZyVFgBmaqudiW9e6fi/exec";
-
-    try {
-      await fetch(sheetUrl, {
-        method: "POST",
-        mode: "no-cors",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          feedback,
-          timestamp: new Date().toISOString(),
-          userAgent: navigator.userAgent,
-          source: "modal",
-        }),
-      });
-    } catch (error) {
-      console.error("Failed to submit feedback:", error);
-    }
-
-    // Mark feedback as submitted (won't show again)
-    localStorage.setItem("uzbektype_feedback_submitted", "true");
-  };
+  // Also marks feedback as submitted, so the modal won't show again
+  const handleFeedbackSubmit = (feedback: string) => submitFeedback(feedback, "modal", lang);
 
   const handleFeedbackClose = () => {
     setShowFeedbackModal(false);

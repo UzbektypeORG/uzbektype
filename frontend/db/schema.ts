@@ -162,3 +162,20 @@ export const bannedEmails = pgTable("banned_email", {
   userId: uuid("user_id"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 }, (table) => [index("banned_email_user_id_idx").on(table.userId)]);
+
+// User feedback from the post-test modal and the footer button. The Google
+// Sheet still gets every entry; this copy is what can be queried directly.
+export const feedback = pgTable(
+  "feedback",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    message: text("message").notNull(),
+    source: varchar("source", { length: 16 }).notNull(), // 'modal' | 'footer'
+    lang: varchar("lang", { length: 2 }),
+    anonId: varchar("anon_id", { length: 64 }),
+    userId: uuid("user_id"),
+    userAgent: text("user_agent"),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (table) => [index("feedback_created_at_idx").on(table.createdAt)]
+);
