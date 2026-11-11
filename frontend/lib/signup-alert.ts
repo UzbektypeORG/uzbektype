@@ -2,6 +2,7 @@ import { db, users, bannedEmails } from "@/db";
 import { eq } from "drizzle-orm";
 import { normalizeEmail } from "@/lib/banned-emails";
 import { sendAdminMessage, type InlineKeyboard } from "@/lib/telegram";
+import { telegramIdFromEmail } from "@/lib/telegram-email";
 
 // Sign-up alert flow, sent to the admin's Telegram DM:
 //   alert           → [🚫 Bloklash]
@@ -31,8 +32,14 @@ export async function sendSignupAlert(user: { id?: string; name?: string | null;
   const text =
     `🆕 <b>Yangi foydalanuvchi</b>\n\n` +
     `👤 ${htmlEscape(user.name?.trim() || "—")}\n` +
-    `📧 ${htmlEscape(user.email)}`;
+    contactLine(user.email);
   await sendAdminMessage(text, keyboards.initial(user.id));
+}
+
+// Telegram sign-ins carry a synthetic email; show the account id instead.
+function contactLine(email: string): string {
+  const tgId = telegramIdFromEmail(email);
+  return tgId ? `✈️ Telegram ID: <code>${tgId}</code>` : `📧 ${htmlEscape(email)}`;
 }
 
 // A name passes the link filter on sign-up and gets swapped for an ad later,
@@ -46,7 +53,7 @@ export async function sendNameChangeAlert(
     `✏️ <b>Ism o'zgardi</b>\n\n` +
     `Eski: ${htmlEscape(oldName || "—")}\n` +
     `Yangi: <b>${htmlEscape(newName || "—")}</b>\n` +
-    `📧 ${htmlEscape(user.email)}`;
+    contactLine(user.email);
   await sendAdminMessage(text, keyboards.initial(user.id));
 }
 
@@ -56,7 +63,7 @@ export async function sendPanelBanAlert(user: { id: string; email: string; name:
   const text =
     `🚫 <b>Admin paneldan bloklandi</b>\n\n` +
     `👤 ${htmlEscape(user.name || "—")}\n` +
-    `📧 ${htmlEscape(user.email)}`;
+    contactLine(user.email);
   await sendAdminMessage(text, keyboards.banned(user.id));
 }
 

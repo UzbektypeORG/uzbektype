@@ -1,24 +1,19 @@
 "use client";
 
-import { useState } from "react";
-import { signIn } from "next-auth/react";
+export const OPEN_LOGIN_EVENT = "uzbektype:open-login";
 
 /**
- * Login helper. Triggers Google OAuth and lands the user on /[lang]/profile
- * after sign-in. The /profile page handles both onboarding (new users with
- * no firstName) and editing (existing users).
+ * Login helper. Opens the sign-in chooser (components/LoginModal.tsx, mounted
+ * once in Providers): Telegram (recommended) or Google. Both land the user on
+ * /[lang]/profile, which handles onboarding (no firstName yet) and editing.
+ *
+ * Kept under its old name so the six login buttons didn't need touching;
+ * isLoggingIn stays false because the modal shows its own progress.
  */
 export function useGoogleLogin(lang: string) {
-  const [isLoggingIn, setIsLoggingIn] = useState(false);
-
-  const handleLogin = async () => {
-    setIsLoggingIn(true);
-    try {
-      await signIn("google", { callbackUrl: `/${lang}/profile` });
-    } finally {
-      setIsLoggingIn(false);
-    }
+  const handleLogin = () => {
+    window.dispatchEvent(new CustomEvent(OPEN_LOGIN_EVENT, { detail: { lang } }));
   };
 
-  return { handleLogin, isLoggingIn };
+  return { handleLogin, isLoggingIn: false };
 }

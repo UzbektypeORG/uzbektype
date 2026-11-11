@@ -40,13 +40,14 @@ export async function sendChannelMessage(text: string): Promise<void> {
 // (TELEGRAM_ADMIN_CHAT_ID — numeric id; the admin must /start the bot once).
 // Button presses come back to /api/telegram/webhook.
 
-export type InlineKeyboard = { text: string; callback_data: string }[][];
+export type InlineKeyboard = ({ text: string; callback_data: string } | { text: string; url: string })[][];
 
-export async function callTelegram(method: string, payload: Record<string, unknown>): Promise<void> {
+// Bot API call that hands back `result`, or null on any failure (logged).
+export async function telegramApi<T>(method: string, payload: Record<string, unknown>): Promise<T | null> {
   const token = process.env.TELEGRAM_BOT_TOKEN;
   if (!token) {
     console.warn(`[telegram] ${method} skipped — TELEGRAM_BOT_TOKEN not set`);
-    return;
+    return null;
   }
   try {
     const res = await fetch(`https://api.telegram.org/bot${token}/${method}`, {
@@ -57,10 +58,18 @@ export async function callTelegram(method: string, payload: Record<string, unkno
     if (!res.ok) {
       const body = await res.text().catch(() => "<no body>");
       console.error(`[telegram] ${method} HTTP ${res.status}: ${body.slice(0, 500)}`);
+      return null;
     }
+    const json = (await res.json()) as { result?: T };
+    return json.result ?? null;
   } catch (err) {
     console.error(`[telegram] ${method} threw:`, err);
+    return null;
   }
+}
+
+export async function callTelegram(method: string, payload: Record<string, unknown>): Promise<void> {
+  await telegramApi(method, payload);
 }
 
 export async function sendAdminMessage(text: string, keyboard?: InlineKeyboard): Promise<void> {

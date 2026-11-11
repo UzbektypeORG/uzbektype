@@ -1,13 +1,15 @@
 import { NextResponse } from "next/server";
 import { callTelegram } from "@/lib/telegram";
 import { banUser, unbanUser, keyboards, htmlEscape } from "@/lib/signup-alert";
+import { handleLoginStart, handleSubscribeCheck, START_PREFIX, SUB_CHECK_PREFIX } from "@/lib/telegram-login";
 
 export const dynamic = "force-dynamic";
 export const fetchCache = "force-no-store";
 
-// Telegram bot webhook. Handles the buttons on the admin's sign-up alerts
-// (see lib/signup-alert.ts) and answers /start with the chat id, which is
-// what TELEGRAM_ADMIN_CHAT_ID must be set to.
+// Telegram bot webhook. Handles the "Telegram orqali kirish" flow
+// (lib/telegram-login.ts), the buttons on the admin's sign-up alerts
+// (lib/signup-alert.ts), and answers a plain /start with the chat id, which
+// is what TELEGRAM_ADMIN_CHAT_ID must be set to.
 //
 // Trust: Telegram echoes TELEGRAM_WEBHOOK_SECRET (given to setWebhook) in a
 // header, and every button press must come from the admin's own account.
@@ -20,7 +22,11 @@ type CallbackQuery = {
 };
 
 type Update = {
-  message?: { chat: { id: number }; text?: string };
+  message?: {
+    chat: { id: number };
+    from?: { id: number; first_name?: string; last_name?: string; username?: string };
+    text?: string;
+  };
   callback_query?: CallbackQuery;
 };
 
@@ -36,17 +42,27 @@ export async function POST(req: Request) {
   const update = (await req.json().catch(() => null)) as Update | null;
   if (!update) return NextResponse.json({ ok: true });
 
-  if (update.message?.text?.startsWith("/start")) {
-    await callTelegram("sendMessage", {
-      chat_id: update.message.chat.id,
-      text: `Chat ID: <code>${update.message.chat.id}</code>`,
-      parse_mode: "HTML",
-    });
+  const msg = update.message;
+  if (msg?.text?.startsWith("/start")) {
+    const payload = msg.text.split(" ")[1] ?? "";
+    if (payload.startsWith(START_PREFIX) && msg.from) {
+      await handleLoginStart(msg.chat.id, msg.from, payload.slice(START_PREFIX.length));
+    } else {
+      await callTelegram("sendMessage", {
+        chat_id: msg.chat.id,
+        text:
+          `👋 Assalomu alaykum! Bu UzbekType boti.\n\n` +
+          `Saytga kirish uchun uzbektype.uz'da <b>«Telegram orqali kirish»</b> tugmasini bosing.\n\n` +
+          `<i>Chat ID: <code>${msg.chat.id}</code></i>`,
+        parse_mode: "HTML",
+      });
+    }
     return NextResponse.json({ ok: true });
   }
 
   const cq = update.callback_query;
-  if (cq) await handleCallback(cq);
+  if (cq?.data?.startsWith(SUB_CHECK_PREFIX)) await handleSubscribeCheck(cq);
+  else if (cq) await handleCallback(cq);
 
   // Always 200, otherwise Telegram keeps retrying the same update.
   return NextResponse.json({ ok: true });

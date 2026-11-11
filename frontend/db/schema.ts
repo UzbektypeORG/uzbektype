@@ -163,6 +163,25 @@ export const bannedEmails = pgTable("banned_email", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 }, (table) => [index("banned_email_user_id_idx").on(table.userId)]);
 
+// One row per "Telegram orqali kirish" attempt. The site creates it (its id
+// rides in the bot deep link and an httpOnly cookie), the bot fills in the
+// Telegram account and a one-time code once the channel subscription checks
+// out, and /api/telegram-login/verify consumes it.
+export const telegramLogins = pgTable(
+  "telegram_login",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    telegramId: text("telegram_id"),
+    telegramName: text("telegram_name"),
+    codeHash: varchar("code_hash", { length: 64 }),
+    attempts: integer("attempts").notNull().default(0),
+    expiresAt: timestamp("expires_at").notNull(),
+    usedAt: timestamp("used_at"),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (table) => [index("telegram_login_expires_at_idx").on(table.expiresAt)]
+);
+
 // User feedback from the post-test modal and the footer button. The Google
 // Sheet still gets every entry; this copy is what can be queried directly.
 export const feedback = pgTable(

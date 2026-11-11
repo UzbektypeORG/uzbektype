@@ -1,4 +1,5 @@
 import { stripLinks } from "@/lib/name-filter";
+import { telegramIdFromEmail } from "@/lib/telegram-email";
 
 type UserLike = {
   id?: string | null;
@@ -15,6 +16,12 @@ export function displayName(u: UserLike | null | undefined): string {
   const full = stripLinks([u.firstName, u.lastName].filter(Boolean).join(" "));
   if (full) return full;
   return stripLinks(u.name ?? "") || "—";
+}
+
+// The line under the name: the email, or "Telegram" for a Telegram sign-in
+// rather than its synthetic address.
+export function displayEmail(u: UserLike | null | undefined): string {
+  return telegramIdFromEmail(u?.email) ? "Telegram" : u?.email ?? "";
 }
 
 // Default avatar = pixel-art seeded by user identity (each user gets a unique
