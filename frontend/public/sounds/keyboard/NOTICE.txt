@@ -1,0 +1,3 @@
+Keyboard switch recordings in this folder come from kbsim, the Mechanical
+Keyboard Simulator (https://github.com/tplai/kbsim), and are used under its
+MIT license, reproduced in LICENSE.txt. Enter-key recordings were left out.

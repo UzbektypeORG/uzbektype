@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import type { TestConfig, TypingStats, WpmDataPoint } from "@/types";
 import { MAX_GAPS, type KeystrokeTelemetry } from "@/lib/anti-cheat";
 import { foldCombo, isComboPrefix } from "@/lib/new-alphabet";
+import { playKeySound, preloadKeySound, type KeyKind, type SoundProfile } from "@/lib/keySound";
 
 interface TypingTestProps {
   config: TestConfig;
@@ -18,14 +19,18 @@ interface TypingTestProps {
   // New-alphabet mode (/yangi-alifbo): the two-key forms o' g' sh ch fold
   // into ö ğ ş ç, since keyboards don't have those letters yet.
   foldCombos?: boolean;
+  // Keyboard sound effect per keypress (lib/keySound.ts).
+  soundProfile?: SoundProfile;
 }
 
-export default function TypingTest({ config, text: initialText, onComplete, animationSpeed, correctCharColor, animationMode, onActiveChange, foldCombos = false }: TypingTestProps) {
+export default function TypingTest({ config, text: initialText, onComplete, animationSpeed, correctCharColor, animationMode, onActiveChange, foldCombos = false, soundProfile = "off" }: TypingTestProps) {
   const [userInput, setUserInput] = useState("");
   const [startTime, setStartTime] = useState<number | null>(null);
   const [currentTime, setCurrentTime] = useState(0);
   const [isFinished, setIsFinished] = useState(false);
   const [cursorPosition, setCursorPosition] = useState({ left: 0, top: 0, height: 0 });
+  // Keys whose press played a sound, by KeyboardEvent.code → kind, for the keyup release.
+  const soundedKeys = useRef(new Map<string, KeyKind>());
   const [wpmHistory, setWpmHistory] = useState<WpmDataPoint[]>([]);
   const [currentLine, setCurrentLine] = useState(0);
   const [lineOffsets, setLineOffsets] = useState<number[]>([0]);
@@ -210,6 +215,13 @@ export default function TypingTest({ config, text: initialText, onComplete, anim
     onComplete({ ...stats, timeElapsed, wpmHistory, rawWpm, consistency, telemetry: telemetryRef.current });
   };
 
+  // Key auto-repeat stays silent, like holding a real key down.
+  const pressSound = (e: KeyboardEvent, kind: KeyKind) => {
+    if (e.repeat) return;
+    playKeySound(soundProfile, kind);
+    soundedKeys.current.set(e.code, kind);
+  };
+
   const handleKeyPress = (e: KeyboardEvent) => {
     if (isFinished) return;
 
@@ -234,6 +246,7 @@ export default function TypingTest({ config, text: initialText, onComplete, anim
     // Handle backspace
     if (e.key === "Backspace") {
       e.preventDefault();
+      pressSound(e, "back");
       recordKeystroke(e.isTrusted, "back");
       setUserInput((prev) => prev.slice(0, -1));
       return;
@@ -244,6 +257,7 @@ export default function TypingTest({ config, text: initialText, onComplete, anim
       e.preventDefault();
       if (!isTimeBased && userInput.length >= text.length) return;
 
+      pressSound(e, e.key === " " ? "space" : "char");
       recordKeystroke(e.isTrusted, "char");
 
       if (foldCombos) {
@@ -284,6 +298,7 @@ export default function TypingTest({ config, text: initialText, onComplete, anim
     const delta = newValue.length - userInput.length;
     if (delta > 0) recordKeystroke(e.nativeEvent.isTrusted, "char", delta);
     else if (delta < 0) recordKeystroke(e.nativeEvent.isTrusted, "back");
+    if (delta !== 0) playKeySound(soundProfile, delta < 0 ? "back" : newValue.endsWith(" ") ? "space" : "char");
 
     // Start timer on first input
     if (!startTime && newValue.length > 0) {
@@ -464,7 +479,20 @@ export default function TypingTest({ config, text: initialText, onComplete, anim
   useEffect(() => {
     window.addEventListener("keydown", handleKeyPress);
     return () => window.removeEventListener("keydown", handleKeyPress);
-  }, [userInput, startTime, isFinished, text, isTimeBased, foldCombos]);
+  }, [userInput, startTime, isFinished, text, isTimeBased, foldCombos, soundProfile]);
+
+  // Release sound for keys whose press made a sound (so Tab, Shift etc. stay quiet).
+  useEffect(() => {
+    preloadKeySound(soundProfile);
+    const onKeyUp = (e: KeyboardEvent) => {
+      const kind = soundedKeys.current.get(e.code);
+      if (!kind) return;
+      soundedKeys.current.delete(e.code);
+      playKeySound(soundProfile, kind, "release");
+    };
+    window.addEventListener("keyup", onKeyUp);
+    return () => window.removeEventListener("keyup", onKeyUp);
+  }, [soundProfile]);
 
   // Auto-focus hidden input on mount (helps mobile)
   useEffect(() => {

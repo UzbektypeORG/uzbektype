@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { notFound, useParams, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { Timer, RotateCcw, MoveVertical, Blend } from "lucide-react";
+import { Timer, RotateCcw, MoveVertical, Blend, VolumeX } from "lucide-react";
 import TypingTest from "@/components/typing/TypingTest";
 import TestResults from "@/components/typing/TestResults";
 import RecordCelebration from "@/components/RecordCelebration";
@@ -15,6 +15,7 @@ import { getTestText } from "@/lib/getTestText";
 import { calculateStars } from "@/lib/calculateStars";
 import { saveTestResult } from "@/lib/localStorage";
 import { submitFeedback } from "@/lib/submit-feedback";
+import { playKeySound, preloadKeySound, SOUND_LABELS, SOUND_PROFILES, SOUND_STORAGE_KEY, type SoundProfile } from "@/lib/keySound";
 import type { KeystrokeTelemetry } from "@/lib/anti-cheat";
 import type { TestConfig, TypingStats, Language, TestType, Difficulty, WpmDataPoint } from "@/types";
 
@@ -31,6 +32,8 @@ const labels = {
     color: "Harflar rangi",
     speed: "Animatsiya tezligi",
     animation: "Animatsiya",
+    sound: "Klaviatura ovozi",
+    soundOff: "O'chiq",
     easy: "OSON",
     medium: "O'RTA",
     hard: "QIYIN"
@@ -44,6 +47,8 @@ const labels = {
     color: "Letters color",
     speed: "Animation speed",
     animation: "Animation",
+    sound: "Keyboard sound",
+    soundOff: "Off",
     easy: "EASY",
     medium: "MEDIUM",
     hard: "HARD"
@@ -57,6 +62,8 @@ const labels = {
     color: "Цвет букв",
     speed: "Скорость анимации",
     animation: "Анимация",
+    sound: "Звук клавиш",
+    soundOff: "Выкл",
     easy: "ЛЁГКИЙ",
     medium: "СРЕДНИЙ",
     hard: "СЛОЖНЫЙ"
@@ -102,6 +109,7 @@ export default function TestPage() {
   const [isTyping, setIsTyping] = useState(false);
   const [animationSpeed, setAnimationSpeed] = useState(1);
   const [correctCharColor, setCorrectCharColor] = useState<'default' | 'blue' | 'yellow' | 'green'>('default');
+  const [soundProfile, setSoundProfile] = useState<SoundProfile>("off");
   const [animationMode, setAnimationMode] = useState<'bounce' | 'fade'>('bounce');
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
   const [showChannelModal, setShowChannelModal] = useState(false);
@@ -174,6 +182,11 @@ export default function TestPage() {
     const savedMode = localStorage.getItem("uzbektype_animation_mode") as 'bounce' | 'fade';
     if (savedMode && ['bounce', 'fade'].includes(savedMode)) {
       setAnimationMode(savedMode);
+    }
+
+    const savedSound = localStorage.getItem(SOUND_STORAGE_KEY) as SoundProfile;
+    if (savedSound && SOUND_PROFILES.includes(savedSound)) {
+      setSoundProfile(savedSound);
     }
 
     // Parse test type and difficulty from URL
@@ -377,6 +390,16 @@ export default function TestPage() {
     localStorage.setItem("uzbektype_animation_mode", mode);
   };
 
+  const handleSoundProfileChange = (profile: SoundProfile) => {
+    setSoundProfile(profile);
+    localStorage.setItem(SOUND_STORAGE_KEY, profile);
+    // Preview: one key press and release, once the recordings are decoded.
+    preloadKeySound(profile).then(() => {
+      playKeySound(profile, "char");
+      setTimeout(() => playKeySound(profile, "char", "release"), 90);
+    });
+  };
+
   if (!config || !text) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -442,7 +465,7 @@ export default function TestPage() {
 
               {/* Mobile Row 2: Color picker + Slider + Animation mode */}
               {/* Desktop: Center section */}
-              <div className={`flex items-end gap-2 md:gap-3 w-full md:w-auto justify-center transition-opacity duration-300 ${isTyping ? "opacity-0 pointer-events-none" : "opacity-100"}`}>
+              <div className={`flex flex-wrap md:flex-nowrap items-end gap-2 md:gap-3 w-full md:w-auto justify-center transition-opacity duration-300 ${isTyping ? "opacity-0 pointer-events-none" : "opacity-100"}`}>
                 {/* Color */}
                 <div className="flex flex-col items-center gap-1">
                   <span className={captionCls}>{t.color}</span>
@@ -535,6 +558,32 @@ export default function TestPage() {
                     </button>
                   </div>
                 </div>
+
+                {/* Keyboard sound */}
+                <div className="flex flex-col items-center gap-1">
+                  <span className={captionCls}>{t.sound}</span>
+                  <div className="flex items-center gap-0.5 md:gap-1 border border-border rounded-lg p-0.5 md:p-1">
+                    {SOUND_PROFILES.map((profile) => (
+                      <button
+                        key={profile}
+                        onClick={() => handleSoundProfileChange(profile)}
+                        className={`h-6 md:h-7 px-1.5 md:px-2 rounded text-[10px] md:text-xs font-medium inline-flex items-center transition-all ${
+                          soundProfile === profile
+                            ? 'bg-foreground text-background'
+                            : 'text-muted-foreground hover:text-foreground'
+                        }`}
+                        title={profile === "off" ? t.soundOff : SOUND_LABELS[profile].title}
+                      >
+                        {profile === "off" ? (
+                          <>
+                            <VolumeX size={14} className="md:hidden" />
+                            <VolumeX size={16} className="hidden md:block" />
+                          </>
+                        ) : SOUND_LABELS[profile].short}
+                      </button>
+                    ))}
+                  </div>
+                </div>
               </div>
 
               {/* Mobile Row 3: Back + Restart, centered like the other rows.
@@ -570,6 +619,7 @@ export default function TestPage() {
                 correctCharColor={correctCharColor}
                 animationMode={animationMode}
                 onActiveChange={setIsTyping}
+                soundProfile={soundProfile}
               />
             </div>
           </div>
