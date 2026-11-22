@@ -3,7 +3,8 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { notFound, useParams, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { Timer, RotateCcw, MoveVertical, Blend, VolumeX } from "lucide-react";
+import { Timer, RotateCcw, MoveVertical, Blend, VolumeX, Settings } from "lucide-react";
+import TestSettingsModal from "@/components/typing/TestSettingsModal";
 import TypingTest from "@/components/typing/TypingTest";
 import TestResults from "@/components/typing/TestResults";
 import RecordCelebration from "@/components/RecordCelebration";
@@ -34,6 +35,9 @@ const labels = {
     animation: "Animatsiya",
     sound: "Klaviatura ovozi",
     soundOff: "O'chiq",
+    settings: "Sozlamalar",
+    settingsButton: "Sozlash",
+    done: "Tayyor",
     easy: "OSON",
     medium: "O'RTA",
     hard: "QIYIN"
@@ -49,6 +53,9 @@ const labels = {
     animation: "Animation",
     sound: "Keyboard sound",
     soundOff: "Off",
+    settings: "Settings",
+    settingsButton: "Settings",
+    done: "Done",
     easy: "EASY",
     medium: "MEDIUM",
     hard: "HARD"
@@ -64,6 +71,9 @@ const labels = {
     animation: "Анимация",
     sound: "Звук клавиш",
     soundOff: "Выкл",
+    settings: "Настройки",
+    settingsButton: "Настроить",
+    done: "Готово",
     easy: "ЛЁГКИЙ",
     medium: "СРЕДНИЙ",
     hard: "СЛОЖНЫЙ"
@@ -110,6 +120,8 @@ export default function TestPage() {
   const [animationSpeed, setAnimationSpeed] = useState(1);
   const [correctCharColor, setCorrectCharColor] = useState<'default' | 'blue' | 'yellow' | 'green'>('default');
   const [soundProfile, setSoundProfile] = useState<SoundProfile>("off");
+  const [showSettings, setShowSettings] = useState(false);
+  const closeSettings = useCallback(() => setShowSettings(false), []);
   const [animationMode, setAnimationMode] = useState<'bounce' | 'fade'>('bounce');
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
   const [showChannelModal, setShowChannelModal] = useState(false);
@@ -419,9 +431,9 @@ export default function TestPage() {
           {/* Upper flex-1 space - test header at bottom */}
           <div className="pt-4 md:pt-0 md:flex-1 flex items-start md:items-end justify-center pb-4 md:pb-8 px-2 md:px-0">
             <div className="w-full md:w-[80%] max-w-6xl flex flex-col md:flex-row items-center justify-between gap-3 md:gap-0">
-              {/* Mobile Row 1: Time + Difficulty (side by side) */}
-              {/* Desktop: Left section */}
-              <div className={`flex items-end gap-3 md:gap-5 w-full md:w-auto justify-center md:justify-start transition-opacity duration-300 ${isTyping ? "opacity-0 pointer-events-none" : "opacity-100"}`}>
+              {/* Desktop: Left section (Time + Difficulty). On mobile every
+                  setting lives in the "Sozlash" modal instead. */}
+              <div className={`hidden md:flex items-end gap-3 md:gap-5 w-full md:w-auto justify-center md:justify-start transition-opacity duration-300 ${isTyping ? "opacity-0 pointer-events-none" : "opacity-100"}`}>
                 {/* Time */}
                 <div className="flex flex-col items-center gap-1">
                   <span className={captionCls}>{t.time}</span>
@@ -463,9 +475,8 @@ export default function TestPage() {
                 </div>
               </div>
 
-              {/* Mobile Row 2: Color picker + Slider + Animation mode */}
-              {/* Desktop: Center section */}
-              <div className={`flex flex-wrap md:flex-nowrap items-end gap-2 md:gap-3 w-full md:w-auto justify-center transition-opacity duration-300 ${isTyping ? "opacity-0 pointer-events-none" : "opacity-100"}`}>
+              {/* Desktop: Center section (Color, Speed, Animation, Sound) */}
+              <div className={`hidden md:flex items-end gap-2 md:gap-3 w-full md:w-auto justify-center transition-opacity duration-300 ${isTyping ? "opacity-0 pointer-events-none" : "opacity-100"}`}>
                 {/* Color */}
                 <div className="flex flex-col items-center gap-1">
                   <span className={captionCls}>{t.color}</span>
@@ -586,26 +597,70 @@ export default function TestPage() {
                 </div>
               </div>
 
-              {/* Mobile Row 3: Back + Restart, centered like the other rows.
+              {/* Mobile: Back + Settings + Restart in one row.
                   Desktop: Back only, right-aligned. */}
-              <div className="flex items-center gap-3 w-full md:w-auto justify-center md:justify-end">
+              <div className="flex items-center gap-3 w-full md:w-auto justify-between md:justify-end">
                 <Link
                   href={`/${lang}`}
-                  className={`px-2 py-1 md:px-3 md:py-1.5 text-[10px] md:text-xs text-muted-foreground hover:text-foreground transition-all duration-300 ${isTyping ? "opacity-0 pointer-events-none" : "opacity-100"}`}
+                  className={`px-2 py-1 md:px-3 md:py-1.5 text-xs text-muted-foreground hover:text-foreground transition-all duration-300 ${isTyping ? "opacity-0 pointer-events-none" : "opacity-100"}`}
                 >
                   ← {t.back}
                 </Link>
+                <button
+                  onClick={() => setShowSettings(true)}
+                  className={`md:hidden inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-border text-sm font-medium hover:border-foreground transition-all duration-300 ${isTyping ? "opacity-0 pointer-events-none" : "opacity-100"}`}
+                >
+                  <Settings size={16} />
+                  {t.settingsButton}
+                  <span className="text-xs text-muted-foreground font-normal">
+                    {config.testType.toUpperCase()} · {t[config.difficulty]}
+                  </span>
+                </button>
                 {/* Restart — mobile only, on the right; dims to 20% while typing */}
                 <button
                   onClick={handleRetry}
-                  className={`md:hidden p-1.5 border border-border rounded hover:border-foreground transition-all duration-300 ${isTyping ? "opacity-20" : "opacity-100"}`}
+                  className={`md:hidden p-2 border border-border rounded-lg hover:border-foreground transition-all duration-300 ${isTyping ? "opacity-20" : "opacity-100"}`}
                   title={t.restart}
                 >
-                  <RotateCcw size={14} />
+                  <RotateCcw size={16} />
                 </button>
               </div>
             </div>
           </div>
+
+          <TestSettingsModal
+            isOpen={showSettings}
+            onClose={closeSettings}
+            t={{
+              settings: t.settings,
+              done: t.done,
+              time: t.time,
+              difficulty: t.difficulty,
+              color: t.color,
+              speed: t.speed,
+              animation: t.animation,
+              sound: t.sound,
+              soundOff: t.soundOff,
+            }}
+            timeOptions={timeOptions.map((time) => ({
+              label: time.toUpperCase(),
+              href: `/${lang}/tests/${time}-${config.difficulty}${topicQuery}`,
+              active: config.testType === time,
+            }))}
+            difficultyOptions={difficultyOptions.map((diff) => ({
+              label: t[diff],
+              href: `/${lang}/tests/${config.testType}-${diff}${topicQuery}`,
+              active: config.difficulty === diff,
+            }))}
+            correctCharColor={correctCharColor}
+            onColorChange={handleCorrectCharColorChange}
+            animationSpeed={animationSpeed}
+            onSpeedChange={handleAnimationSpeedChange}
+            animationMode={animationMode}
+            onModeChange={handleAnimationModeChange}
+            soundProfile={soundProfile}
+            onSoundChange={handleSoundProfileChange}
+          />
 
           {/* Typing text - center */}
           <div className="flex justify-center px-4 md:px-0">
